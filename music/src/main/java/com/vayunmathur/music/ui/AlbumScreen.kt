@@ -46,11 +46,8 @@ fun AlbumScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
         Box(Modifier.padding(paddingValues)) {
             ListPage<Album, Route, Route.Song>(backStack, viewModel, "Music", { Text(it.name) }, {
                 Text(it.artist)
-            }, { toPlay ->
-                val allSongs = viewModel.getAll<Music>()
-                val toPlayIndex = allSongs.indexOfFirst { it.id == toPlay }
-                playbackManager.playSong(allSongs, toPlayIndex)
-                Route.Song
+            }, {
+                Route.AlbumDetail(it)
             }, leadingContent = { music ->
                 AlbumArt(music.uri.toUri(), Modifier.size(40.dp))
             }, searchEnabled = true, bottomBar = {

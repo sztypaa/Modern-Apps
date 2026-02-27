@@ -17,6 +17,7 @@ import com.vayunmathur.music.database.Album
 import com.vayunmathur.music.database.Artist
 import com.vayunmathur.music.database.Music
 import com.vayunmathur.music.database.MusicDatabase
+import com.vayunmathur.music.ui.AlbumDetailScreen
 import com.vayunmathur.music.ui.AlbumScreen
 import com.vayunmathur.music.ui.ArtistScreen
 import com.vayunmathur.music.ui.HomeScreen
@@ -53,6 +54,9 @@ sealed interface Route: NavKey {
     data object Artists: Route
     @Serializable
     data object Song: Route
+
+    @Serializable
+    data class AlbumDetail(val albumId: Long): Route
 }
 
 @Composable
@@ -70,6 +74,9 @@ fun Navigation(viewModel: DatabaseViewModel) {
         }
         entry<Route.Artists> {
             ArtistScreen(backStack, viewModel)
+        }
+        entry<Route.AlbumDetail> {
+            AlbumDetailScreen(backStack, viewModel, it.albumId)
         }
     }
 }

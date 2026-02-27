@@ -15,6 +15,7 @@ import com.vayunmathur.music.database.Music
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlin.random.Random
 
 class PlaybackManager private constructor(context: Context) {
 
@@ -89,6 +90,34 @@ class PlaybackManager private constructor(context: Context) {
     fun playSong(songs: List<Music>, startWithIndex: Int) {
         val player = controller ?: return
         if (player.currentMediaItem?.mediaId == songs[startWithIndex].id.toString()) return
+
+        val mediaItems = songs.map { song ->
+            MediaItem.Builder()
+                .setMediaId(song.id.toString())
+                .setUri(song.uri.toUri())
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle(song.title)
+                        .setArtist(song.artist)
+                        .setArtworkUri(song.uri.toUri())
+                        .build()
+                )
+                .build()
+        }
+
+        player.stop()
+        player.setMediaItems(mediaItems, startWithIndex, 0L)
+        player.prepare()
+        player.play()
+    }
+
+    fun playShuffled(songs: List<Music>) {
+        if(!shuffleMode.value) {
+            toggleShuffle()
+        }
+        val player = controller ?: return
+        var startWithIndex = Random.nextInt(songs.size)
+        if (player.currentMediaItem?.mediaId == songs[startWithIndex].id.toString()) startWithIndex++
 
         val mediaItems = songs.map { song ->
             MediaItem.Builder()
