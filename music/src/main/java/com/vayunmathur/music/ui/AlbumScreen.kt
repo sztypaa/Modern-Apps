@@ -45,7 +45,7 @@ fun AlbumScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
     }) { paddingValues ->
         Box(Modifier.padding(paddingValues)) {
             ListPage<Album, Route, Route.Song>(backStack, viewModel, "Music", { Text(it.name) }, {
-                Text(it.artist)
+                Text(it.artistString(viewModel))
             }, {
                 Route.AlbumDetail(it)
             }, leadingContent = { music ->

@@ -35,9 +35,12 @@ fun getThumbnail(context: Context, uri: Uri): Bitmap? {
 }
 
 suspend fun saveMediaToFile(context: Context, viewModel: DatabaseViewModel) {
-    viewModel.replaceAll(getMedia(context))
-    viewModel.replaceAll(getAlbums(context))
-    viewModel.replaceAll(getArtists(context))
+    val musics = getMedia(context)
+    val albums = getAlbums(context, musics)
+    val artists = getArtists(context)
+    viewModel.replaceAll(musics)
+    viewModel.replaceAll(albums)
+    viewModel.replaceAll(artists)
 }
 
 suspend fun getMedia(context: Context): List<Music> = withContext(Dispatchers.IO) {
@@ -90,7 +93,7 @@ suspend fun getMedia(context: Context): List<Music> = withContext(Dispatchers.IO
 }
 
 
-suspend fun getAlbums(context: Context): List<Album> = withContext(Dispatchers.IO) {
+suspend fun getAlbums(context: Context, musics: List<Music>): List<Album> = withContext(Dispatchers.IO) {
     val musicList = mutableListOf<Album>()
     val projection = arrayOf(
         MediaStore.Audio.Albums._ID,
@@ -111,14 +114,10 @@ suspend fun getAlbums(context: Context): List<Album> = withContext(Dispatchers.I
     )?.use { cursor ->
         val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID)
         val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM)
-        val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST)
-        val artistIDColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST_ID)
 
         while (cursor.moveToNext()) {
             val id = cursor.getLong(idColumn)
             val title = cursor.getString(titleColumn)
-            val artist = cursor.getString(artistColumn)
-            val artistID = cursor.getLong(artistIDColumn)
 
             // Construct the actual File URI
             val contentUri = ContentUris.withAppendedId(
@@ -126,7 +125,10 @@ suspend fun getAlbums(context: Context): List<Album> = withContext(Dispatchers.I
                 id
             ).toString()
 
-            musicList.add(Album(id, title, artist, artistID, contentUri))
+            val inThisAlbum = musics.filter { it.albumId == id }
+            val artists = inThisAlbum.map { it.artistId }.distinct()
+
+            musicList.add(Album(id, title, artists, contentUri))
         }
     }
     return@withContext musicList

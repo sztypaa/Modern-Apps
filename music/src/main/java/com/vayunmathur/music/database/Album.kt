@@ -1,8 +1,12 @@
 package com.vayunmathur.music.database
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.vayunmathur.library.util.DatabaseItem
+import com.vayunmathur.library.util.DatabaseViewModel
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -10,7 +14,17 @@ import kotlinx.serialization.Serializable
 data class Album(
     @PrimaryKey(autoGenerate = true) override val id: Long,
     val name: String,
-    val artist: String,
-    val artistId: Long,
+    val artistIDs: List<Long>,
     val uri: String
-): DatabaseItem
+): DatabaseItem {
+    @Composable
+    fun artistString(viewModel: DatabaseViewModel): String {
+        return remember {
+            if(artistIDs.size > 2) {
+                return@remember "Various Artists"
+            }
+            val artists = viewModel.data<Artist>().value
+            artistIDs.joinToString { id -> artists.find { it.id == id }!!.name }
+        }
+    }
+}

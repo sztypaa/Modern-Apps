@@ -3,6 +3,8 @@ package com.vayunmathur.music.database
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import com.vayunmathur.library.util.DefaultConverters
 import com.vayunmathur.library.util.TrueDao
 
 @Dao
@@ -12,6 +14,7 @@ interface AlbumDao: TrueDao<Album>
 @Dao
 interface ArtistDao: TrueDao<Artist>
 
+@TypeConverters(DefaultConverters::class)
 @Database(entities = [Music::class, Album::class, Artist::class], version = 1)
 abstract class MusicDatabase: RoomDatabase() {
     abstract fun musicDao(): MusicDao

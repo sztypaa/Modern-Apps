@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import kotlin.reflect.KClass
 import kotlin.time.Instant
 
@@ -219,4 +220,12 @@ class DefaultConverters {
     fun fromInstant(value: Instant) = value.epochSeconds
     @TypeConverter
     fun toInstant(value: Long) = Instant.fromEpochSeconds(value)
+    @TypeConverter
+    fun fromList(value: List<Long>?): String? {
+        return value?.let { Json.encodeToString(it) }
+    }
+    @TypeConverter
+    fun toList(value: String?): List<Long>? {
+        return value?.let { Json.decodeFromString<List<Long>>(it) }
+    }
 }
