@@ -9,12 +9,23 @@ body:
       label: App Name
       description: Which app is experiencing the issue?
       options:
-        - pdf
-        - openassistant
-        - crypto
-        - chess
         - calendar
         - contacts
+        - crypto
+        - files
+        - findfamily
+        - chess
+        - unblockjam
+        - wordmaker
+        - health
+        - maps
+        - music
+        - notes
+        - openassistant
+        - passwords
+        - pdf
+        - photos
+        - youpipe
     validations:
       required: true
   - type: input
