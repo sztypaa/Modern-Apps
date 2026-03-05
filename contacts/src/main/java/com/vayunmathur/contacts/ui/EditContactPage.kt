@@ -77,6 +77,7 @@ import com.vayunmathur.contacts.PhoneNumber
 import com.vayunmathur.contacts.Photo
 import com.vayunmathur.contacts.R
 import com.vayunmathur.contacts.Route
+import com.vayunmathur.library.ui.IconClose
 import com.vayunmathur.library.ui.IconEdit
 import com.vayunmathur.library.util.ResultEffect
 import com.vayunmathur.library.util.pop
@@ -126,7 +127,7 @@ fun EditContactPage(backStack: NavBackStack<Route>, viewModel: ContactViewModel,
                 title = { Text(if (contact == null) "Add contact" else "Edit contact") },
                 navigationIcon = {
                     IconButton(onClick = { backStack.pop() }) {
-                        Icon(painterResource(R.drawable.outline_close_24), contentDescription = "Close")
+                        IconClose()
                     }
                 },
                 actions = {

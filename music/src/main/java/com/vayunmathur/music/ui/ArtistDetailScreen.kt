@@ -44,6 +44,7 @@ import androidx.core.net.toUri
 import androidx.navigation3.runtime.NavBackStack
 import coil.compose.AsyncImage
 import com.vayunmathur.library.ui.IconNavigation
+import com.vayunmathur.library.ui.IconPlay
 import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.music.AlbumArt
 import com.vayunmathur.music.PlaybackManager
@@ -127,7 +128,7 @@ fun ArtistDetailScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewMo
                         shape = RoundedCornerShape(50.dp),
                         contentPadding = PaddingValues(vertical = 12.dp)
                     ) {
-                        Icon(painterResource(com.vayunmathur.music.R.drawable.ic_play_arrow), contentDescription = null, tint = Color.White)
+                        IconPlay(tint = Color.White)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Play", color = Color.White)
                     }

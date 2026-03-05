@@ -33,6 +33,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation3.runtime.NavBackStack
+import com.vayunmathur.library.ui.IconPause
+import com.vayunmathur.library.ui.IconPlay
 import com.vayunmathur.library.ui.ListPage
 import com.vayunmathur.library.ui.invisibleClickable
 import com.vayunmathur.library.util.BottomBarItem
@@ -142,10 +144,11 @@ fun PlayingBottomBar(
                     trailingContent = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             IconButton(onClick = { playbackManager.togglePlayPause() }) {
-                                Icon(
-                                    if (isPlaying) painterResource(R.drawable.ic_pause) else painterResource(R.drawable.ic_play_arrow),
-                                    contentDescription = null
-                                )
+                                if(isPlaying) {
+                                    IconPause()
+                                } else {
+                                    IconPlay()
+                                }
                             }
                             IconButton(onClick = { playbackManager.skipNext() }) {
                                 Icon(painterResource(R.drawable.ic_skip_next), contentDescription = null)

@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import androidx.media3.common.Player
 import androidx.navigation3.runtime.NavBackStack
 import com.vayunmathur.library.ui.IconNavigation
+import com.vayunmathur.library.ui.IconPause
+import com.vayunmathur.library.ui.IconPlay
 import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.music.AlbumArt
 import com.vayunmathur.music.PlaybackManager
@@ -189,10 +191,11 @@ fun SongScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
                             .clickable { playbackManager.togglePlayPause() },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            painter = painterResource(if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play_arrow),
-                            null, Modifier.size(42.dp), tint = Color.White
-                        )
+                        if(isPlaying) {
+                            IconPause()
+                        } else {
+                            IconPlay()
+                        }
                     }
                     Spacer(Modifier.width(16.dp))
                     IconButton(onClick = { playbackManager.skipNext() }) {
