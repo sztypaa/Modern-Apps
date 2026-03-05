@@ -36,7 +36,7 @@ import com.vayunmathur.calendar.ui.dialog.SettingsAddCalendarDialog
 import com.vayunmathur.calendar.ui.dialog.SettingsChangeColorDialog
 import com.vayunmathur.calendar.ui.dialog.SettingsDeleteCalendarDialog
 import com.vayunmathur.calendar.ui.dialog.SettingsRenameCalendarDialog
-import com.vayunmathur.calendar.ui.dialog.TimePickerDialogContent
+import com.vayunmathur.library.ui.dialog.TimePickerDialogContent
 import com.vayunmathur.calendar.ui.dialog.TimezonePickerDialog
 import com.vayunmathur.library.ui.DynamicTheme
 import com.vayunmathur.library.ui.dialog.DatePickerDialog

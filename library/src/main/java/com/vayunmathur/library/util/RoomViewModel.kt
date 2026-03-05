@@ -43,6 +43,8 @@ import kotlinx.serialization.json.Json
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.reflect.KClass
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
 
 class DaoInterface<T: DatabaseItem>(val dao: TrueDao<T>, val viewModelScope: CoroutineScope) {
@@ -303,4 +305,9 @@ class DefaultConverters {
     fun toList(value: String?): List<Long>? {
         return value?.let { Json.decodeFromString<List<Long>>(it) }
     }
+
+    @TypeConverter
+    fun fromDuration(value: Duration) = value.inWholeMilliseconds
+    @TypeConverter
+    fun toDuration(value: Long) = value.milliseconds
 }

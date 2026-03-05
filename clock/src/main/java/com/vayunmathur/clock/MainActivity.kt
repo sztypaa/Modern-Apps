@@ -6,15 +6,21 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavKey
+import com.vayunmathur.clock.data.ClockDatabase
+import com.vayunmathur.clock.data.Timer
 import com.vayunmathur.clock.ui.AlarmPage
 import com.vayunmathur.clock.ui.ClockPage
 import com.vayunmathur.clock.ui.StopwatchPage
 import com.vayunmathur.clock.ui.TimerPage
+import com.vayunmathur.clock.ui.dialog.NewTimerDialog
 import com.vayunmathur.clock.ui.dialog.SelectTimeZonesDialog
 import com.vayunmathur.library.ui.DynamicTheme
+import com.vayunmathur.library.ui.dialog.TimePickerDialogContent
 import com.vayunmathur.library.util.BottomBarItem
 import com.vayunmathur.library.util.DataStoreUtils
+import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.library.util.MainNavigation
+import com.vayunmathur.library.util.buildDatabase
 import com.vayunmathur.library.util.rememberNavBackStack
 import kotlinx.serialization.Serializable
 
@@ -23,9 +29,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val ds = DataStoreUtils.getInstance(this)
+        val db = buildDatabase<ClockDatabase>()
+        val viewModel = DatabaseViewModel(db, Timer::class to db.timerDao())
         setContent {
             DynamicTheme {
-                Navigation(ds)
+                Navigation(ds, viewModel)
             }
         }
     }
@@ -43,6 +51,8 @@ sealed interface Route : NavKey {
     data object Stopwatch: Route
     @Serializable
     data object SelectTimeZonesDialog: Route
+    @Serializable
+    data object NewTimerDialog: Route
 }
 
 val MAIN_PAGES = listOf(
@@ -53,7 +63,7 @@ val MAIN_PAGES = listOf(
 )
 
 @Composable
-fun Navigation(ds: DataStoreUtils) {
+fun Navigation(ds: DataStoreUtils, viewModel: DatabaseViewModel) {
     val backStack = rememberNavBackStack<Route>(Route.Alarm)
     MainNavigation(backStack) {
         entry<Route.Alarm> {
@@ -63,13 +73,16 @@ fun Navigation(ds: DataStoreUtils) {
             ClockPage(backStack, ds)
         }
         entry<Route.Timer> {
-            TimerPage(backStack)
+            TimerPage(backStack, viewModel)
         }
         entry<Route.Stopwatch> {
             StopwatchPage(backStack)
         }
         entry<Route.SelectTimeZonesDialog> {
             SelectTimeZonesDialog(backStack, ds)
+        }
+        entry<Route.NewTimerDialog> {
+            NewTimerDialog(backStack, viewModel)
         }
     }
 }
