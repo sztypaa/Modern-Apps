@@ -62,6 +62,21 @@ fun BottomSheetContent(selectedFeature: SpecificFeature?, setSelectedFeature: (S
                 }
             }
         }
+        is SpecificFeature.GenericPlace -> {
+            RestaurantBottomSheet(inactiveNavigation, selectedFeature) {
+                if (inactiveNavigation == null) {
+                    setSelectedFeature(SpecificFeature.Route(listOf(null, selectedFeature)))
+                } else {
+                    setSelectedFeature(
+                        SpecificFeature.Route(
+                            inactiveNavigation.waypoints + listOf(
+                                selectedFeature
+                            )
+                        )
+                    )
+                }
+            }
+        }
         is SpecificFeature.Route -> {
             if(route != null) {
                 Column {

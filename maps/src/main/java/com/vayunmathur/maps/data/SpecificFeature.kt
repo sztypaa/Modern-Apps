@@ -23,6 +23,8 @@ sealed interface SpecificFeature {
     @Serializable
     data class Restaurant(override val name: String, val phone: String?, val website: String?, val menu: String?, val openingHours: OpeningHours?,
                           override val position: Position): RoutableFeature
+    data class GenericPlace(override val name: String, val phone: String?, val website: String?, val openingHours: OpeningHours?,
+                          override val position: Position): RoutableFeature
     @Serializable
     data class Route(val waypoints: List<RoutableFeature?>) : SpecificFeature
 }
@@ -47,6 +49,23 @@ suspend fun parse(feature: Feature1, db: AmenityDatabase): SpecificFeature? {
         "restaurant", "fast_food", "cafe", "bar" -> {
             val tags = db.tagDao().getTags(id.toLong()).associate { it.key to it.value }
             SpecificFeature.Restaurant(tags["name"] ?: "", tags["phone"], tags["website"], tags["website:menu"], tags["opening_hours"]?.let { OpeningHours.from(it) }, (geometry as Point).coordinates)
+        }
+        !in listOf(
+            "country", "region", "county", "locality", "address", "building", "building_part",
+            "barren", "farmland", "forest", "glacier", "grassland", "scrub", "urban_area",
+            "earth", "aerodrome", "attraction", "bare_rock", "beach", "cafe", "camp_site",
+            "cemetery", "college", "commercial", "dog_park", "farmyard", "footway", "garden",
+            "golf_course", "grass", "grocery", "hospital", "hotel", "industrial", "kindergarten",
+            "library", "marina", "meadow", "military", "national_park", "nature_reserve",
+            "neighbourhood", "orchard", "other", "park", "pedestrian", "pier", "pitch",
+            "platform", "playground", "post_office", "protected_area", "railway", "runway",
+            "recreation_ground", "residential", "sand", "school", "stadium", "supermarket",
+            "taxiway", "townhall", "university", "wetland", "wood", "zoo", "macrohood",
+            "highway", "major_road", "minor_road", "path", "aerialway", "ferry", "rail",
+            "aeroway", "water", "lake", "playa", "ocean"
+        ) -> {
+            val tags = db.tagDao().getTags(id.toLong()).associate { it.key to it.value }
+            SpecificFeature.GenericPlace(tags["name"] ?: "", tags["phone"], tags["website"], tags["opening_hours"]?.let { OpeningHours.from(it) }, (geometry as Point).coordinates)
         }
         else -> null
     }

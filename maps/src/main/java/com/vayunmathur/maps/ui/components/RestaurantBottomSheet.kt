@@ -128,6 +128,78 @@ fun RestaurantBottomSheet(inactiveNavigation: SpecificFeature.Route?, feature: S
     }
 }
 
+@Composable
+fun RestaurantBottomSheet(inactiveNavigation: SpecificFeature.Route?, feature: SpecificFeature.GenericPlace, requestDirections: () -> Unit) {
+    var reviews by remember { mutableStateOf<FullPlaceInfo?>(null) }
+    LaunchedEffect(Unit) {
+        reviews = Reviews.getRatingForOsmLocation(feature.name, feature.position.latitude, feature.position.longitude)
+    }
+    val context = LocalContext.current
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            ListItem({
+                Text(
+                    feature.name,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+            }, supportingContent = reviews?.let { reviews ->
+                { Text("${reviews.rating} stars | ${reviews.userRatingCount} reviews") }
+            }, trailingContent = {
+                Button({requestDirections()}) {
+                    if(inactiveNavigation == null) {
+                        Text("Directions")
+                    } else {
+                        Text("Add Stop to Route")
+                    }
+                }
+            }, colors = ListItemDefaults.colors(containerColor = Color.Transparent))
+        }
+        feature.openingHours?.let {
+            Spacer(Modifier.height(8.dp))
+            var showDetails by remember { mutableStateOf(false) }
+
+            val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+            val isOpen = it.isOpen(now)
+            val nextChangeTime = it.nextStatusChangeTime(now)
+            val text = AnnotatedString.Builder().apply {
+                if(isOpen) withStyle(SpanStyle(Color.Green)){append("Open")} else withStyle(SpanStyle(Color.Red)){append("Closed")}
+                append(" • ")
+                if(isOpen) append("Closes ${nextChangeTime.time.format(timeFormat)}")
+                else append("Opens ${nextChangeTime.time.format(timeFormat)}")
+                if(nextChangeTime.date != now.date) append(" ${nextChangeTime.date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }}")
+            }.toAnnotatedString()
+            Column {
+                RestaurantItem(
+                    R.drawable.outline_nest_clock_farsight_analog_24,
+                    text,
+                    shape = verticalShape(0, if (showDetails) 2 else 1)
+                ) {
+                    showDetails = !showDetails
+                }
+                if (showDetails) {
+                    Spacer(Modifier.padding(2.dp))
+                    Card(shape = verticalShape(1, 2)) {
+                        for ((day, hours) in it.openingHours()) {
+                            ListItem(
+                                { Text(day.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                leadingContent = {},
+                                trailingContent = { Text(hours) },
+                                colors = ListItemDefaults.colors(Color.Transparent)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        feature.website?.let {
+            RestaurantItem(R.drawable.outline_globe_24, it.toUri().host!!) { goto(context, it) }
+        }
+        feature.phone?.let {
+            RestaurantItem(R.drawable.outline_phone_enabled_24, it) { goto(context, "tel:$it") }
+        }
+    }
+}
+
 fun verticalShape(index: Int, count: Int): RoundedCornerShape {
     val top = if (index == 0) 12.dp else 0.dp
     val bottom = if (index == count - 1) 12.dp else 0.dp
