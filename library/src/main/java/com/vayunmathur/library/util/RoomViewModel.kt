@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.LocalTime
 import kotlinx.serialization.json.Json
 import kotlin.math.max
 import kotlin.math.min
@@ -310,4 +311,9 @@ class DefaultConverters {
     fun fromDuration(value: Duration) = value.inWholeMilliseconds
     @TypeConverter
     fun toDuration(value: Long) = value.milliseconds
+
+    @TypeConverter
+    fun fromLocalTime(value: LocalTime) = value.toSecondOfDay()
+    @TypeConverter
+    fun toLocalTime(value: Int) = LocalTime.fromSecondOfDay(value)
 }

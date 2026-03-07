@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavKey
+import com.vayunmathur.clock.data.Alarm
 import com.vayunmathur.clock.data.ClockDatabase
 import com.vayunmathur.clock.data.Timer
 import com.vayunmathur.clock.ui.AlarmPage
@@ -19,10 +20,15 @@ import com.vayunmathur.library.ui.dialog.TimePickerDialogContent
 import com.vayunmathur.library.util.BottomBarItem
 import com.vayunmathur.library.util.DataStoreUtils
 import com.vayunmathur.library.util.DatabaseViewModel
+import com.vayunmathur.library.util.DialogPage
 import com.vayunmathur.library.util.MainNavigation
 import com.vayunmathur.library.util.buildDatabase
 import com.vayunmathur.library.util.rememberNavBackStack
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,7 +36,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val ds = DataStoreUtils.getInstance(this)
         val db = buildDatabase<ClockDatabase>()
-        val viewModel = DatabaseViewModel(db, Timer::class to db.timerDao())
+        val viewModel = DatabaseViewModel(db, Timer::class to db.timerDao(), Alarm::class to db.alarmDao())
         setContent {
             DynamicTheme {
                 Navigation(ds, viewModel)
@@ -53,6 +59,10 @@ sealed interface Route : NavKey {
     data object SelectTimeZonesDialog: Route
     @Serializable
     data object NewTimerDialog: Route
+    @Serializable
+    data object NewAlarmDialog: Route
+    @Serializable
+    data class AlarmSetTimeDialog(val id: Long, val time: LocalTime): Route
 }
 
 val MAIN_PAGES = listOf(
@@ -67,7 +77,7 @@ fun Navigation(ds: DataStoreUtils, viewModel: DatabaseViewModel) {
     val backStack = rememberNavBackStack<Route>(Route.Alarm)
     MainNavigation(backStack) {
         entry<Route.Alarm> {
-            AlarmPage(backStack)
+            AlarmPage(backStack, viewModel)
         }
         entry<Route.Clock> {
             ClockPage(backStack, ds)
@@ -83,6 +93,12 @@ fun Navigation(ds: DataStoreUtils, viewModel: DatabaseViewModel) {
         }
         entry<Route.NewTimerDialog> {
             NewTimerDialog(backStack, viewModel)
+        }
+        entry<Route.NewAlarmDialog>(metadata = DialogPage()) {
+            TimePickerDialogContent(backStack, "alarm_time", Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time)
+        }
+        entry<Route.AlarmSetTimeDialog>(metadata = DialogPage()) {
+            TimePickerDialogContent(backStack, "alarm_set_time_${it.id}", it.time)
         }
     }
 }
