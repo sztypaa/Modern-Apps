@@ -75,16 +75,14 @@ import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.library.util.buildDatabase
 import com.vayunmathur.library.util.pop
 import com.vayunmathur.library.util.setLast
+import com.vayunmathur.openassistant.LLamaAPI
 import com.vayunmathur.openassistant.R
 import com.vayunmathur.openassistant.Route
-import com.vayunmathur.openassistant.api.GrokApi
-import com.vayunmathur.openassistant.api.GrokRequest
 import com.vayunmathur.openassistant.data.Conversation
 import com.vayunmathur.openassistant.data.Message
 import com.vayunmathur.openassistant.data.Tools
 import com.vayunmathur.openassistant.data.database.MessageDao
 import com.vayunmathur.openassistant.data.database.MessageDatabase
-import com.vayunmathur.openassistant.data.toGrokMessage
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -111,20 +109,15 @@ class ConversationWorker(appContext: Context, workerParams: WorkerParameters): C
         return Result.success()
     }
 
-    suspend fun requestResponse(viewModel: DatabaseViewModel, messageDao: MessageDao, conversationID: Long, apiKey: String, userMessage: Message? = null) {
-        val grokApi = GrokApi(apiKey)
-
+    suspend fun requestResponse(viewModel: DatabaseViewModel, messageDao: MessageDao, conversationID: Long, userMessage: Message? = null) {
+        val llamaAPI = LLamaAPI.getInstance(applicationContext)
         val messages = viewModel.getAll<Message>().filter { it.conversationId == conversationID }.sortedBy { it.timestamp }
 
-        val request = GrokRequest(
-            messages = (messages + userMessage).filterNotNull().map(Message::toGrokMessage),
-            model = "grok-4-1-fast-reasoning",
-            stream = true,
-            temperature = 0.7,
-            tools = Tools.API_TOOLS
-        )
+
         if (userMessage != null)
             messageDao.upsert(userMessage)
+
+        if(userMessage == null) return
 
         var assistantMessage = Message(
             id = Random.nextLong(),
@@ -139,59 +132,42 @@ class ConversationWorker(appContext: Context, workerParams: WorkerParameters): C
         var fullResponse = ""
         var usedTools = false
 
-        try {
-            grokApi.getGrokCompletionStream(request) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    Toast.makeText(applicationContext, it, Toast.LENGTH_SHORT).show()
-                }
-            }.collect { chunk ->
-                val delta = chunk.choices.first().delta
-                delta.toolCalls?.forEach {
-                    usedTools = true
-                    val action = Tools.getToolAction(it.function.name)
-                    if (action != null) {
-                        val result = action(Json.decodeFromString(it.function.arguments), applicationContext)
-                        val message = Message(
-                            conversationId = conversationID,
-                            role = "tool",
-                            textContent = result.llmResponse,
-                            displayContent = result.userResponse,
-                            images = emptyList(),
-                            toolCallId = it.id,
-                        )
-                        messageDao.upsert(message)
-                    }
-                    assistantMessage =
-                        assistantMessage.copy(toolCalls = assistantMessage.toolCalls + it)
-                    messageDao.upsert(assistantMessage)
-                }
-                delta.content?.let {
-                    println("NEW CONTENT: $it")
-                    fullResponse += it
-                    assistantMessage = assistantMessage.copy(textContent = fullResponse)
-                    messageDao.upsert(assistantMessage)
-                }
-            }
-        } catch (e: GrokApi.GrokException) {
-            when (e.errorNum) {
-                400, 401 -> {
-                    // 400 means invalid api key, 401 means no api key included
-                    if (e.errorNum == 400) {
-                        Toast.makeText(applicationContext, "Invalid API key", Toast.LENGTH_SHORT).show()
-                    }
-                    e.printStackTrace()
-                }
-
-                else -> {
-                    throw e
-                }
-            }
-        } finally {
+        llamaAPI.model!!.generateStream(userMessage.textContent).collect {
+//            val delta = chunk.choices.first().delta
+//            delta.toolCalls?.forEach {
+//                usedTools = true
+//                val action = Tools.getToolAction(it.function.name)
+//                if (action != null) {
+//                    val result = action(Json.decodeFromString(it.function.arguments), applicationContext)
+//                    val message = Message(
+//                        conversationId = conversationID,
+//                        role = "tool",
+//                        textContent = result.llmResponse,
+//                        displayContent = result.userResponse,
+//                        images = emptyList(),
+//                        toolCallId = it.id,
+//                    )
+//                    messageDao.upsert(message)
+//                }
+//                assistantMessage =
+//                    assistantMessage.copy(toolCalls = assistantMessage.toolCalls + it)
+//                messageDao.upsert(assistantMessage)
+//            }
+//            delta.content?.let {
+//                println("NEW CONTENT: $it")
+//                fullResponse += it
+//                assistantMessage = assistantMessage.copy(textContent = fullResponse)
+//                messageDao.upsert(assistantMessage)
+//            }
+            println("NEW CONTENT: $it")
+            fullResponse += it
+            assistantMessage = assistantMessage.copy(textContent = fullResponse)
+            messageDao.upsert(assistantMessage)
         }
 
         if (usedTools) {
             delay(1000)
-            requestResponse(viewModel, messageDao, conversationID, apiKey)
+            requestResponse(viewModel, messageDao, conversationID)
         }
     }
 
@@ -210,7 +186,7 @@ class ConversationWorker(appContext: Context, workerParams: WorkerParameters): C
             textContent = userInput,
             images = imageBase64s
         )
-        requestResponse(viewModel, messageDao, conversationID, ds.getString("api_key")!!, userMessage)
+        requestResponse(viewModel, messageDao, conversationID, userMessage)
     }
 }
 
@@ -269,10 +245,6 @@ fun ConversationScreen(
     }
 
     fun send() {
-        if(ds.getString("api_key") == null) {
-            showApiKeyDialog = true
-            return
-        }
         if (userInput.isNotBlank()) {
             if (conversationID == 0L) {
                 createNewConversation() { id ->

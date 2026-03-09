@@ -5,11 +5,21 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.vayunmathur.library.util.DatabaseItem
-import com.vayunmathur.openassistant.api.GrokRequest
-import com.vayunmathur.openassistant.api.ImageUrl
-import com.vayunmathur.openassistant.api.ImageUrlContent
-import com.vayunmathur.openassistant.api.TextContent
-import com.vayunmathur.openassistant.api.ToolCall
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ToolCall(
+    val id: String,
+    val type: String,
+    val function: Function
+) {
+    @Serializable
+    data class Function(
+        val name: String,
+        val arguments: String
+    )
+}
+
 
 @Entity(
     foreignKeys = [ForeignKey(
@@ -32,12 +42,3 @@ data class Message(
     val toolCalls: List<ToolCall> = listOf(),
     val timestamp: Long = System.currentTimeMillis()
 ): DatabaseItem
-
-fun Message.toGrokMessage(): GrokRequest.Message {
-    return GrokRequest.Message(
-        role = role,
-        content = listOf(TextContent(textContent), *images.map { ImageUrlContent(ImageUrl("data:image/jpeg;base64,$it")) }.toTypedArray()),
-        toolCalls = toolCalls,
-        toolCallId = toolCallId
-    )
-}
