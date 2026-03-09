@@ -7,8 +7,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -75,18 +79,44 @@ class MainActivity : ComponentActivity() {
 fun DatabaseSetup(ds: DataStoreUtils) {
     val context = LocalContext.current
     val progress by ds.doubleFlow("downloadProgress").collectAsState(0.0)
+
     LaunchedEffect(Unit) {
-        val id = downloadOsmData(context, "https://data.vayunmathur.com/amenities.db")
-        while(progress != 1.0) {
-            ds.setDouble("downloadProgress", getProgress(context, id))
-            delay(100)
+        // Define all the files needed for the routing engine and amenities
+        val filesToDownload = listOf(
+            Triple("https://data.vayunmathur.com/amenities.db", "amenities.db", "Downloading Amenity Database..."),
+            Triple("https://data.vayunmathur.com/nodes_lookup.bin", "nodes_lookup.bin", "Downloading Routing Nodes..."),
+            Triple("https://data.vayunmathur.com/nodes_spatial.bin", "nodes_spatial.bin", "Downloading Spatial Index..."),
+            Triple("https://data.vayunmathur.com/edges.bin", "edges.bin", "Downloading Routing Graph..."),
+            Triple("https://data.vayunmathur.com/edge_index.bin", "edge_index.bin", "Downloading Edge Index...")
+        )
+
+        // Enqueue all downloads and collect their DownloadManager IDs
+        val downloadIds = filesToDownload.map { (url, fileName, desc) ->
+            downloadMapData(context, url, fileName, desc)
         }
+
+        // Poll DownloadManager until aggregate progress is 1.0 (100%)
+        while (true) {
+            val currentProgress = getAggregateProgress(context, downloadIds)
+            ds.setDouble("downloadProgress", currentProgress)
+
+            if (currentProgress >= 1.0) break
+            delay(500) // Check twice a second
+        }
+
         ds.setBoolean("dbSetupComplete", true)
     }
-    Scaffold() { paddingValues ->
-        Box(Modifier.padding(paddingValues).fillMaxSize(), contentAlignment = Alignment.Center) {
-            Box(Modifier.padding(16.dp)) {
-                Text((progress*100).toString())
+
+    Scaffold { paddingValues ->
+        Box(
+            Modifier.padding(paddingValues).fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator(progress = { progress.toFloat() })
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Downloading Offline Map Data: ${String.format("%.1f", progress * 100)}%")
+                Text("Please keep the app open.", modifier = Modifier.padding(top = 8.dp))
             }
         }
     }
@@ -119,23 +149,44 @@ fun Navigation(ds: DataStoreUtils, db: AmenityDatabase, viewModel: SelectedFeatu
     }
 }
 
-fun getProgress(context: Context, downloadId: Long): Double {
-    val q = DownloadManager.Query().setFilterById(downloadId)
-    val cursor = (context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).query(q)
-    if (cursor.moveToFirst()) {
+fun getAggregateProgress(context: Context, downloadIds: List<Long>): Double {
+    if (downloadIds.isEmpty()) return 1.0
+
+    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+    val query = DownloadManager.Query().setFilterById(*downloadIds.toLongArray())
+    val cursor = downloadManager.query(query) ?: return 0.0
+
+    var totalBytes = 0L
+    var downloadedBytes = 0L
+    var allCompleted = true
+
+    while (cursor.moveToNext()) {
+        val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
         val bytesDownloaded = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
         val bytesTotal = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
-        if (bytesTotal == 0L) return 0.0
-        return ((bytesDownloaded).toDouble() / bytesTotal)
+
+        if (status != DownloadManager.STATUS_SUCCESSFUL) {
+            allCompleted = false
+        }
+
+        if (bytesTotal > 0) {
+            totalBytes += bytesTotal
+            downloadedBytes += bytesDownloaded
+        }
     }
-    return 0.0
+    cursor.close()
+
+    // If totalBytes is still 0 (e.g., pending connection), report 0%
+    if (totalBytes == 0L) return if (allCompleted) 1.0 else 0.0
+
+    // Ensure we return exactly 1.0 if completed, otherwise a precise ratio
+    return if (allCompleted) 1.0 else (downloadedBytes.toDouble() / totalBytes)
 }
 
-fun downloadOsmData(context: Context, url: String): Long {
+fun downloadMapData(context: Context, url: String, fileName: String, description: String): Long {
     val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-    val fileName = "amenities.db"
 
-    // 1. Check if the download is already in progress or completed
+    // 1. Check if the specific file is already downloading or completed
     val query = DownloadManager.Query()
     val cursor = downloadManager.query(query)
 
@@ -144,8 +195,8 @@ fun downloadOsmData(context: Context, url: String): Long {
             val title = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TITLE))
             val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
 
-            // Check by title or destination (Title is more reliable for filtering here)
-            if (title == "OSM Data Update") {
+            // Check by the specific fileName so we don't mix up the routing binaries
+            if (title == fileName) {
                 val id = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_ID))
 
                 // If it's running, pending, or successful, return the existing ID
@@ -160,13 +211,13 @@ fun downloadOsmData(context: Context, url: String): Long {
         cursor.close()
     }
 
-    // 2. If no active/completed download found, start a new one
+    // 2. If no active/completed download found for this file, start a new one
     val request = DownloadManager.Request(url.toUri())
-        .setTitle("OSM Data Update")
-        .setDescription("Downloading 2.5GB tag database...")
+        .setTitle(fileName)
+        .setDescription(description)
         .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
         .setDestinationInExternalFilesDir(context, null, fileName)
-        .setAllowedOverMetered(false)
+        .setAllowedOverMetered(false) // Wait for WiFi for these massive files
         .setRequiresCharging(false)
 
     return downloadManager.enqueue(request)
