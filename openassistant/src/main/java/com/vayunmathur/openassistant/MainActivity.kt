@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             DynamicTheme {
                 InitialDownloadChecker(ds, listOf(
-                    Triple("https://huggingface.co/bartowski/Phi-3.5-mini-instruct-GGUF/resolve/main/Phi-3.5-mini-instruct-Q4_K_M.gguf", "phi3.gguf", "model weights")
+                    Triple("https://huggingface.co/unsloth/gemma-3n-E4B-it-GGUF/resolve/main/gemma-3n-E4B-it-Q5_K_M.gguf", "phi3.gguf", "model weights")
                 )) {
                     LaunchedEffect(Unit) {
                         LLamaAPI.getInstance(this@MainActivity)

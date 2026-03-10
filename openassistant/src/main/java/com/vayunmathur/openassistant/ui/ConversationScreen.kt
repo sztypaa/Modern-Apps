@@ -132,7 +132,7 @@ class ConversationWorker(appContext: Context, workerParams: WorkerParameters): C
         var fullResponse = ""
         var usedTools = false
 
-        llamaAPI.model!!.generateStream(userMessage.textContent).collect {
+        llamaAPI.model!!.generateStream("<bos><start_of_turn>user ${userMessage.textContent}<end_of_turn>\n<start_of_turn>model\n").collect {
 //            val delta = chunk.choices.first().delta
 //            delta.toolCalls?.forEach {
 //                usedTools = true
