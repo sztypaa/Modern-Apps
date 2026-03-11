@@ -20,6 +20,8 @@ fun readVersionInfo(): Pair<Int, String> {
     } else throw IllegalStateException("version.txt not found")
 }
 
+val proguardFile = File(projectDir, "proguard-rules.pro")
+
 val (appVersionCode, appVersionName) = readVersionInfo()
 
 subprojects {
@@ -85,7 +87,7 @@ subprojects {
                         signingConfig = signingConfigs.getByName("release")
                     }
                     proguardFiles(
-                        getDefaultProguardFile("proguard-android-optimize.txt"), "./../proguard-rules.pro"
+                        getDefaultProguardFile("proguard-android-optimize.txt"), proguardFile.absolutePath,
                     )
                 }
 //                getByName("debug") {
