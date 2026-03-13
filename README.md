@@ -7,7 +7,8 @@ This ecosystem also contains apps that aren't as well covered by the open-source
 
 This ecosystem also includes games, which I personally believe are an important part of a good phone experience (at least the kind from the "golden age" of mobile games are), so I have remade some mobile games I enjoyed and might add more as time goes on.
 
-Note: the v2.x.x versions of these apps are all to be considered beta versions. Lots of features/apps being done in a short period of time will inevitably result in some bugs here and there. All bug reports are appreciated, and any PRs to add fixes or new features (as long as not bloaty) are very appreciated. Version numbering will change to v3.x.x when all the apps are stable.
+### Acknowledgement of Bugs
+The v2.x.x versions of these apps are all to be considered beta versions. Lots of features/apps being done in a short period of time will inevitably result in some bugs here and there. All bug reports are appreciated, and any PRs to add fixes or new features (as long as not bloaty) are very appreciated. Version numbering will change to v3.x.x when all the apps are stable.
 
 # App Feature Descriptions
 Just for the "interesting" apps
