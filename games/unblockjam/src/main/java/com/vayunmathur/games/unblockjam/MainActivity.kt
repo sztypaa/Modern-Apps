@@ -114,7 +114,7 @@ fun LevelScreen(backStack: NavBackStack<Route>, completedLevelsRepository: Compl
         LazyVerticalGrid(
             GridCells.Adaptive(80.dp),
             Modifier.padding(paddingValues),
-            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
+            contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 0.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
