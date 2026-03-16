@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -49,7 +48,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,8 +67,6 @@ import androidx.work.WorkerParameters
 import com.vayunmathur.library.ui.IconAdd
 import com.vayunmathur.library.ui.IconDelete
 import com.vayunmathur.library.ui.IconNavigation
-import com.vayunmathur.library.ui.IconSettings
-import com.vayunmathur.library.util.DataStoreUtils
 import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.library.util.buildDatabase
 import com.vayunmathur.library.util.pop
@@ -80,19 +76,12 @@ import com.vayunmathur.openassistant.R
 import com.vayunmathur.openassistant.Route
 import com.vayunmathur.openassistant.data.Conversation
 import com.vayunmathur.openassistant.data.Message
-import com.vayunmathur.openassistant.data.ToolCall
 import com.vayunmathur.openassistant.data.Tools
 import com.vayunmathur.openassistant.data.database.MessageDao
 import com.vayunmathur.openassistant.data.database.MessageDatabase
 import com.vayunmathur.openassistant.data.toStreamedText
 import dev.jeziellago.compose.markdowntext.MarkdownText
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import okio.Buffer
 import kotlin.random.Random
 import kotlin.random.nextUInt
@@ -103,12 +92,9 @@ class ConversationWorker(appContext: Context, workerParams: WorkerParameters): C
         val conversationID = inputData.getLong("conv_id", 0)
         val userMessage = inputData.getString("userMessage")!!
         val uris = inputData.getStringArray("uris")!!.map { it.toUri() }
-        val ds = DataStoreUtils.getInstance(applicationContext)
-        ds.setBoolean("isThinking", true)
         val db = applicationContext.buildDatabase<MessageDatabase>()
         val viewModel = DatabaseViewModel(db,Message::class to db.messageDao(), Conversation::class to db.conversationDao())
         send(viewModel, db.messageDao(), conversationID, userMessage, uris)
-        ds.setBoolean("isThinking", false)
         return Result.success()
     }
 
@@ -214,43 +200,16 @@ class ConversationWorker(appContext: Context, workerParams: WorkerParameters): C
     }
 }
 
-fun parseToolCall(input: String): List<ToolCall> {
-    return Json{
-        isLenient = true
-    }.decodeFromString(input);
-    // Regex to find: func_name(key=value, key=value)
-//    val functionRegex = Regex("""(\w+)\(([^)]+)\)""")
-//    // Regex to find: key=value
-//    val paramRegex = Regex("""(\w+)=([^,]+)""")
-//
-//    return functionRegex.findAll(input).map { match ->
-//        val name = match.groupValues[1]
-//        val paramsString = match.groupValues[2]
-//
-//        val parameters = paramRegex.findAll(paramsString).associate { paramMatch ->
-//            val key = paramMatch.groupValues[1].trim()
-//            val value = paramMatch.groupValues[2].trim()
-//
-//            // Convert the string value to the appropriate JsonElement
-//            key to Json.parseToJsonElement(value)
-//        }
-//
-//        ToolCall(name, parameters)
-//    }.toList()
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConversationScreen(
     backStack: NavBackStack<Route>,
     viewModel: DatabaseViewModel,
-    ds: DataStoreUtils,
     conversationID: Long
 ) {
-    val isThinking by ds.booleanFlow("isThinking").collectAsState(false)
-
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
+    val llmAPI = remember { LLamaAPI.getInstance(context) }
+    val llmState by llmAPI.isAvailable.collectAsState()
 
     val conversation by viewModel.getNullable<Conversation>(conversationID)
 
@@ -264,7 +223,6 @@ fun ConversationScreen(
     }
 
     var userInput by remember { mutableStateOf("") }
-    var showApiKeyDialog by remember { mutableStateOf(false) }
     var selectedImageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
     val imageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -327,18 +285,6 @@ fun ConversationScreen(
             }
         }
     }
-
-    if (showApiKeyDialog) {
-        ApiKeyDialog(
-            onDismiss = { showApiKeyDialog = false },
-            onSave = { apiKey ->
-                coroutineScope.launch {
-                    ds.setString("api_key", apiKey)
-                    showApiKeyDialog = false
-                }
-            }
-        )
-    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -356,9 +302,6 @@ fun ConversationScreen(
                         IconButton(onClick = { deleteConversation(it) }) {
                             IconDelete()
                         }
-                    }
-                    IconButton(onClick = { showApiKeyDialog = true }) {
-                        IconSettings()
                     }
                 }
             )
@@ -400,7 +343,7 @@ fun ConversationScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            if (visibleMessages.isEmpty() && !isThinking) {
+            if (visibleMessages.isEmpty() && llmState == LLamaAPI.LLMState.READY) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -494,7 +437,7 @@ fun ConversationScreen(
                             }
                         }
                     }
-                    if (isThinking) {
+                    if (llmState == LLamaAPI.LLMState.THINKING) {
                         item {
                             Row(
                                 modifier = Modifier

@@ -26,35 +26,50 @@ import com.vayunmathur.openassistant.ui.ConversationListScreen
 import com.vayunmathur.openassistant.ui.ConversationScreen
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.pytorch.executorch.extension.llm.LlmCallback
 import org.pytorch.executorch.extension.llm.LlmModule
+import org.pytorch.executorch.extension.llm.LlmModuleConfig
 import java.io.File
-
 
 class LLamaAPI(context: Context) {
 
-    val llmModule = LlmModule(File(context.getExternalFilesDir(null)!!, "model.pte").absolutePath, File(context.getExternalFilesDir(null)!!, "model.bin").absolutePath, 0.8f)
-
-    init {
-        llmModule.load()
+    enum class LLMState {
+        READY,
+        THINKING,
+        GENERATING
     }
 
+    val llmModule = LlmModule(File(context.getExternalFilesDir(null)!!, "model.pte").absolutePath, File(context.getExternalFilesDir(null)!!, "tokenizer.json").absolutePath, 0.8f)
+
     fun run(content: String) = callbackFlow {
+        _isAvailable.value = LLMState.THINKING
         llmModule.generate(content, 32768, object : LlmCallback {
             override fun onResult(result: String) {
+                _isAvailable.value = LLMState.GENERATING
                 trySend(result)
+                if(result.contains("<|im_end|>")) {
+                    llmModule.stop()
+                }
             }
             override fun onStats(stats: String) {
                 println(stats)
                 close()
             }
         }, false)
-        awaitClose { }
+        awaitClose {
+            _isAvailable.value = LLMState.READY
+        }
     }
+
+    private var _isAvailable = MutableStateFlow(LLMState.READY)
+    val isAvailable: StateFlow<LLMState> = _isAvailable
 
     val toolCallRegex = Regex("""<tool_call>\s*(.*?)\s*</tool_call>""", RegexOption.DOT_MATCHES_ALL)
 
@@ -63,18 +78,15 @@ class LLamaAPI(context: Context) {
         var fullResponse = ""
         return run(content).map { chunk ->
             fullResponse += chunk
-            println(fullResponse)
 
             // Extract all current tool calls from the accumulating response
             val matches = toolCallRegex.findAll(fullResponse)
-            println(matches)
             val toolCalls = matches.mapNotNull { match ->
                 val jsonString = match.groupValues[1]
                 runCatching {
                     Json.decodeFromString<ToolCall>(jsonString)
                 }.getOrNull()
             }.toList()
-            println(toolCalls)
 
             // Update message with parsed tool calls and clean text
             updatedMessage = updatedMessage.copy(
@@ -110,13 +122,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             DynamicTheme {
                 InitialDownloadChecker(ds, listOf(
-                    Triple("https://huggingface.co/software-mansion/react-native-executorch-qwen-3/resolve/main/qwen-3-1.7B/quantized/qwen3_1_7b_8da4w.pte", "model.pte", "Model"),
-                    Triple("https://huggingface.co/software-mansion/react-native-executorch-qwen-3/resolve/main/tokenizer.json", "model.bin", "Weights")
+                    Triple("https://data.vayunmathur.com/ai/model.pte", "model.pte", "Model"),
+                    Triple("https://data.vayunmathur.com/ai/tokenizer.json", "tokenizer.json", "Tokenizer")
                 )) {
                     LaunchedEffect(Unit) {
                         LLamaAPI.getInstance(this@MainActivity)
                     }
-                    Navigation(viewModel, ds)
+                    Navigation(viewModel)
                 }
             }
         }
@@ -134,12 +146,12 @@ sealed interface Route: NavKey {
 }
 
 @Composable
-fun Navigation(viewModel: DatabaseViewModel, ds: DataStoreUtils) {
+fun Navigation(viewModel: DatabaseViewModel) {
     val backStack = rememberNavBackStack(Route.ConversationList, Route.Conversation(0))
     MainNavigation(backStack) {
         entry<Route.ConversationList>(metadata = ListPage{
-            ConversationScreen(backStack, viewModel, ds, 0)
+            ConversationScreen(backStack, viewModel, 0)
         }) { ConversationListScreen(backStack, viewModel) }
-        entry<Route.Conversation>(metadata = ListDetailPage()) { ConversationScreen(backStack, viewModel, ds, it.conversationID) }
+        entry<Route.Conversation>(metadata = ListDetailPage()) { ConversationScreen(backStack, viewModel, it.conversationID) }
     }
 }

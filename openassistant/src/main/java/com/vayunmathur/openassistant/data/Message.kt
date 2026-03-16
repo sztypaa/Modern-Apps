@@ -50,7 +50,7 @@ fun List<Message>.toStreamedText(tools: List<ToolSimple> = Tools.ALL_TOOLS): Str
         If none of the function can be used, point it out. If the given question lacks the parameters required by the function,
         also point it out. You should only return the function call in tools call sections.
 
-        If you decide to invoke any of the function(s), you MUST put it in the format:
+        If you decide to invoke any of the function(s), you MUST put it in the format, surrounded by <tool_call></tool_call>:
         <tool_call>
         {"name": "function_name", "arguments": {"key": "value"}}
         </tool_call>
