@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -108,7 +109,7 @@ fun Navigation(completedLevelsRepository: CompletedLevelsRepository) {
 fun LevelScreen(backStack: NavBackStack<Route>, completedLevelsRepository: CompletedLevelsRepository) {
     val levelStats = completedLevelsRepository.getLevelStats()
     Scaffold(topBar = {
-        TopAppBar({Text("Level Selector")})
+        TopAppBar({Text(stringResource(R.string.level_selector))})
     }) { paddingValues ->
         LazyVerticalGrid(
             GridCells.Adaptive(80.dp),
@@ -233,7 +234,7 @@ fun GameScreen(backStack: NavBackStack<Route>, completedLevelsRepository: Comple
                         },
                         enabled = history.isNotEmpty() && !isLevelWon
                     ) {
-                        Text("Undo")
+                        Text(stringResource(R.string.undo))
                     }
                     Button(onClick = {
                         history.clear()
@@ -241,7 +242,7 @@ fun GameScreen(backStack: NavBackStack<Route>, completedLevelsRepository: Comple
                         isLevelWon = false
                     },
                         enabled = history.isNotEmpty() && !isLevelWon) {
-                        Text("Restart")
+                        Text(stringResource(R.string.restart))
                     }
                 }
             }
@@ -251,7 +252,7 @@ fun GameScreen(backStack: NavBackStack<Route>, completedLevelsRepository: Comple
 
 @Composable
 fun PuzzleInfoBox(levelIndex: Int, onLevelChange: (Int) -> Unit, isCompleted: Boolean, maxLevelIndex: Int) {
-    InfoBox(title = "Puzzle") {
+    InfoBox(title = stringResource(R.string.level)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -263,7 +264,7 @@ fun PuzzleInfoBox(levelIndex: Int, onLevelChange: (Int) -> Unit, isCompleted: Bo
             ) {
                 Icon(
                     painterResource(R.drawable.arrow_back_24px),
-                    contentDescription = "Previous Level",
+                    contentDescription = stringResource(R.string.previous_level),
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -279,13 +280,13 @@ fun PuzzleInfoBox(levelIndex: Int, onLevelChange: (Int) -> Unit, isCompleted: Bo
             ) {
                 Icon(
                     painterResource(R.drawable.arrow_forward_24px),
-                    contentDescription = "Next Level",
+                    contentDescription = stringResource(R.string.next_level),
                 )
             }
         }
         if (isCompleted) {
             Text(
-                text = "Completed",
+                text = stringResource(R.string.completed),
                 color = MaterialTheme.colorScheme.error,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
@@ -296,7 +297,7 @@ fun PuzzleInfoBox(levelIndex: Int, onLevelChange: (Int) -> Unit, isCompleted: Bo
 
 @Composable
 fun MovesInfoBox(moves: Int, bestScore: Int?, optimalMoves: Int) {
-    InfoBox(title = "Moves") {
+    InfoBox(title = stringResource(R.string.moves)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = "$moves",
