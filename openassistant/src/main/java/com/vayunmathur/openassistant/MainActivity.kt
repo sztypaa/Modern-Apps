@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             DynamicTheme {
                 InitialDownloadChecker(ds, listOf(
-                    Triple("https://huggingface.co/charlesLoder/gemma-3n-E4B-it-litert-lm/resolve/main/gemma-3n-E4B-it-int4.litertlm", "model.litertlm", "Model"),
+                    Triple("https://huggingface.co/na5h13/gemma-3n-E2B-it-litert-lm/resolve/main/gemma-3n-E2B-it-int4.litertlm", "model.litertlm", "Model"),
                 )) {
                     // Once downloads are complete, find the file in internal storage
                     val modelFile = File(getExternalFilesDir(null)!!, "model.litertlm")

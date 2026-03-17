@@ -1,34 +1,37 @@
 package com.vayunmathur.openassistant
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.MediaRecorder
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import coil.compose.AsyncImage
 import com.google.ai.edge.litertlm.*
 import com.vayunmathur.library.ui.IconAdd
+import com.vayunmathur.library.ui.IconClose
 import com.vayunmathur.library.ui.IconStop
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
@@ -41,10 +44,18 @@ import java.util.*
 import java.util.regex.Pattern
 
 /**
- * ToolSet implementation for LiteRT-LM.
+ * Data class for Chat Messages supporting multiple images
+ */
+data class ChatMessage(
+    val text: String,
+    val isUser: Boolean,
+    val imageUris: List<Uri> = emptyList()
+)
+
+/**
+ * ToolSet implementation
  */
 class AssistantToolSet(private val context: Context) : ToolSet {
-
     @Tool(description = "Get the current date and time in the local timezone")
     fun getLocalCurrentDateTime(): String {
         val now = LocalDateTime.now()
@@ -61,24 +72,17 @@ class AssistantToolSet(private val context: Context) : ToolSet {
     }
 
     @Tool(description = "Open an app given its package id")
-    fun openApp(
-        @ToolParam(description = "the package id of the app to open") packageId: String
-    ): String {
+    fun openApp(@ToolParam(description = "package id") packageId: String): String {
         val intent = context.packageManager.getLaunchIntentForPackage(packageId)
         return if (intent != null) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
             "Success: Opened $packageId"
-        } else {
-            "Error: App not found"
-        }
+        } else "Error: App not found"
     }
 
-    @Tool(description = "Send a message to a recipient")
-    fun sendMessage(
-        @ToolParam(description = "the phone number of the recipient") recipient: String,
-        @ToolParam(description = "the content of the message") message: String
-    ): String {
+    @Tool(description = "Send a message")
+    fun sendMessage(recipient: String, message: String): String {
         return try {
             val intent = Intent(Intent.ACTION_SENDTO).apply {
                 data = "smsto:$recipient".toUri()
@@ -90,10 +94,8 @@ class AssistantToolSet(private val context: Context) : ToolSet {
         } catch (e: Exception) { "Error: ${e.message}" }
     }
 
-    @Tool(description = "Make a phone call to a recipient")
-    fun makePhoneCall(
-        @ToolParam(description = "the phone number of the recipient") recipient: String
-    ): String {
+    @Tool(description = "Make a phone call")
+    fun makePhoneCall(recipient: String): String {
         return try {
             val intent = Intent(Intent.ACTION_DIAL).apply {
                 data = "tel:$recipient".toUri()
@@ -104,16 +106,11 @@ class AssistantToolSet(private val context: Context) : ToolSet {
         } catch (e: Exception) { "Error: ${e.message}" }
     }
 
-    @Tool(description = "Get the current weather for a specific location")
-    fun getWeather(
-        @ToolParam(description = "the latitude of the location") latitude: Double,
-        @ToolParam(description = "the longitude of the location") longitude: Double
-    ): String {
-        return "Weather data for ($latitude, $longitude): 22°C, Sunny."
-    }
+    @Tool(description = "Get weather")
+    fun getWeather(latitude: Double, longitude: Double): String = "Weather: 22°C, Sunny."
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalApi::class)
 @Composable
 fun LiteRTChatUi(modelFile: File) {
     val context = LocalContext.current
@@ -126,11 +123,9 @@ fun LiteRTChatUi(modelFile: File) {
     var inputText by remember { mutableStateOf("") }
     var isInitializing by remember { mutableStateOf(true) }
 
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    var selectedImageFile by remember { mutableStateOf<File?>(null) }
-    var isRecording by remember { mutableStateOf(false) }
-    var audioRecorder by remember { mutableStateOf<MediaRecorder?>(null) }
-    var recordedAudioFile by remember { mutableStateOf<File?>(null) }
+    // State for multiple images
+    val selectedImageUris = remember { mutableStateListOf<Uri>() }
+    val selectedImageFiles = remember { mutableStateListOf<File>() }
 
     var activeJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
     val isGenerating by remember { derivedStateOf { activeJob?.isActive == true } }
@@ -138,25 +133,18 @@ fun LiteRTChatUi(modelFile: File) {
     val assistantTools = remember { AssistantToolSet(context) }
 
     LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) {
-            listState.animateScrollToItem(messages.size - 1)
-        }
+        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
     }
 
-    val recordAudioPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) {
-            val file = File(context.cacheDir, "recording_${System.currentTimeMillis()}.amr")
-            recordedAudioFile = file
-            startRecording(context, file) { recorder ->
-                audioRecorder = recorder
-                isRecording = true
+    // Support multiple picks
+    val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri> ->
+        uris.forEach { uri ->
+            selectedImageUris.add(uri)
+            scope.launch(Dispatchers.IO) {
+                val file = copyUriToFile(context, uri)
+                withContext(Dispatchers.Main) { selectedImageFiles.add(file) }
             }
         }
-    }
-
-    val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        selectedImageUri = uri
-        uri?.let { scope.launch(Dispatchers.IO) { selectedImageFile = copyUriToFile(context, it) } }
     }
 
     LaunchedEffect(modelFile) {
@@ -165,74 +153,72 @@ fun LiteRTChatUi(modelFile: File) {
                 val config = EngineConfig(
                     modelPath = modelFile.absolutePath,
                     backend = Backend.GPU(),
+                    visionBackend = Backend.GPU(),
+                    //audioBackend = Backend.CPU(),
                     cacheDir = context.cacheDir.absolutePath
                 )
-                val newEngine = Engine(config).apply { initialize() }
-                engine = newEngine
+                ExperimentalFlags.enableConversationConstrainedDecoding = false
+                engine = Engine(config).apply { initialize() }
 
                 val systemPrompt = """
-                    You are a helpful Android assistant with access to tools.
-                    When you need to use a tool, you MUST use the following format:
-                    <start_function_call>tool_name(arg1="val1", arg2="val2")<end_function_call>
-                    
-                    Important instructions:
-                    1. Respond ONLY with the function call block when a tool is needed, then end your turn immediately.
-                    2. Once you receive the tool result, interpret the data and convey the information to the user in natural, conversational language.
-                    3. Do not repeat the raw, machine-readable tool output (like JSON, raw lists, or technical timestamps) directly to the user.
+                    You are a helpful Android assistant. Use tool calls:
+                    <start_function_call>tool_name(arg1="val1")<end_function_call>
+                    Interpret tool results conversationally.
                 """.trimIndent()
 
-                val conversationConfig = ConversationConfig(
+                conversation = engine?.createConversation(ConversationConfig(
                     systemInstruction = Contents.of(systemPrompt),
                     tools = listOf(tool(assistantTools)),
                     automaticToolCalling = false
-                )
-                conversation = newEngine.createConversation(conversationConfig)
+                ))
                 isInitializing = false
-            } catch (e: Exception) {
-                e.printStackTrace()
-                isInitializing = false
-            }
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            activeJob?.cancel()
-            audioRecorder?.apply { try { stop() } catch(e: Exception) {}; release() }
-            conversation?.close()
-            engine?.close()
+            } catch (e: Exception) { isInitializing = false }
         }
     }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Open Assistant", fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
+                title = { Text("Open Assistant", fontWeight = FontWeight.Bold) }
             )
         },
         bottomBar = {
-            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp)) {
-                if (selectedImageUri != null || isRecording) {
-                    Row(modifier = Modifier.padding(bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        if (selectedImageUri != null) {
-                            Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = RoundedCornerShape(8.dp), modifier = Modifier.size(60.dp)) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text("Image", style = MaterialTheme.typography.labelSmall)
-                                    IconButton(onClick = { selectedImageUri = null; selectedImageFile = null }, modifier = Modifier.align(Alignment.TopEnd).size(24.dp)) {
-                                        Icon(painterResource(android.R.drawable.ic_menu_close_clear_cancel), contentDescription = null, tint = Color.Red)
-                                    }
-                                }
-                            }
-                        }
-                        if (isRecording) {
-                            Spacer(Modifier.width(8.dp))
-                            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer), shape = RoundedCornerShape(8.dp)) {
-                                Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Text("Recording...", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
-                                    Spacer(Modifier.width(8.dp))
-                                    TextButton(onClick = { stopRecording(audioRecorder); audioRecorder = null; isRecording = false; recordedAudioFile = null }, contentPadding = PaddingValues(0.dp)) {
-                                        Text("Cancel", color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                // MULTI-IMAGE PRE-SEND PREVIEW
+                if (selectedImageUris.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.weight(1f, fill = false)
+                        ) {
+                            items(selectedImageUris) { uri ->
+                                Box(modifier = Modifier.size(80.dp)) {
+                                    AsyncImage(
+                                        model = uri,
+                                        contentDescription = "Selected image",
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                    IconButton(
+                                        onClick = {
+                                            val index = selectedImageUris.indexOf(uri)
+                                            if (index != -1) {
+                                                selectedImageUris.removeAt(index)
+                                                if (index < selectedImageFiles.size) selectedImageFiles.removeAt(index)
+                                            }
+                                        }
+                                    ) {
+                                        IconClose()
                                     }
                                 }
                             }
@@ -240,40 +226,45 @@ fun LiteRTChatUi(modelFile: File) {
                     }
                 }
 
-                Surface(tonalElevation = 2.dp, shadowElevation = 1.dp, shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
+                Surface(
+                    tonalElevation = 3.dp,
+                    shape = RoundedCornerShape(28.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                        if (!isRecording) {
-                            IconButton(onClick = { imagePickerLauncher.launch("image/*") }, enabled = !isInitializing && !isGenerating) { IconAdd() }
-                            IconButton(onClick = {
-                                if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-                                    val file = File(context.cacheDir, "recording_${System.currentTimeMillis()}.amr"); recordedAudioFile = file
-                                    startRecording(context, file) { recorder -> audioRecorder = recorder; isRecording = true }
-                                } else { recordAudioPermission.launch(Manifest.permission.RECORD_AUDIO) }
-                            }, enabled = !isInitializing && !isGenerating) {
-                                Icon(painterResource(R.drawable.baseline_mic_24), contentDescription = "Record Voice")
-                            }
-                        }
+                        IconButton(onClick = { imagePickerLauncher.launch("image/*") }, enabled = !isGenerating) { IconAdd() }
 
                         TextField(
                             value = inputText,
                             onValueChange = { inputText = it },
                             modifier = Modifier.weight(1f),
-                            enabled = !isInitializing && !isGenerating && !isRecording,
-                            placeholder = { Text("Ask anything...") },
-                            colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent)
+                            enabled = !isGenerating,
+                            placeholder = { Text("Message...") },
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                disabledContainerColor = Color.Transparent,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent
+                            )
                         )
 
                         if (isGenerating) {
                             IconButton(onClick = { activeJob?.cancel(); activeJob = null }) { IconStop(MaterialTheme.colorScheme.error) }
                         } else {
-                            val canSend = (inputText.isNotBlank() || selectedImageFile != null || recordedAudioFile != null)
+                            val canSend = (inputText.isNotBlank() || selectedImageFiles.isNotEmpty())
                             IconButton(
-                                enabled = !isInitializing && canSend,
+                                enabled = canSend,
                                 onClick = {
-                                    if (isRecording) { stopRecording(audioRecorder); audioRecorder = null; isRecording = false }
-                                    sendMessageManual(scope = scope, conversation = conversation, assistantTools = assistantTools, messages = messages, text = inputText, imageFile = selectedImageFile, audioFile = recordedAudioFile, onComplete = {
-                                        inputText = ""; selectedImageFile = null; selectedImageUri = null; recordedAudioFile = null
-                                    }, onJobFinished = {activeJob = null} , onJobStarted = { activeJob = it })
+                                    sendMessageManual(
+                                        scope, conversation, assistantTools, messages,
+                                        inputText, selectedImageFiles.toList(), selectedImageUris.toList(),
+                                        onComplete = {
+                                            inputText = ""; selectedImageFiles.clear(); selectedImageUris.clear()
+                                        },
+                                        onJobFinished = { activeJob = null },
+                                        onJobStarted = { activeJob = it }
+                                    )
                                 }
                             ) {
                                 Icon(painterResource(android.R.drawable.ic_menu_send), contentDescription = "Send", tint = if (canSend) MaterialTheme.colorScheme.primary else Color.Gray)
@@ -283,10 +274,10 @@ fun LiteRTChatUi(modelFile: File) {
                 }
             }
         }
-    ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues).background(MaterialTheme.colorScheme.background)) {
-            if (isInitializing) LinearProgressIndicator(modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter))
-            LazyColumn(state = listState, modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    ) { padding ->
+        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+            if (isInitializing) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            LazyColumn(state = listState, modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 items(messages) { msg -> ChatBubble(msg) }
             }
         }
@@ -295,13 +286,48 @@ fun LiteRTChatUi(modelFile: File) {
 
 @Composable
 fun ChatBubble(message: ChatMessage) {
-    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = if (message.isUser) Alignment.CenterEnd else Alignment.CenterStart) {
-        if (message.isUser) {
-            Surface(color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp, 16.dp, 0.dp, 16.dp), modifier = Modifier.widthIn(max = 280.dp)) {
-                Text(text = message.text, modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), color = MaterialTheme.colorScheme.onPrimary, fontSize = 15.sp)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = if (message.isUser) Alignment.End else Alignment.Start
+    ) {
+        val bubbleColor = if (message.isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer
+        val textColor = if (message.isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer
+        val shape = if (message.isUser) RoundedCornerShape(20.dp, 20.dp, 4.dp, 20.dp) else RoundedCornerShape(20.dp, 20.dp, 20.dp, 4.dp)
+
+        Surface(
+            color = bubbleColor,
+            shape = shape,
+            modifier = Modifier.widthIn(max = 320.dp)
+        ) {
+            Column(modifier = Modifier.padding(if (message.imageUris.isNotEmpty()) 4.dp else 12.dp)) {
+                if (message.imageUris.isNotEmpty()) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        message.imageUris.forEach { uri ->
+                            AsyncImage(
+                                model = uri,
+                                contentDescription = "User attached image",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = 240.dp)
+                                    .clip(RoundedCornerShape(16.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+                }
+
+                if (message.text.isNotBlank()) {
+                    Text(
+                        text = message.text,
+                        color = textColor,
+                        fontSize = 15.sp,
+                        modifier = Modifier.padding(
+                            horizontal = if (message.imageUris.isNotEmpty()) 8.dp else 0.dp,
+                            vertical = if (message.imageUris.isNotEmpty()) 8.dp else 0.dp
+                        )
+                    )
+                }
             }
-        } else {
-            Text(text = message.text, modifier = Modifier.widthIn(max = 300.dp), color = MaterialTheme.colorScheme.onBackground, fontSize = 15.sp, lineHeight = 22.sp)
         }
     }
 }
@@ -312,27 +338,25 @@ private fun sendMessageManual(
     assistantTools: AssistantToolSet,
     messages: MutableList<ChatMessage>,
     text: String,
-    imageFile: File?,
-    audioFile: File?,
+    imageFiles: List<File>,
+    imageUris: List<Uri>,
     onComplete: () -> Unit,
     onJobFinished: () -> Unit,
     onJobStarted: (kotlinx.coroutines.Job) -> Unit
 ) {
-    val userDisplay = when {
-        audioFile != null -> "🎤 Audio Message"
-        imageFile != null -> "🖼️ Image Message"
-        else -> ""
-    } + if (text.isNotBlank()) " $text" else ""
-    messages.add(ChatMessage(userDisplay.trim(), true))
+    messages.add(ChatMessage(
+        text = text,
+        isUser = true,
+        imageUris = imageUris
+    ))
 
     val aiMessageIndex = messages.size
     messages.add(ChatMessage("", false))
 
     val job = scope.launch {
         val initialParts = mutableListOf<Content>()
-        imageFile?.let { initialParts.add(Content.ImageFile(it.absolutePath)) }
-        audioFile?.let { initialParts.add(Content.AudioFile(it.absolutePath)) }
-        initialParts.add(Content.Text(text))
+        imageFiles.forEach { initialParts.add(Content.ImageFile(it.absolutePath)) }
+        if (text.isNotBlank()) initialParts.add(Content.Text(text))
 
         var nextInput: Any = Contents.of(initialParts)
         var isLooping = true
@@ -344,11 +368,10 @@ private fun sendMessageManual(
             var insideTag = false
             var insideFunctionBlock = false
 
-            val stream = if (nextInput is Contents) {
-                conversation?.sendMessageAsync(nextInput)
-            } else {
-                conversation?.sendMessageAsync(nextInput as Message)
-            } ?: break
+            val stream = if (nextInput is Contents) conversation?.sendMessageAsync(nextInput)
+            else conversation?.sendMessageAsync(nextInput as Message)
+
+            if (stream == null) break
 
             stream.catch { e ->
                 messages[aiMessageIndex] = ChatMessage("Error: ${e.message}", false)
@@ -357,63 +380,32 @@ private fun sendMessageManual(
                 val chunkText = chunk.contents.contents.filterIsInstance<Content.Text>().joinToString("") { it.text }
                 fullResponseText += chunkText
 
-                // Character-by-character filtering and Turn Control
                 for (char in chunkText) {
-                    if (char == '<') {
-                        insideTag = true
-                        tagBuffer = "<"
-                    } else if (insideTag) {
+                    if (char == '<') { insideTag = true; tagBuffer = "<" }
+                    else if (insideTag) {
                         tagBuffer += char
                         if (char == '>') {
                             insideTag = false
-
-                            when {
-                                tagBuffer.contains("start_function_call") -> {
-                                    insideFunctionBlock = true
-                                }
-                                tagBuffer.contains("end_function_call") -> {
-                                    insideFunctionBlock = false
-                                }
-                                tagBuffer.contains("end_of_turn") -> {
-                                }
-                            }
+                            if (tagBuffer.contains("start_function_call")) insideFunctionBlock = true
+                            else if (tagBuffer.contains("end_function_call")) insideFunctionBlock = false
                             tagBuffer = ""
                         }
-                    } else {
-                        if (!insideFunctionBlock) {
-                            displayedText += char
-                        }
+                    } else if (!insideFunctionBlock) {
+                        displayedText += char
                     }
                 }
-
-                if (displayedText.isNotBlank()) {
-                    messages[aiMessageIndex] = ChatMessage(displayedText, false)
-                }
+                if (displayedText.isNotBlank()) messages[aiMessageIndex] = ChatMessage(displayedText, false)
             }
 
-            // Execute logic using regex on the FULL raw response
             val toolRegex = Pattern.compile("<start_function_call>(.*?)<end_function_call>", Pattern.DOTALL)
             val matcher = toolRegex.matcher(fullResponseText)
 
             if (matcher.find()) {
                 val callBody = matcher.group(1)?.trim() ?: ""
                 val toolResult = processManualCallBody(callBody, assistantTools)
-
-                withContext(Dispatchers.Main) {
-                    messages[aiMessageIndex] = ChatMessage("Thinking...", false)
-                }
-
+                withContext(Dispatchers.Main) { messages[aiMessageIndex] = ChatMessage("Thinking...", false) }
                 nextInput = Message.tool(Contents.of(listOf(Content.ToolResponse("manual_action", toolResult))))
             } else {
-                withContext(Dispatchers.Main) {
-                    // Final UI cleanup
-                    val finalDisplay = if (insideTag && !tagBuffer.contains("function_call") && !tagBuffer.contains("end_of_turn")) {
-                        displayedText + tagBuffer
-                    } else {
-                        displayedText
-                    }
-                    messages[aiMessageIndex] = ChatMessage(finalDisplay, false)
-                }
                 isLooping = false
             }
         }
@@ -427,56 +419,31 @@ private fun processManualCallBody(body: String, tools: AssistantToolSet): String
     return try {
         val name = body.substringBefore("(").trim()
         val argsString = body.substringAfter("(").substringBeforeLast(")")
-
         val argsMap = mutableMapOf<String, String>()
         if (argsString.isNotBlank()) {
             argsString.split(",").forEach { pair ->
                 val parts = pair.split("=")
                 if (parts.size == 2) {
-                    val key = parts[0].trim()
-                    val value = parts[1].trim().removeSurrounding("\"").removeSurrounding("'")
-                    argsMap[key] = value
+                    argsMap[parts[0].trim()] = parts[1].trim().removeSurrounding("\"").removeSurrounding("'")
                 }
             }
         }
-
         when (name) {
             "get_local_current_date_time" -> tools.getLocalCurrentDateTime()
             "get_list_of_apps" -> tools.getListOfApps()
             "open_app" -> tools.openApp(argsMap["packageId"] ?: "")
             "send_message" -> tools.sendMessage(argsMap["recipient"] ?: "", argsMap["message"] ?: "")
             "make_phone_call" -> tools.makePhoneCall(argsMap["recipient"] ?: "")
-            "get_weather" -> tools.getWeather(
-                argsMap["latitude"]?.toDoubleOrNull() ?: 0.0,
-                argsMap["longitude"]?.toDoubleOrNull() ?: 0.0
-            )
+            "get_weather" -> tools.getWeather(argsMap["latitude"]?.toDoubleOrNull() ?: 0.0, argsMap["longitude"]?.toDoubleOrNull() ?: 0.0)
             else -> "Error: Unknown tool $name"
         }
-    } catch (e: Exception) {
-        "Error parsing tool call: ${e.message}"
-    }
-}
-
-private fun startRecording(context: Context, file: File, onStarted: (MediaRecorder) -> Unit) {
-    val recorder = MediaRecorder(context).apply {
-        setAudioSource(MediaRecorder.AudioSource.MIC)
-        setOutputFormat(MediaRecorder.OutputFormat.AMR_NB)
-        setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-        setOutputFile(file.absolutePath)
-        prepare()
-        start()
-    }
-    onStarted(recorder)
-}
-
-private fun stopRecording(recorder: MediaRecorder?) {
-    try { recorder?.stop(); recorder?.release() } catch (e: Exception) { e.printStackTrace() }
+    } catch (e: Exception) { "Error: ${e.message}" }
 }
 
 private fun copyUriToFile(context: Context, uri: Uri): File {
-    val tempFile = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
-    context.contentResolver.openInputStream(uri)?.use { input -> FileOutputStream(tempFile).use { output -> input.copyTo(output) } }
+    val tempFile = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}_${UUID.randomUUID()}.jpg")
+    context.contentResolver.openInputStream(uri)?.use { input ->
+        FileOutputStream(tempFile).use { output -> input.copyTo(output) }
+    }
     return tempFile
 }
-
-data class ChatMessage(val text: String, val isUser: Boolean)
