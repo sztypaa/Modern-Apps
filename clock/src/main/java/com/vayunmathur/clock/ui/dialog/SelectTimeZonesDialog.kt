@@ -43,9 +43,9 @@ fun SelectTimeZonesDialog(backStack: NavBackStack<Route>, ds: DataStoreUtils) {
     var searchQuery by remember { mutableStateOf("") }
 
     // Map all available IDs to a pair of (Clean City Name, Original ID)
-    val allOptions = remember {
-        citiesToTimezones.entries.map { Triple(it.key, it.value, "${it.key} ${it.value}".lowercase()) }
-    }
+    val allOptions = remember(citiesToTimezones) {
+        citiesToTimezones?.entries?.map { Triple(it.key, it.value, "${it.key} ${it.value}".lowercase()) }
+    } ?: listOf()
 
     val filteredOptions by produceState(initialValue = allOptions, searchQuery) {
         value = if(searchQuery.isEmpty()) {

@@ -88,7 +88,7 @@ fun ClockPage(backStack: NavBackStack<Route>, ds: DataStoreUtils) {
                 }))
             }
             items(timeZones.toList()) {city ->
-                val it = citiesToTimezones[city] ?: return@items
+                val it = citiesToTimezones?.get(city) ?: return@items
                 val timeHere = now.toLocalDateTime(TimeZone.of(it))
                 Card {
                     ListItem({Text(city)}, trailingContent = {
