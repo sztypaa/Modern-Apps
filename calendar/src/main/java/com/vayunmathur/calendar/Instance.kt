@@ -11,6 +11,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
+import java.time.DateTimeException
+import java.time.ZoneId
 import kotlin.time.Instant
 
 
@@ -82,8 +84,13 @@ data class Instance(
                     val start =
                         it.getLong(it.getColumnIndexOrThrow(CalendarContract.Instances.BEGIN))
                     val end = it.getLong(it.getColumnIndexOrThrow(CalendarContract.Instances.END))
-                    val timezone =
+                    var timezone =
                         it.getString(it.getColumnIndexOrThrow(CalendarContract.Instances.EVENT_TIMEZONE))
+                    try {
+                        ZoneId.of(timezone)
+                    } catch(e: DateTimeException) {
+                        timezone = "UTC"
+                    }
                     val allDay =
                         it.getInt(it.getColumnIndexOrThrow(CalendarContract.Instances.ALL_DAY)) > 0
                     val eventTitle = it.getString(it.getColumnIndexOrThrow(CalendarContract.Instances.TITLE))

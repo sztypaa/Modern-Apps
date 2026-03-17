@@ -8,6 +8,8 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
+import java.time.DateTimeException
+import java.time.ZoneId
 import kotlin.time.Duration
 import kotlin.time.Instant
 
@@ -74,8 +76,13 @@ data class Event(
                     var end = it.getLong(it.getColumnIndexOrThrow(CalendarContract.Events.DTEND))
                     val allDay =
                         it.getInt(it.getColumnIndexOrThrow(CalendarContract.Events.ALL_DAY)) == 1
-                    val timezone =
+                    var timezone =
                         it.getString(it.getColumnIndexOrThrow(CalendarContract.Events.EVENT_TIMEZONE))
+                    try {
+                        ZoneId.of(timezone)
+                    } catch(e: DateTimeException) {
+                        timezone = "UTC"
+                    }
                     val deleted =
                         it.getInt(it.getColumnIndexOrThrow(CalendarContract.Events.DELETED)) == 1
                     val rrule =

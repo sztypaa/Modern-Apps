@@ -26,23 +26,27 @@ import androidx.navigation3.runtime.NavBackStack
 import com.vayunmathur.library.util.LocalNavResultRegistry
 import com.vayunmathur.library.util.pop
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.offsetAt
+import kotlinx.datetime.toJavaZoneOffset
+import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimezonePickerDialog(backStack: NavBackStack<com.vayunmathur.calendar.Route>, resultKey: String) {
     val registry = LocalNavResultRegistry.current
     val scope = rememberCoroutineScope()
-    val allZones = java.time.ZoneId.getAvailableZoneIds().toList().sorted()
+    val allZones = TimeZone.availableZoneIds.toList().sorted()
 
     var query by remember { mutableStateOf("") }
 
     // Build a list of pairs (zoneId, offsetString) once so we can search offsets too
     val zoneWithOffset = remember(allZones) {
         allZones.map { z ->
-            val zid = java.time.ZoneId.of(z)
+            val zid = TimeZone.of(z)
             // compute current offset for this zone
-            val offset = java.time.ZonedDateTime.now(zid).offset
-            val offsetId = if (offset.id == "Z") "+00:00" else offset.id
+            val offset = zid.offsetAt(Clock.System.now())
+            val offsetId = if (offset.toJavaZoneOffset().id == "Z") "+00:00" else offset.toJavaZoneOffset().id
             val offsetStr = "UTC${offsetId}"
             z to offsetStr
         }

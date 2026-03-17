@@ -174,12 +174,6 @@ fun EditEventScreen(viewModel: ContactViewModel, eventId: Long?, backStack: NavB
 
     // Timezone selector (navigation dialog) - open via Nav route and handle result
     ResultEffect<String>(KEY_TIMEZONE) { z -> timezone = z }
-    if (!allDay) {
-        Item(
-            { Icon(painterResource(R.drawable.globe_24px), null) },
-            { Text(timezone, Modifier.clickable { backStack.add(Route.EditEvent.TimezonePickerDialog(KEY_TIMEZONE)) }) }
-        )
-    }
 
     Scaffold(topBar = {
         TopAppBar({}, navigationIcon = {
@@ -276,8 +270,6 @@ fun EditEventScreen(viewModel: ContactViewModel, eventId: Long?, backStack: NavB
                 }) }
             )
 
-            // Timezone selector (navigation dialog) - open via Nav route and handle result
-            ResultEffect<String>(KEY_TIMEZONE) { z -> timezone = z }
             if (!allDay) {
                 Item(
                     { Box(modifier = Modifier.size(24.dp).background(Color.Transparent)) { Icon(painterResource(R.drawable.globe_24px), null) } },
