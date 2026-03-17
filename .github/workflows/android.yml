@@ -129,10 +129,13 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # CRITICAL FIX: Add only source files, specifically ignore the APK distribution folder
           git add .
+          git reset distribution_apks/
+          
           VERSION_NAME="${{ steps.version_info.outputs.version_name }}"
           git commit -m "chore: prepare release $VERSION_NAME" || echo "No changes to commit"
-          # We push the commit to main, but we don't push the tag manually yet.
           git push origin HEAD
 
       - name: Create GitHub Release and Tag
