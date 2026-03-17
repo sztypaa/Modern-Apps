@@ -1,6 +1,7 @@
 package com.vayunmathur.clock
 
 import android.app.AlarmManager
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -47,6 +48,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlin.time.Clock
+import androidx.core.net.toUri
 
 lateinit var citiesToTimezones: Map<String, String>
 
@@ -64,6 +66,17 @@ class MainActivity : ComponentActivity() {
             startActivity(intent)
         }
         createTimerNotificationChannels(this)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            if (!notificationManager.canUseFullScreenIntent()) {
+                // Direct the user to the settings page to toggle "Allow full screen intents"
+                val intent = Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
+                    data = "package:${packageName}".toUri()
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+            }
+        }
         val ds = DataStoreUtils.getInstance(this)
         val db = buildDatabase<ClockDatabase>()
         val viewModel = DatabaseViewModel(db, Timer::class to db.timerDao(), Alarm::class to db.alarmDao())
@@ -155,17 +168,23 @@ fun createTimerNotificationChannels(context: Context) {
 
     nm.createNotificationChannels(listOf(
         // 1. Quiet channel for ongoing countdowns
-        NotificationChannel("active_timers_channel", "Active Timers", NotificationManager.IMPORTANCE_LOW).apply {
+        NotificationChannel("active_timers_channel", "Ongoing Timers", NotificationManager.IMPORTANCE_LOW).apply {
             description = "Ongoing countdowns"
             setShowBadge(false)
         },
         // 2. Loud channel for the "Time's Up" alert
-        NotificationChannel("finished_timers_channel", "Timer Alarms", NotificationManager.IMPORTANCE_HIGH).apply {
+        NotificationChannel("finished_timers_channel", "Completed Timers", NotificationManager.IMPORTANCE_HIGH).apply {
             description = "Alerts when timers finish"
             enableVibration(true)
             setSound(
                 RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
                 AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build())
+        },
+        NotificationChannel("ALARM_CHANNEL_ID", "Alarms", NotificationManager.IMPORTANCE_HIGH).apply {
+            description = "Notifications for scheduled alarms"
+            // Optional: Set a specific sound for the channel here
+            setBypassDnd(true) // Allows alarm to ring during Doze/DND
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
     ))
 }

@@ -110,6 +110,7 @@ fun AlarmCard(
                         viewModel.upsertAsync(alarm.copy(enabled = it))
                     })
                     IconButton({
+                        alarmScheduler.cancel(alarm)
                         viewModel.delete(alarm)
                     }) {
                         IconDelete()
