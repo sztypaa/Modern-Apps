@@ -196,7 +196,7 @@ fun GameScreen(backStack: NavBackStack<Route>, completedLevelsRepository: Comple
         if (isLevelWon) {
             completedLevelsRepository.updateBestScore(levelIndex, getCurrentMoves())
             levelStats = completedLevelsRepository.getLevelStats() // Refresh stats
-            delay(1000)
+            delay(500)
             changeLevel(levelIndex + 1)
         }
     }
