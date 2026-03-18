@@ -393,7 +393,12 @@ fun GameBoard(
 
             levelData.blocks.forEachIndexed { index, block ->
                 val isMainBlock = index == 0
-                val color = if (isMainBlock) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primaryContainer
+                val color = if (isMainBlock)
+                    MaterialTheme.colorScheme.error
+                else if (block.fixed)
+                    MaterialTheme.colorScheme.secondaryContainer
+                else
+                    MaterialTheme.colorScheme.primaryContainer
                 val blockWidth = cellWidth * block.dimension.width
                 val blockHeight = cellHeight * block.dimension.height
 
@@ -424,6 +429,7 @@ fun GameBoard(
                         .background(color, shape = RoundedCornerShape(8.dp))
                         .pointerInput(block, levelData, isLevelWon) {
                             if (isLevelWon) return@pointerInput
+                            if (block.fixed) return@pointerInput
 
                             detectDragGestures(
                                 onDragStart = {
