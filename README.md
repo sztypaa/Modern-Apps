@@ -72,6 +72,7 @@ Officially unreleased, but the apk is available for download for testing.
 
 ## OpenAssistant
 A 100% offline AI app that supports text, image, and audio input using the Gemma 4 models
+
 Also supports tool calling, which enables interactions with other apps in this ecosystem (reading and writing to notes, searching and playing music, etc.)
 
 ## YouPipe
