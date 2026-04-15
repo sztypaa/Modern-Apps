@@ -1,5 +1,7 @@
 package com.vayunmathur.calendar.ui
 
+import android.content.Context
+import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.glance.LocalContext
 import com.vayunmathur.library.util.NavBackStack
 import com.vayunmathur.calendar.util.ContactViewModel
 import com.vayunmathur.calendar.data.Instance
@@ -48,6 +51,8 @@ fun EventScreen(viewModel: ContactViewModel, instance: Instance, backStack: NavB
     }
 
     val calendar = calendars.find { it.id == event.calendarID }!!
+
+    val context = LocalContext.current
 
     val isEditable = calendar.canModify
 
@@ -76,7 +81,7 @@ fun EventScreen(viewModel: ContactViewModel, instance: Instance, backStack: NavB
             }, supportingContent = {
                 Column {
                     Text(calendar.displayName)
-                    Text(dateRangeString(instance.startDateTimeDisplay.date, instance.endDateTimeDisplay.date, instance.startDateTimeDisplay.time, instance.endDateTimeDisplay.time, instance.allDay))
+                    Text(dateRangeString(context,instance.startDateTimeDisplay.date, instance.endDateTimeDisplay.date, instance.startDateTimeDisplay.time, instance.endDateTimeDisplay.time, instance.allDay))
                     instance.rrule?.let { Text(it.toString()) }
                 }
             }, leadingContent = {
@@ -94,7 +99,7 @@ fun EventScreen(viewModel: ContactViewModel, instance: Instance, backStack: NavB
     }
 }
 
-fun dateRangeString(startDate: LocalDate, endDate: LocalDate, startTime: LocalTime, endTime: LocalTime, allDay: Boolean): String {
+fun dateRangeString(context: Context, startDate: LocalDate, endDate: LocalDate, startTime: LocalTime, endTime: LocalTime, allDay: Boolean): String {
     return if(allDay) {
         if(startDate.toEpochDays() + 1 == endDate.toEpochDays()) {
             startDate.format(dateFormat)
@@ -103,9 +108,9 @@ fun dateRangeString(startDate: LocalDate, endDate: LocalDate, startTime: LocalTi
         }
     } else {
         if(startDate == endDate) {
-            "${startDate.format(dateFormat)} • ${startTime.format(timeFormat)} - ${endTime.format(timeFormat)}"
+            "${startDate.format(dateFormat)} • ${startTime.format(if(DateFormat.is24HourFormat(context)) timeFormat24 else timeFormat12)} - ${endTime.format(if(DateFormat.is24HourFormat(context)) timeFormat24 else timeFormat12)}"
         } else {
-            "${startDate.format(dateFormat)}, ${startTime.format(timeFormat)} - ${endDate.format(dateFormat)}, ${endTime.format(timeFormat)}"
+            "${startDate.format(dateFormat)}, ${startTime.format(if(DateFormat.is24HourFormat(context)) timeFormat24 else timeFormat12)} - ${endDate.format(dateFormat)}, ${endTime.format(if(DateFormat.is24HourFormat(context)) timeFormat24 else timeFormat12)}"
         }
     }
 }

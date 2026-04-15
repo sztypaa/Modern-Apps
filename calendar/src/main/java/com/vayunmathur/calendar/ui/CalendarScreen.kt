@@ -1,5 +1,6 @@
 package com.vayunmathur.calendar.ui
 
+import android.text.format.DateFormat
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -20,13 +21,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -61,15 +60,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.vayunmathur.library.util.NavBackStack
-import com.vayunmathur.calendar.data.Calendar
-import com.vayunmathur.calendar.util.ContactViewModel
-import com.vayunmathur.calendar.data.Event
-import com.vayunmathur.calendar.data.Instance
 import com.vayunmathur.calendar.R
 import com.vayunmathur.calendar.Route
+import com.vayunmathur.calendar.data.Calendar
+import com.vayunmathur.calendar.data.Event
+import com.vayunmathur.calendar.data.Instance
+import com.vayunmathur.calendar.util.ContactViewModel
 import com.vayunmathur.library.ui.IconAdd
 import com.vayunmathur.library.ui.IconSettings
+import com.vayunmathur.library.util.NavBackStack
 import com.vayunmathur.library.util.ResultEffect
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
@@ -167,8 +166,13 @@ fun CalendarScreen(viewModel: ContactViewModel, backStack: NavBackStack<Route>) 
                         Box(modifier = Modifier
                             .height(56.dp)
                             .width(56.dp)) {
+                            val hourString = if(DateFormat.is24HourFormat(context)) {
+                                "%02d:00".format(hour)
+                            } else {
+                                if (hour == 0) stringResource(R.string.twelve_am) else if (hour < 12) stringResource(R.string.hour_am, hour) else if (hour == 12) stringResource(R.string.twelve_pm) else stringResource(R.string.hour_pm, hour - 12)
+                            }
                             Text(
-                                text = if (hour == 0) stringResource(R.string.twelve_am) else if (hour < 12) stringResource(R.string.hour_am, hour) else if (hour == 12) stringResource(R.string.twelve_pm) else stringResource(R.string.hour_pm, hour - 12),
+                                text = hourString,
                                 modifier = Modifier.padding(start = 8.dp),
                                 style = MaterialTheme.typography.labelSmall
                             )

@@ -2,6 +2,7 @@ package com.vayunmathur.calendar.ui
 
 import android.content.ContentValues
 import android.provider.CalendarContract
+import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -41,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.glance.LocalContext
 import com.vayunmathur.library.util.NavBackStack
 import com.vayunmathur.calendar.util.ContactViewModel
 import com.vayunmathur.calendar.R
@@ -79,6 +81,8 @@ private const val KEY_TIMEZONE = "EditEvent.timezone"
 fun EditEventScreen(viewModel: ContactViewModel, eventId: Long?, backStack: NavBackStack<Route>) {
     val events by viewModel.events.collectAsState()
     val calendars by viewModel.calendars.collectAsState()
+
+    val context = LocalContext.current
 
     val event = events.find { it.id == eventId }
 
@@ -250,7 +254,7 @@ fun EditEventScreen(viewModel: ContactViewModel, eventId: Long?, backStack: NavB
                     // open date picker dialog
                     backStack.add(Route.EditEvent.DatePickerDialog(KEY_START_DATE, startDate))
                 }) },
-                { if(!allDay) Text(startTime.format(timeFormat), Modifier.clickable {
+                { if(!allDay) Text(startTime.format(if(DateFormat.is24HourFormat(context)) timeFormat24 else timeFormat12), Modifier.clickable {
                     // open time picker dialog
                     // no min time for start
                     backStack.add(Route.EditEvent.TimePickerDialog(KEY_START_TIME, startTime, null))
@@ -262,7 +266,7 @@ fun EditEventScreen(viewModel: ContactViewModel, eventId: Long?, backStack: NavB
                     // when opening end date, prevent selecting a date before startDate
                     backStack.add(Route.EditEvent.DatePickerDialog(KEY_END_DATE, endDate, startDate))
                 }) },
-                { if(!allDay) Text(endTime.format(timeFormat), Modifier.clickable{
+                { if(!allDay) Text(endTime.format(if(DateFormat.is24HourFormat(context)) timeFormat24 else timeFormat12), Modifier.clickable{
                     // when opening end time, supply minTime if endDate equals startDate
                     val minTime = if (endDate == startDate) startTime else null
                     backStack.add(Route.EditEvent.TimePickerDialog(KEY_END_TIME, endTime, minTime))
@@ -308,10 +312,16 @@ val dateFormat = LocalDate.Format {
     year(Padding.NONE)
 }
 
-val timeFormat = LocalTime.Format {
+val timeFormat12 = LocalTime.Format {
     amPmHour(Padding.NONE)
     chars(":")
     minute()
     chars(" ")
     amPmMarker("AM", "PM")
+}
+
+val timeFormat24 = LocalTime.Format {
+    hour(Padding.ZERO)
+    chars(":")
+    minute()
 }
