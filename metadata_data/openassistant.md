@@ -4,7 +4,7 @@ Requires 6GB of spare RAM to run.
 
 Features:
 - multiple chats
-- tool calling
+- tool calling (works with several other apps in the Modern Apps ecosystem)
 - streaming long responses
 - multimodal input (photo upload & audio recording)
 - markdown formatted text output

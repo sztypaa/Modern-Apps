@@ -7,6 +7,13 @@ android {
     defaultConfig {
         applicationId = "com.vayunmathur.openassistant"
     }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
+    }
 }
 
 dependencies {

@@ -1,1 +1,1 @@
-A basic note-taking app
+A markdown note-taking app
