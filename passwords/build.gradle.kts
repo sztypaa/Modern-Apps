@@ -12,6 +12,7 @@ android {
 
 dependencies {
     implementRoom(libs)
+    implementation(libs.androidx.fragment.ktx)
 
     // CSV parsing library for Bitwarden CSV imports
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.10.0")

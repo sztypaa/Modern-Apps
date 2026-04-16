@@ -1,10 +1,10 @@
 package com.vayunmathur.passwords
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.fragment.app.FragmentActivity
 import com.vayunmathur.library.util.NavKey
 import androidx.room.migration.Migration
 import com.vayunmathur.library.ui.DynamicTheme
@@ -14,6 +14,7 @@ import com.vayunmathur.library.util.ListPage
 import com.vayunmathur.library.util.MainNavigation
 import com.vayunmathur.library.util.buildDatabase
 import com.vayunmathur.library.util.rememberNavBackStack
+import com.vayunmathur.library.util.unlockDatabaseWithBiometrics
 import com.vayunmathur.passwords.data.PasswordDatabase
 import com.vayunmathur.passwords.ui.MenuPage
 import com.vayunmathur.passwords.data.Password
@@ -22,17 +23,26 @@ import com.vayunmathur.passwords.ui.PasswordPage
 import com.vayunmathur.passwords.ui.SettingsPage
 import kotlinx.serialization.Serializable
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val db = buildDatabase<PasswordDatabase>()
-        val viewModel = DatabaseViewModel(db,Password::class to db.passwordDao())
-        setContent {
-            DynamicTheme {
-                Navigation(viewModel)
+
+        unlockDatabaseWithBiometrics(
+            activity = this,
+            onSuccess = { passphrase ->
+                val db = buildDatabase<PasswordDatabase>(encryptionPassword = passphrase)
+                val viewModel = DatabaseViewModel(db,Password::class to db.passwordDao())
+                setContent {
+                    DynamicTheme {
+                        Navigation(viewModel)
+                    }
+                }
+            },
+            onFailure = {
+                finish()
             }
-        }
+        )
     }
 }
 
