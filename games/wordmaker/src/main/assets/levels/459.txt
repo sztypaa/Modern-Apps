@@ -1,5 +1,6 @@
-SPUR   
-SYRUP  
+SPUR
+
+SYRUP
  U  U S
 UPS SUP
   P   R

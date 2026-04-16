@@ -86,10 +86,6 @@ import com.vayunmathur.games.wordmaker.data.CrosswordData
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        for(i in 750..862) {
-            println(i)
-            CrosswordData.fromAsset(this, "levels/$i.txt")
-        }
         enableEdgeToEdge()
         setContent {
             DynamicTheme {
