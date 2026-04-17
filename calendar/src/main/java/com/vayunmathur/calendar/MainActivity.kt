@@ -24,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import android.content.Intent
+import android.provider.CalendarContract
 import com.vayunmathur.library.util.NavKey
 import com.vayunmathur.calendar.ui.CalendarScreen
 import com.vayunmathur.calendar.ui.EditEventScreen
@@ -62,11 +64,24 @@ class MainActivity : ComponentActivity() {
                 if (!hasPermissions) {
                     NoPermissionsScreen(permissions) { hasPermissions = it }
                 } else {
-                    if(intent.hasExtra("instance")) {
-                        Navigation(Json.decodeFromString<Instance>(intent.getStringExtra("instance")!!))
-                    } else {
-                        Navigation(null)
+                    val initialRoute = when {
+                        intent.hasExtra("instance") -> {
+                            Route.Event(Json.decodeFromString<Instance>(intent.getStringExtra("instance")!!))
+                        }
+                        intent.action == Intent.ACTION_INSERT && (intent.type == "vnd.android.cursor.dir/event" || intent.type == null) -> {
+                            Route.EditEvent(
+                                id = null,
+                                title = intent.getStringExtra(CalendarContract.Events.TITLE),
+                                description = intent.getStringExtra(CalendarContract.Events.DESCRIPTION),
+                                location = intent.getStringExtra(CalendarContract.Events.EVENT_LOCATION),
+                                beginTime = intent.getLongExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, -1L).takeIf { it != -1L },
+                                endTime = intent.getLongExtra(CalendarContract.EXTRA_EVENT_END_TIME, -1L).takeIf { it != -1L },
+                                allDay = intent.getBooleanExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, false).takeIf { intent.hasExtra(CalendarContract.EXTRA_EVENT_ALL_DAY) }
+                            )
+                        }
+                        else -> null
                     }
+                    Navigation(initialRoute)
                 }
             }
         }
@@ -124,7 +139,15 @@ sealed interface Route: NavKey {
     data class Event(val instance: Instance): Route
 
     @Serializable
-    data class EditEvent(val id: Long?): Route {
+    data class EditEvent(
+        val id: Long?,
+        val title: String? = null,
+        val description: String? = null,
+        val location: String? = null,
+        val beginTime: Long? = null,
+        val endTime: Long? = null,
+        val allDay: Boolean? = null
+    ): Route {
         // Dialog routes for date/time picking that are specific to the EditEvent page
         @Serializable
         data class DatePickerDialog(val key: String, val initialDate: LocalDate, val minDate: LocalDate? = null): Route
@@ -143,12 +166,12 @@ sealed interface Route: NavKey {
 }
 
 @Composable
-fun Navigation(instance: Instance?) {
+fun Navigation(initialRoute: Route?) {
     val viewModel: ContactViewModel = viewModel()
-    val backStack = rememberNavBackStack(listOfNotNull(Route.Calendar, instance?.let {Route.Event(it)}))
-    LaunchedEffect(instance) {
-        if(instance != null) {
-            backStack.reset(Route.Calendar, Route.Event(instance))
+    val backStack = rememberNavBackStack(listOfNotNull(Route.Calendar, initialRoute))
+    LaunchedEffect(initialRoute) {
+        if(initialRoute != null) {
+            backStack.reset(Route.Calendar, initialRoute)
         } else {
             backStack.reset(Route.Calendar)
         }
@@ -166,7 +189,7 @@ fun Navigation(instance: Instance?) {
             SettingsScreen(viewModel, backStack)
         }
         entry<Route.EditEvent> { key ->
-            EditEventScreen(viewModel, key.id, backStack)
+            EditEventScreen(viewModel, key, backStack)
         }
 
         entry<Route.Calendar.GotoDialog>(metadata = DialogPage()) { key ->

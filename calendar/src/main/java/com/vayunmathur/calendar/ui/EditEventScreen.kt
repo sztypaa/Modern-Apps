@@ -52,6 +52,7 @@ import com.vayunmathur.calendar.Route
 import com.vayunmathur.library.ui.IconNavigation
 import com.vayunmathur.library.ui.IconSave
 import com.vayunmathur.library.util.ResultEffect
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
@@ -78,7 +79,8 @@ private const val KEY_TIMEZONE = "EditEvent.timezone"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditEventScreen(viewModel: ContactViewModel, eventId: Long?, backStack: NavBackStack<Route>) {
+fun EditEventScreen(viewModel: ContactViewModel, editRoute: Route.EditEvent, backStack: NavBackStack<Route>) {
+    val eventId = editRoute.id
     val events by viewModel.events.collectAsState()
     val calendars by viewModel.calendars.collectAsState()
 
@@ -90,9 +92,9 @@ fun EditEventScreen(viewModel: ContactViewModel, eventId: Long?, backStack: NavB
     val today = znow.date
     val now = znow.time
 
-    var title by remember { mutableStateOf(event?.title ?: "") }
-    var description by remember { mutableStateOf(event?.description ?: "") }
-    var location by remember { mutableStateOf(event?.location ?: "") }
+    var title by remember { mutableStateOf(event?.title ?: editRoute.title ?: "") }
+    var description by remember { mutableStateOf(event?.description ?: editRoute.description ?: "") }
+    var location by remember { mutableStateOf(event?.location ?: editRoute.location ?: "") }
     // default to the event's calendar if editing; otherwise prefer the first editable calendar
     var selectedCalendar by remember { mutableLongStateOf(event?.calendarID ?: (calendars.firstOrNull { it.canModify }?.id ?: calendars.firstOrNull()?.id ?: -1L)) }
     // If calendars load/refresh after composition, ensure the default remains an editable calendar when creating a new event
@@ -106,11 +108,19 @@ fun EditEventScreen(viewModel: ContactViewModel, eventId: Long?, backStack: NavB
             }
         }
     }
-    var allDay by remember { mutableStateOf(event?.allDay ?: false) }
-    var startDate by remember { mutableStateOf(event?.startDateTimeDisplay?.date ?: today) }
-    var endDate by remember { mutableStateOf(event?.endDateTimeDisplay?.date ?: today) }
-    var startTime by remember { mutableStateOf(event?.startDateTimeDisplay?.time ?: now) }
-    var endTime by remember { mutableStateOf(event?.endDateTimeDisplay?.time ?: now) }
+
+    val initialBeginLdt = editRoute.beginTime?.let { Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault()) }
+    val initialEndLdt = editRoute.endTime?.let { Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault()) }
+        ?: initialBeginLdt?.let {
+            val tz = TimeZone.currentSystemDefault()
+            it.toInstant(tz).plus(1.milliseconds * 3600000).toLocalDateTime(tz)
+        }
+
+    var allDay by remember { mutableStateOf(event?.allDay ?: editRoute.allDay ?: false) }
+    var startDate by remember { mutableStateOf(event?.startDateTimeDisplay?.date ?: initialBeginLdt?.date ?: today) }
+    var endDate by remember { mutableStateOf(event?.endDateTimeDisplay?.date ?: initialEndLdt?.date ?: startDate) }
+    var startTime by remember { mutableStateOf(event?.startDateTimeDisplay?.time ?: initialBeginLdt?.time ?: now) }
+    var endTime by remember { mutableStateOf(event?.endDateTimeDisplay?.time ?: initialEndLdt?.time ?: startTime) }
     var timezone by remember { mutableStateOf(event?.timezone ?: TimeZone.currentSystemDefault().id) }
     var rruleObj by remember { mutableStateOf(event?.rrule) }
     val rruleString by remember { derivedStateOf {rruleObj?.toString() ?: ""} }
