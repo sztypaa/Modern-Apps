@@ -37,7 +37,7 @@ void stockfish_main() {
   uci.loop();
 }
 
-extern "C" JNIEXPORT void JNICALL Java_com_vayunmathur_games_chess_StockfishEngine_startEngine(JNIEnv *,
+extern "C" JNIEXPORT void JNICALL Java_com_vayunmathur_games_chess_util_StockfishEngine_startEngine(JNIEnv *,
                                                                    jobject) {
   pipe(input_pipe);  // stdin
   pipe(output_pipe); // stdout
@@ -53,7 +53,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_vayunmathur_games_chess_StockfishEngi
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_vayunmathur_games_chess_StockfishEngine_sendCommand(JNIEnv *env, jobject, jstring jcmd) {
+Java_com_vayunmathur_games_chess_util_StockfishEngine_sendCommand(JNIEnv *env, jobject, jstring jcmd) {
   const char *cmd = env->GetStringUTFChars(jcmd, nullptr);
   if (stockfish_in) {
     fprintf(stockfish_in, "%s\n", cmd); // Send command with newline
@@ -64,7 +64,7 @@ Java_com_vayunmathur_games_chess_StockfishEngine_sendCommand(JNIEnv *env, jobjec
 
 // TODO: bad
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_vayunmathur_games_chess_StockfishEngine_readOutput(JNIEnv *env, jobject) {
+Java_com_vayunmathur_games_chess_util_StockfishEngine_readOutput(JNIEnv *env, jobject) {
   char line[1024];
   if (stockfish_out && fgets(line, sizeof(line), stockfish_out)) {
     // Strip trailing newline if needed
