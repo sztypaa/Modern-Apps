@@ -91,18 +91,19 @@ import kotlin.io.encoding.Base64
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditContactPage(backStack: NavBackStack<Route>, viewModel: ContactViewModel, contactId: Long?) {
+fun EditContactPage(backStack: NavBackStack<Route>, viewModel: ContactViewModel, editRoute: Route.EditContact) {
+    val contactId = editRoute.contactId
     val contact = remember { contactId?.let { viewModel.getContact(it) } }
     val details = contact?.details
     val context = LocalContext.current
 
     var namePrefix by remember { mutableStateOf(contact?.name?.namePrefix ?: "") }
-    var firstName by remember { mutableStateOf(contact?.name?.firstName ?: "") }
+    var firstName by remember { mutableStateOf(contact?.name?.firstName ?: editRoute.name ?: "") }
     var middleName by remember { mutableStateOf(contact?.name?.middleName ?: "") }
     var lastName by remember { mutableStateOf(contact?.name?.lastName ?: "") }
     var nameSuffix by remember { mutableStateOf(contact?.name?.nameSuffix ?: "") }
-    var company by remember { mutableStateOf(contact?.org?.company ?: "") }
-    var noteContent by remember { mutableStateOf(contact?.note?.content ?: "") }
+    var company by remember { mutableStateOf(contact?.org?.company ?: editRoute.company ?: "") }
+    var noteContent by remember { mutableStateOf(contact?.note?.content ?: editRoute.notes ?: "") }
     var nickname by remember { mutableStateOf(contact?.nickname?.nickname ?: "") }
     var photo by remember { mutableStateOf(contact?.photo) }
     var birthday by remember { mutableStateOf(contact?.birthday?.startDate) }
@@ -122,8 +123,20 @@ fun EditContactPage(backStack: NavBackStack<Route>, viewModel: ContactViewModel,
             photo = photo?.withValue(value) ?: Photo(0, value)
         }
     }
-    val phoneNumbers = remember { mutableStateListOf(*details?.phoneNumbers?.toTypedArray()?:emptyArray()) }
-    val emails = remember { mutableStateListOf(*details?.emails?.toTypedArray()?:emptyArray()) }
+    val phoneNumbers = remember { 
+        val list = mutableStateListOf(*details?.phoneNumbers?.toTypedArray()?:emptyArray())
+        if (list.isEmpty() && editRoute.phone != null) {
+            list.add(PhoneNumber(0, editRoute.phone, CDKPhone.TYPE_MOBILE))
+        }
+        list
+    }
+    val emails = remember { 
+        val list = mutableStateListOf(*details?.emails?.toTypedArray()?:emptyArray())
+        if (list.isEmpty() && editRoute.email != null) {
+            list.add(com.vayunmathur.contacts.data.Email(0, editRoute.email, CDKEmail.TYPE_HOME))
+        }
+        list
+    }
     val dates = remember { mutableStateListOf(*details?.dates?.toTypedArray()?:emptyArray()) }
     val addresses = remember { mutableStateListOf(*details?.addresses?.toTypedArray()?:emptyArray()) }
 

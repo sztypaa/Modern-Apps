@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import android.provider.ContactsContract
 import com.vayunmathur.library.util.NavKey
 import com.vayunmathur.contacts.ui.ContactDetailsPage
 import com.vayunmathur.contacts.ui.ContactList
@@ -78,7 +79,34 @@ class MainActivity : ComponentActivity() {
                             finish()
                         }
                     } else {
-                        Navigation(viewModel)
+                        val initialRoute = when (intent.action) {
+                            Intent.ACTION_INSERT -> {
+                                Route.EditContact(
+                                    contactId = null,
+                                    name = intent.getStringExtra(ContactsContract.Intents.Insert.NAME),
+                                    phone = intent.getStringExtra(ContactsContract.Intents.Insert.PHONE),
+                                    email = intent.getStringExtra(ContactsContract.Intents.Insert.EMAIL),
+                                    company = intent.getStringExtra(ContactsContract.Intents.Insert.COMPANY),
+                                    jobTitle = intent.getStringExtra(ContactsContract.Intents.Insert.JOB_TITLE),
+                                    notes = intent.getStringExtra(ContactsContract.Intents.Insert.NOTES)
+                                )
+                            }
+                            Intent.ACTION_EDIT -> {
+                                val contactId = intent.data?.lastPathSegment?.toLongOrNull()
+                                Route.EditContact(
+                                    contactId = contactId,
+                                    name = intent.getStringExtra(ContactsContract.Intents.Insert.NAME),
+                                    phone = intent.getStringExtra(ContactsContract.Intents.Insert.PHONE),
+                                    email = intent.getStringExtra(ContactsContract.Intents.Insert.EMAIL)
+                                )
+                            }
+                            Intent.ACTION_VIEW -> {
+                                val contactId = intent.data?.lastPathSegment?.toLongOrNull()
+                                contactId?.let { Route.ContactDetail(it) }
+                            }
+                            else -> null
+                        }
+                        Navigation(viewModel, initialRoute)
                     }
                 }
             }
@@ -113,8 +141,8 @@ fun NoPermissionsScreen(permissions: Array<String>, setHasPermissions: (Boolean)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Navigation(viewModel: ContactViewModel) {
-    val backStack = rememberNavBackStack<Route>(Route.ContactsList)
+fun Navigation(viewModel: ContactViewModel, initialRoute: Route? = null) {
+    val backStack = rememberNavBackStack<Route>(listOfNotNull(Route.ContactsList, initialRoute).distinct())
 
     MainNavigation(backStack) {
         entry<Route.ContactsList>(metadata = ListPage {
@@ -155,7 +183,7 @@ fun Navigation(viewModel: ContactViewModel) {
             )
         }
         entry<Route.EditContact>(metadata = ListDetailPage()) { key ->
-            EditContactPage(backStack, viewModel, key.contactId)
+            EditContactPage(backStack, viewModel, key)
         }
 
         entry<Route.Settings>(metadata = ListDetailPage()) {
@@ -191,7 +219,15 @@ sealed interface Route: NavKey {
     data class ContactDetail(val contactId: Long) : Route
 
     @Serializable
-    data class EditContact(val contactId: Long?) : Route
+    data class EditContact(
+        val contactId: Long?,
+        val name: String? = null,
+        val phone: String? = null,
+        val email: String? = null,
+        val company: String? = null,
+        val jobTitle: String? = null,
+        val notes: String? = null
+    ) : Route
 
     @Serializable
     data class EventDatePickerDialog(val id: String, val initialDate: LocalDate?): Route
