@@ -28,6 +28,7 @@ import com.vayunmathur.findfamily.data.getLatestMap
 import com.vayunmathur.findfamily.data.havershine
 import com.vayunmathur.findfamily.MainActivity
 import com.vayunmathur.findfamily.Migration_1_2
+import com.vayunmathur.findfamily.Migration_2_3
 import com.vayunmathur.findfamily.R
 import com.vayunmathur.library.util.DataStoreUtils
 import com.vayunmathur.library.util.DatabaseViewModel
@@ -170,7 +171,7 @@ class LocationTrackingService : Service() {
     }
 
     private fun startTracking() {
-        val db = buildDatabase<FFDatabase>(listOf(Migration_1_2))
+        val db = buildDatabase<FFDatabase>(listOf(Migration_1_2, Migration_2_3))
         viewModel = DatabaseViewModel(db,
             User::class to db.userDao(),
             Waypoint::class to db.waypointDao(),

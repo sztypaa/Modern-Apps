@@ -1,7 +1,10 @@
 package com.vayunmathur.findfamily
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.location.LocationManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -18,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -53,6 +57,7 @@ import com.vayunmathur.library.ui.dialog.DatePickerDialog
 import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.library.util.DialogPage
 import com.vayunmathur.library.util.MainNavigation
+import com.vayunmathur.library.util.NavBackStack
 import com.vayunmathur.library.util.buildDatabase
 import com.vayunmathur.library.util.rememberNavBackStack
 import kotlinx.datetime.LocalDate
@@ -118,10 +123,17 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun Main(platform: Platform, viewModel: DatabaseViewModel) {
+        val context = LocalContext.current
+        val isNetworkEnabled = remember {
+            val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        }
+        val isGeocoderPresent = remember { Geocoder.isPresent() }
+
         LaunchedEffect(Unit) {
             ensureSync(this@MainActivity)
         }
-        Navigation(platform, viewModel)
+        Navigation(platform, viewModel, !isNetworkEnabled || !isGeocoderPresent)
     }
 }
 
@@ -193,6 +205,37 @@ fun NoPermissionsScreen(
     }
 }
 
+@Composable
+fun MissingFeaturesDialog(backStack: NavBackStack<Route>) {
+    Surface(
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.padding(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.missing_features_title),
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = stringResource(R.string.missing_features_explanation),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(Modifier.height(24.dp))
+            Button(onClick = { backStack.pop() }) {
+                Text(stringResource(android.R.string.ok))
+            }
+        }
+    }
+}
+
 @Serializable
 sealed interface Route: NavKey {
     @Serializable
@@ -212,11 +255,21 @@ sealed interface Route: NavKey {
 
     @Serializable
     data object AddLinkDialog: Route
+
+    @Serializable
+    data object MissingFeaturesDialog: Route
 }
 
 @Composable
-fun Navigation(platform: Platform, viewModel: DatabaseViewModel) {
+fun Navigation(platform: Platform, viewModel: DatabaseViewModel, showMissingFeatures: Boolean) {
     val backStack = rememberNavBackStack<Route>(Route.MainPage)
+
+    LaunchedEffect(showMissingFeatures) {
+        if (showMissingFeatures) {
+            backStack.add(Route.MissingFeaturesDialog)
+        }
+    }
+
     MainNavigation(backStack) {
         entry<Route.MainPage> {
             MainPage(platform, backStack, viewModel)
@@ -236,6 +289,9 @@ fun Navigation(platform: Platform, viewModel: DatabaseViewModel) {
         }
         entry<Route.AddLinkDialog>(metadata = DialogPage()) {
             AddLinkDialog(backStack, viewModel)
+        }
+        entry<Route.MissingFeaturesDialog>(metadata = DialogPage()) {
+            MissingFeaturesDialog(backStack)
         }
     }
 }
