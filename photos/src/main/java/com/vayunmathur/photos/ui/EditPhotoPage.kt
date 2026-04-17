@@ -7,6 +7,7 @@ import android.graphics.Matrix
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -105,7 +106,6 @@ import com.vayunmathur.library.ui.IconVisible
 import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.library.util.NavBackStack
 import com.vayunmathur.photos.R
-import com.vayunmathur.photos.Route
 import com.vayunmathur.photos.util.SyncWorker
 import com.vayunmathur.photos.data.Photo
 import kotlinx.coroutines.Dispatchers
@@ -133,9 +133,26 @@ fun Drawing.computeBoundingBox(width: Float, height: Float): Rect {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditPhotoPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, id: Long) {
-    val context = LocalContext.current
-    val photo by viewModel.getNullable<Photo>(id)
+fun EditPhotoPage(backStack: NavBackStack<EditRoute>, viewModel: DatabaseViewModel, id: Long, initialUri: String? = null) {
+    val context = LocalActivity.current!!
+    val photoFromDb by viewModel.getNullable<Photo>(id)
+    val photo = remember(photoFromDb, initialUri) {
+        photoFromDb ?: initialUri?.let { uri ->
+            Photo(
+                id = 0,
+                name = uri.substringAfterLast("/"),
+                uri = uri,
+                date = System.currentTimeMillis(),
+                width = 0,
+                height = 0,
+                dateModified = System.currentTimeMillis() / 1000,
+                exifSet = false,
+                lat = null,
+                long = null,
+                videoData = null
+            )
+        }
+    }
     val scope = rememberCoroutineScope()
 
     var isCropping by remember { mutableStateOf(false) }
@@ -367,12 +384,12 @@ fun EditPhotoPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, 
                             IconButton(onClick = {
                                 selectedDrawingId?.let { id ->
                                     drawings.find { it.id == id }?.let { drawing ->
-                                        backStack.add(Route.DrawingSettings(drawing.tool, drawing.color, drawing.strokeWidth, drawing.opacity))
+                                        backStack.add(EditRoute.DrawingSettings(drawing.tool, drawing.color, drawing.strokeWidth, drawing.opacity))
                                     }
                                 }
                                 selectedTextId?.let { id ->
                                     texts.find { it.id == id }?.let { textElement ->
-                                        backStack.add(Route.DrawingSettings(DrawingTool.Text, textElement.color, textElement.fontSize, 1f))
+                                        backStack.add(EditRoute.DrawingSettings(DrawingTool.Text, textElement.color, textElement.fontSize, 1f))
                                     }
                                 }
                             }) {
@@ -421,7 +438,7 @@ fun EditPhotoPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, 
                                         photo?.let {
                                             scope.launch {
                                                 savePhoto(context, it, rotation, cropRect, drawings.toList(), texts.toList(), currentViewportWidth, false)
-                                                backStack.pop()
+                                                context.finish()
                                             }
                                         }
                                     }
@@ -433,7 +450,7 @@ fun EditPhotoPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, 
                                         photo?.let {
                                             scope.launch {
                                                 savePhoto(context, it, rotation, cropRect, drawings.toList(), texts.toList(), currentViewportWidth, true)
-                                                backStack.pop()
+                                                context.finish()
                                             }
                                         }
                                     }
@@ -463,7 +480,9 @@ fun EditPhotoPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, 
 
                 photo?.let { p ->
                     val isFlipped = (rotation / 90f).roundToInt() % 2 != 0
-                    val photoRatio = if (isFlipped) p.height.toFloat() / p.width.toFloat() else p.width.toFloat() / p.height.toFloat()
+                    val actualWidth = if (p.width > 0) p.width.toFloat() else originalBitmap?.width?.toFloat() ?: 1f
+                    val actualHeight = if (p.height > 0) p.height.toFloat() else originalBitmap?.height?.toFloat() ?: 1f
+                    val photoRatio = if (isFlipped) actualHeight / actualWidth else actualWidth / actualHeight
                     
                     val displayRatio = if (isCropping) photoRatio else (cropRect.width / cropRect.height) * photoRatio
                     val containerRatio = maxWidth / maxHeight
@@ -781,7 +800,7 @@ fun EditPhotoPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, 
                         val isSelectedMatch = selectedDrawingId?.let { id -> drawings.find { it.id == id }?.tool == DrawingTool.Pen } ?: false
                         if (isSelectedMatch || activeTool == DrawingTool.Pen) {
                             val drawing = drawings.find { it.id == selectedDrawingId }
-                            backStack.add(Route.DrawingSettings(DrawingTool.Pen, drawing?.color ?: penColor.toArgb(), drawing?.strokeWidth ?: penWidth, 1f))
+                            backStack.add(EditRoute.DrawingSettings(DrawingTool.Pen, drawing?.color ?: penColor.toArgb(), drawing?.strokeWidth ?: penWidth, 1f))
                         } else {
                             activeTool = DrawingTool.Pen
                             selectedDrawingId = null
@@ -794,7 +813,7 @@ fun EditPhotoPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, 
                         val isSelectedMatch = selectedDrawingId?.let { id -> drawings.find { it.id == id }?.tool == DrawingTool.Highlighter } ?: false
                         if (isSelectedMatch || activeTool == DrawingTool.Highlighter) {
                             val drawing = drawings.find { it.id == selectedDrawingId }
-                            backStack.add(Route.DrawingSettings(DrawingTool.Highlighter, drawing?.color ?: highlighterColor.toArgb(), drawing?.strokeWidth ?: highlighterWidth, drawing?.opacity ?: highlighterOpacity))
+                            backStack.add(EditRoute.DrawingSettings(DrawingTool.Highlighter, drawing?.color ?: highlighterColor.toArgb(), drawing?.strokeWidth ?: highlighterWidth, drawing?.opacity ?: highlighterOpacity))
                         } else {
                             activeTool = DrawingTool.Highlighter
                             selectedDrawingId = null
@@ -807,7 +826,7 @@ fun EditPhotoPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, 
                         val isSelectedMatch = selectedDrawingId?.let { id -> drawings.find { it.id == id }?.tool == DrawingTool.Eraser } ?: false
                         if (isSelectedMatch || activeTool == DrawingTool.Eraser) {
                             val drawing = drawings.find { it.id == selectedDrawingId }
-                            backStack.add(Route.DrawingSettings(DrawingTool.Eraser, Color.Transparent.toArgb(), drawing?.strokeWidth ?: eraserWidth, 1f))
+                            backStack.add(EditRoute.DrawingSettings(DrawingTool.Eraser, Color.Transparent.toArgb(), drawing?.strokeWidth ?: eraserWidth, 1f))
                         } else {
                             activeTool = DrawingTool.Eraser
                             selectedDrawingId = null
@@ -820,10 +839,10 @@ fun EditPhotoPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, 
                         if (selectedTextId != null || activeTool == DrawingTool.Text) {
                             if (selectedTextId != null) {
                                 texts.find { it.id == selectedTextId }?.let { textElement ->
-                                    backStack.add(Route.DrawingSettings(DrawingTool.Text, textElement.color, textElement.fontSize, 1f))
+                                    backStack.add(EditRoute.DrawingSettings(DrawingTool.Text, textElement.color, textElement.fontSize, 1f))
                                 }
                             } else {
-                                backStack.add(Route.DrawingSettings(DrawingTool.Text, penColor.toArgb(), textFontSize, 1f))
+                                backStack.add(EditRoute.DrawingSettings(DrawingTool.Text, penColor.toArgb(), textFontSize, 1f))
                             }
                         } else {
                             activeTool = DrawingTool.Text

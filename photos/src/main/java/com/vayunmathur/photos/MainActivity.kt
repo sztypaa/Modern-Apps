@@ -30,9 +30,6 @@ import com.vayunmathur.photos.data.MIGRATION_2_3
 import com.vayunmathur.photos.ui.GalleryPage
 import com.vayunmathur.photos.ui.MapPage
 import com.vayunmathur.photos.ui.PhotoPage
-import com.vayunmathur.photos.ui.EditPhotoPage
-import com.vayunmathur.photos.ui.DrawingSettingsPage
-import com.vayunmathur.photos.data.DrawingTool
 import kotlinx.serialization.Serializable
 import com.vayunmathur.photos.util.ImageLoader
 import com.vayunmathur.photos.util.SyncWorker
@@ -82,17 +79,6 @@ sealed interface Route: NavKey {
     data class PhotoPage(val id: Long, val overridePhotosList: List<Photo>?): Route
 
     @Serializable
-    data class EditPhoto(val id: Long): Route
-
-    @Serializable
-    data class DrawingSettings(
-        val tool: DrawingTool,
-        val currentColor: Int,
-        val currentThickness: Float,
-        val currentOpacity: Float
-    ): Route
-
-    @Serializable
     data object Map: Route
 }
 
@@ -109,15 +95,7 @@ fun Navigation(viewModel: DatabaseViewModel) {
         }
 
         entry<Route.PhotoPage> {
-            PhotoPage(backStack, viewModel, it.id, it.overridePhotosList)
-        }
-
-        entry<Route.EditPhoto> {
-            EditPhotoPage(backStack, viewModel, it.id)
-        }
-
-        entry<Route.DrawingSettings>(DialogPage()) {
-            DrawingSettingsPage(backStack, it.tool, it.currentColor, it.currentThickness, it.currentOpacity)
+            PhotoPage(viewModel, it.id, it.overridePhotosList)
         }
     }
 }

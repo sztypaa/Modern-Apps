@@ -38,13 +38,12 @@ import com.vayunmathur.library.ui.IconDraw
 import com.vayunmathur.library.ui.IconEraser
 import com.vayunmathur.library.util.LocalNavResultRegistry
 import com.vayunmathur.library.util.NavBackStack
-import com.vayunmathur.photos.Route
 import com.vayunmathur.photos.data.DrawingTool
 import kotlinx.coroutines.launch
 
 @Composable
 fun DrawingSettingsPage(
-    backStack: NavBackStack<Route>,
+    backStack: NavBackStack<EditRoute>,
     initialTool: DrawingTool,
     initialColor: Int,
     initialThickness: Float,

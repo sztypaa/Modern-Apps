@@ -30,6 +30,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.EditActivity"
+            android:exported="true"
+            android:theme="@style/Theme.General">
+            <intent-filter android:label="Edit with My App">
+                <action android:name="android.intent.action.EDIT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+        </activity>
         <!-- Glance widget receiver -->
         <receiver
             android:name=".glance.PhotoGlanceWidgetReceiver"

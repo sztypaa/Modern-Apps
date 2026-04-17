@@ -1,6 +1,7 @@
 package com.vayunmathur.photos.ui
 
 import android.content.Context
+import android.content.Intent
 import android.location.Geocoder
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
@@ -79,7 +80,7 @@ import kotlin.time.Instant
 data class ZoomState(val scale: Float = 1f, val offset: Offset = Offset.Zero)
 
 @Composable
-fun PhotoPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, id: Long, overridePhotosList: List<Photo>?) {
+fun PhotoPage(viewModel: DatabaseViewModel, id: Long, overridePhotosList: List<Photo>?) {
     val photosAll by viewModel.data<Photo>().collectAsState(initial = emptyList())
     val photos = overridePhotosList ?: photosAll
     val context = LocalContext.current
@@ -121,7 +122,16 @@ fun PhotoPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, id: 
                     currentZoom = zoomState,
                     onZoomUpdate = { newState -> zoomStates[photo.id] = newState },
                     onToggleMetadata = { isMetadataVisible = !isMetadataVisible },
-                    onEditPhoto = { backStack.add(Route.EditPhoto(photo.id)) }
+                    onEditPhoto = {
+                        val intent = Intent(context, EditActivity::class.java).apply {
+                            putExtra("photo_id", photo.id)
+                            // Use NEW_DOCUMENT to treat this as a separate document in Recents
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
+                            // MULTIPLE_TASK ensures it doesn't just recycle an old task
+                            addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+                        }
+                        context.startActivity(intent)
+                    }
                 )
             }
         }
