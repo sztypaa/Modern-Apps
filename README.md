@@ -38,6 +38,8 @@ Just for the "interesting" apps
 
 iOS: https://apps.apple.com/us/app/find-family-secure-private/id6760863634
 
+Note: GrapheneOS users must enable network location in order to use this app.
+
 ### Features:
 - End-to-end encryption
 - No emails, phone numbers, or any other personal information required
