@@ -27,10 +27,10 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun NewTimerDialog(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
-    var name by remember { mutableStateOf("") }
-    var minutes: Int? by remember { mutableStateOf(null) }
-    var seconds: Int? by remember { mutableStateOf(null) }
+fun NewTimerDialog(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, initialLengthSeconds: Int? = null, initialMessage: String? = null) {
+    var name by remember { mutableStateOf(initialMessage ?: "") }
+    var minutes: Int? by remember { mutableStateOf(initialLengthSeconds?.let { it / 60 }) }
+    var seconds: Int? by remember { mutableStateOf(initialLengthSeconds?.let { it % 60 }) }
     val context = LocalContext.current
     Dialog({ backStack.pop() }) {
         Card {

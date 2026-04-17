@@ -46,12 +46,16 @@ import kotlinx.datetime.format.char
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlarmPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
+fun AlarmPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, newAlarmParams: Route.NewAlarmDialog? = null) {
     val alarms by viewModel.data<Alarm>().collectAsState()
     val context = LocalContext.current
     val alarmScheduler = remember { AlarmScheduler.get() }
     ResultEffect<LocalTime>("alarm_time") {
-        val newAlarm = Alarm(it, "", true, 0)
+        var daysMask = 0
+        newAlarmParams?.days?.forEach { day ->
+            daysMask = daysMask or (1 shl (day - 1))
+        }
+        val newAlarm = Alarm(it, newAlarmParams?.message ?: "", true, daysMask)
         val id = viewModel.upsert(newAlarm)
         alarmScheduler.schedule(context,newAlarm.copy(id = id))
     }
@@ -61,7 +65,7 @@ fun AlarmPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
         BottomNavBar(backStack, mainPages(), Route.Alarm)
     }, floatingActionButton = {
         FloatingActionButton({
-            backStack.add(Route.NewAlarmDialog)
+            backStack.add(Route.NewAlarmDialog())
         }) {
             IconAdd()
         }

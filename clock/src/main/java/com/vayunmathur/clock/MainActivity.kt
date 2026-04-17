@@ -11,6 +11,7 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.AlarmClock
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -32,6 +33,8 @@ import com.vayunmathur.clock.ui.StopwatchPage
 import com.vayunmathur.clock.ui.TimerPage
 import com.vayunmathur.clock.ui.dialogs.NewTimerDialog
 import com.vayunmathur.clock.ui.dialogs.SelectTimeZonesDialog
+import com.vayunmathur.clock.ui.sendTimerNotification
+import com.vayunmathur.clock.util.AlarmScheduler
 import com.vayunmathur.library.ui.DynamicTheme
 import com.vayunmathur.library.ui.dialog.TimePickerDialogContent
 import com.vayunmathur.library.util.BottomBarItem
@@ -49,6 +52,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
 
 var citiesToTimezones: Map<String, String>? by mutableStateOf(null)
 
@@ -80,6 +84,51 @@ class MainActivity : ComponentActivity() {
         val ds = DataStoreUtils.getInstance(this)
         val db = buildDatabase<ClockDatabase>()
         val viewModel = DatabaseViewModel(db, Timer::class to db.timerDao(), Alarm::class to db.alarmDao())
+
+        val initialRoute = when (intent.action) {
+            AlarmClock.ACTION_SET_ALARM -> {
+                val hour = intent.getIntExtra(AlarmClock.EXTRA_HOUR, -1).takeIf { it != -1 }
+                val minutes = intent.getIntExtra(AlarmClock.EXTRA_MINUTES, -1).takeIf { it != -1 }
+                val message = intent.getStringExtra(AlarmClock.EXTRA_MESSAGE)
+                val days = intent.getIntegerArrayListExtra(AlarmClock.EXTRA_DAYS)
+                val skipUi = intent.getBooleanExtra(AlarmClock.EXTRA_SKIP_UI, false)
+
+                if (skipUi && hour != null && minutes != null) {
+                    val time = LocalTime(hour, minutes)
+                    var daysMask = 0
+                    days?.forEach { day ->
+                        daysMask = daysMask or (1 shl (day - 1))
+                    }
+                    val alarm = Alarm(time, message ?: "", true, daysMask)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val id = viewModel.upsert(alarm)
+                        AlarmScheduler.get().schedule(this@MainActivity, alarm.copy(id = id))
+                    }
+                    null
+                } else {
+                    Route.NewAlarmDialog(hour, minutes, message, days, skipUi)
+                }
+            }
+            AlarmClock.ACTION_SET_TIMER -> {
+                val length = intent.getIntExtra(AlarmClock.EXTRA_LENGTH, -1).takeIf { it != -1 }
+                val message = intent.getStringExtra(AlarmClock.EXTRA_MESSAGE)
+                val skipUi = intent.getBooleanExtra(AlarmClock.EXTRA_SKIP_UI, false)
+
+                if (skipUi && length != null) {
+                    val timer = Timer(true, message ?: "", Clock.System.now(), length.seconds, length.seconds)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val id = viewModel.upsert(timer)
+                        sendTimerNotification(this@MainActivity, timer.copy(id = id), true)
+                    }
+                    null
+                } else {
+                    Route.NewTimerDialog(length, message)
+                }
+            }
+            AlarmClock.ACTION_SHOW_ALARMS -> Route.Alarm
+            else -> null
+        }
+
         setContent {
             LaunchedEffect(Unit) {
                 CoroutineScope(Dispatchers.IO).launch {
@@ -87,7 +136,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             DynamicTheme {
-                Navigation(ds, viewModel)
+                Navigation(ds, viewModel, initialRoute)
             }
         }
     }
@@ -118,9 +167,15 @@ sealed interface Route : NavKey {
     @Serializable
     data object SelectTimeZonesDialog: Route
     @Serializable
-    data object NewTimerDialog: Route
+    data class NewTimerDialog(val lengthSeconds: Int? = null, val message: String? = null): Route
     @Serializable
-    data object NewAlarmDialog: Route
+    data class NewAlarmDialog(
+        val hour: Int? = null,
+        val minutes: Int? = null,
+        val message: String? = null,
+        val days: ArrayList<Int>? = null,
+        val skipUi: Boolean = false
+    ): Route
     @Serializable
     data class AlarmSetTimeDialog(val id: Long, val time: LocalTime): Route
 }
@@ -134,11 +189,11 @@ fun mainPages() = listOf(
 )
 
 @Composable
-fun Navigation(ds: DataStoreUtils, viewModel: DatabaseViewModel) {
-    val backStack = rememberNavBackStack<Route>(Route.Alarm)
+fun Navigation(ds: DataStoreUtils, viewModel: DatabaseViewModel, initialRoute: Route?) {
+    val backStack = rememberNavBackStack<Route>(listOfNotNull(Route.Alarm, initialRoute).distinct())
     MainNavigation(backStack) {
         entry<Route.Alarm> {
-            AlarmPage(backStack, viewModel)
+            AlarmPage(backStack, viewModel, initialRoute as? Route.NewAlarmDialog)
         }
         entry<Route.Clock> {
             ClockPage(backStack, ds)
@@ -152,11 +207,16 @@ fun Navigation(ds: DataStoreUtils, viewModel: DatabaseViewModel) {
         entry<Route.SelectTimeZonesDialog>(metadata = DialogPage()) {
             SelectTimeZonesDialog(backStack, ds)
         }
-        entry<Route.NewTimerDialog>(metadata = DialogPage()) {
-            NewTimerDialog(backStack, viewModel)
+        entry<Route.NewTimerDialog>(metadata = DialogPage()) { key ->
+            NewTimerDialog(backStack, viewModel, key.lengthSeconds, key.message)
         }
-        entry<Route.NewAlarmDialog>(metadata = DialogPage()) {
-            TimePickerDialogContent(backStack, "alarm_time", Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time)
+        entry<Route.NewAlarmDialog>(metadata = DialogPage()) { key ->
+            val initialTime = if (key.hour != null && key.minutes != null) {
+                LocalTime(key.hour, key.minutes)
+            } else {
+                Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time
+            }
+            TimePickerDialogContent(backStack, "alarm_time", initialTime)
         }
         entry<Route.AlarmSetTimeDialog>(metadata = DialogPage()) {
             TimePickerDialogContent(backStack, "alarm_set_time_${it.id}", it.time)
