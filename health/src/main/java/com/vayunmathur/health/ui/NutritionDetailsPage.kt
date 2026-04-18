@@ -123,13 +123,8 @@ fun NutrientProgressCard(nutrient: NutrientDV, start: kotlinx.datetime.Instant, 
                 progress = { progress },
                 modifier = Modifier.fillMaxWidth().height(8.dp),
                 color = if (progress >= 1f) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
                 strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
-            )
-            Text(
-                text = "${(progress * 100).toInt()}% of daily recommended",
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.align(Alignment.End).padding(top = 4.dp)
             )
         }
     }

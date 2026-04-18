@@ -71,7 +71,7 @@ fun TimerPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
         BottomNavBar(backStack, mainPages(), Route.Timer)
     }, floatingActionButton = {
         FloatingActionButton({
-            backStack.add(Route.NewTimerDialog)
+            backStack.add(Route.NewTimerDialog())
         }) {
             IconAdd()
         }
