@@ -96,7 +96,7 @@ object HealthAPI {
                         chars("-")
                         monthNumber()
                         chars("-")
-                        dayOfMonth()
+                        day()
                         chars(" ")
                         hour()
                         chars(":")

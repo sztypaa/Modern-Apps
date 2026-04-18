@@ -2,11 +2,17 @@ package com.vayunmathur.health.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -16,8 +22,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.feature.ExperimentalPersonalHealthRecordApi
@@ -46,9 +54,14 @@ fun MedicalRecordsPage(backStack: NavBackStack<Route>) {
         }
     }
 
-    Scaffold(topBar = { TopAppBar({}, navigationIcon = {
-        IconNavigation(backStack)
-    }) }) { paddingValues ->
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { Text(stringResource(R.string.section_medical_records)) },
+            navigationIcon = {
+                IconNavigation(backStack)
+            }
+        )
+    }) { paddingValues ->
         Column(Modifier.padding(paddingValues).padding(horizontal = 16.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 patients.forEach {
@@ -63,18 +76,27 @@ fun MedicalRecordsPage(backStack: NavBackStack<Route>) {
 fun PatientCard(patient: Patient) {
     val nameString = patient.name.firstOrNull()?.displayString()
     val addressString = patient.address.firstOrNull()?.displayString()
-    Card {
-        ListItem({
-            Text(nameString ?: stringResource(R.string.unknown))
-        }, supportingContent = {
+    Card(Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            androidx.compose.material3.Icon(
+                painterResource(R.drawable.baseline_favorite_24),
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.width(16.dp))
             Column {
+                Text(nameString ?: stringResource(R.string.unknown), style = MaterialTheme.typography.titleLarge)
                 if (patient.gender != null)
-                    Text(patient.gender.displayString())
+                    Text(patient.gender.displayString(), style = MaterialTheme.typography.bodyMedium)
                 if (patient.birthDate != null)
-                    Text(patient.birthDate.displayString())
+                    Text(patient.birthDate.displayString(), style = MaterialTheme.typography.bodyMedium)
                 if (addressString != null)
-                    Text(addressString)
+                    Text(addressString, style = MaterialTheme.typography.bodyMedium)
             }
-        }, colors = ListItemDefaults.colors(Color.Transparent))
+        }
     }
 }

@@ -2,7 +2,7 @@ package com.vayunmathur.health.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -41,8 +41,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -52,6 +60,9 @@ import com.vayunmathur.health.util.HealthAPI
 import com.vayunmathur.health.R
 import com.vayunmathur.health.Route
 import com.vayunmathur.health.data.RecordType
+import com.vayunmathur.health.data.displayString
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.res.stringResource
 import com.vayunmathur.library.ui.IconCheck
 import com.vayunmathur.library.ui.IconNavigation
 import com.vayunmathur.library.util.Tuple4
@@ -188,17 +199,71 @@ fun BarChartDetails(
             HealthAPI.getListOfSums(config.recordType, startTime, endTimeNow, periodType2)
         }
 
-        val mappedChart = rawPairs.mapIndexed { i, p -> i.toString() to p.second }
+        val mappedChart = rawPairs.mapIndexed { i, p ->
+            val label = when (selectedTab) {
+                0 -> { // Hourly
+                    val hour = (p.first % 24).toInt()
+                    if (hour % 6 == 0) {
+                        val amPm = if (hour < 12) "AM" else "PM"
+                        val h = if (hour % 12 == 0) 12 else hour % 12
+                        "$h $amPm"
+                    } else ""
+                }
+                1 -> { // Weekly
+                    val date = LocalDate.fromEpochDays(p.first.toInt())
+                    date.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
+                }
+                2 -> { // Monthly
+                    val date = LocalDate.fromEpochDays(p.first.toInt())
+                    if (date.day % 7 == 1) date.day.toString() else ""
+                }
+                else -> { // Yearly
+                    val date = LocalDate.fromEpochDays(p.first.toInt())
+                    date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
+                }
+            }
+            label to p.second
+        }
         val mappedSecondaryChart = if (config.isDualSeries) {
-            rawPairs.mapIndexed { i, p -> i.toString() to p.third }
+            rawPairs.mapIndexed { i, p ->
+                val label = when (selectedTab) {
+                    0 -> { // Hourly
+                        val hour = (p.first % 24).toInt()
+                        if (hour % 6 == 0) {
+                            val amPm = if (hour < 12) "AM" else "PM"
+                            val h = if (hour % 12 == 0) 12 else hour % 12
+                            "$h $amPm"
+                        } else ""
+                    }
+                    1 -> { // Weekly
+                        val date = LocalDate.fromEpochDays(p.first.toInt())
+                        date.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
+                    }
+                    2 -> { // Monthly
+                        val date = LocalDate.fromEpochDays(p.first.toInt())
+                        if (date.day % 7 == 1) date.day.toString() else ""
+                    }
+                    else -> { // Yearly
+                        val date = LocalDate.fromEpochDays(p.first.toInt())
+                        date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
+                    }
+                }
+                label to p.third
+            }
         } else null
 
         val history = if(selectedTab != 0) rawPairsHistory.mapIndexed { index, triple ->
             val label = when (selectedTab) {
                 0 -> ""
                 1 -> startTime.plus(index.toLong(), DateTimeUnit.DAY, tz).toLocalDateTime(tz).dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
-                2 -> String.format(dayLabelFormat, index + 1)
-                else -> String.format(monthLabelFormat, index + 1)
+                2 -> {
+                    val date = startTime.plus(index.toLong(), DateTimeUnit.DAY, tz).toLocalDateTime(tz).date
+                    "${date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} ${date.day}"
+                }
+                else -> {
+                    val date = startTime.plus(index.toLong(), DateTimeUnit.MONTH, tz).toLocalDateTime(tz).date
+                    date.month.name.lowercase().replaceFirstChar { it.uppercase() }
+                }
             }
             HistoryItem(
                 label = label,
@@ -233,7 +298,7 @@ fun BarChartDetails(
             )
         }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+        Column(modifier = Modifier.padding(top = padding.calculateTopPadding()).fillMaxSize()) {
             if(config != HealthMetricConfig.HEART_RATE) {
                 SecondaryTabRow(selectedTabIndex = selectedTab, divider = {}) {
                     tabs.forEachIndexed { index, title ->
@@ -251,58 +316,59 @@ fun BarChartDetails(
                 }
             }
 
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp)
-            ) {
-                item {
-                    val weekOfFormat = stringResource(R.string.week_of)
-                    val headerLabel = when (selectedTab) {
-                        0 -> "${anchorDate.month.name} ${anchorDate.day}, ${anchorDate.year}"
-                        1 -> String.format(weekOfFormat, anchorDate.minus((anchorDate.dayOfWeek.ordinal+1)%7, DateTimeUnit.DAY))
-                        2 -> "${anchorDate.month.name} ${anchorDate.year}"
-                        else -> anchorDate.year.toString()
+            Column(modifier = Modifier.padding(horizontal = 16.dp).padding(top = 16.dp)) {
+                val headerLabel = when (selectedTab) {
+                    0 -> anchorDate.displayString()
+                    1 -> {
+                        val start = anchorDate.minus((anchorDate.dayOfWeek.ordinal + 1) % 7, DateTimeUnit.DAY)
+                        val end = start.plus(6, DateTimeUnit.DAY)
+                        stringResource(R.string.week_range, start.displayString(), end.displayString())
+                    }
+                    2 -> "${anchorDate.month.name.lowercase().replaceFirstChar { it.uppercase() }} ${anchorDate.year}"
+                    else -> anchorDate.year.toString()
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    IconButton(onClick = {
+                        anchorDate = when(selectedTab) {
+                            0 -> anchorDate.minus(1, DateTimeUnit.DAY)
+                            1 -> anchorDate.minus(1, DateTimeUnit.WEEK)
+                            2 -> anchorDate.minus(1, DateTimeUnit.MONTH)
+                            else -> anchorDate.minus(1, DateTimeUnit.YEAR)
+                        }
+                    }) {
+                        Icon(painterResource(R.drawable.baseline_arrow_back_24), stringResource(R.string.nav_prev))
                     }
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        IconButton(onClick = {
-                            anchorDate = when(selectedTab) {
-                                0 -> anchorDate.minus(1, DateTimeUnit.DAY)
-                                1 -> anchorDate.minus(1, DateTimeUnit.WEEK)
-                                2 -> anchorDate.minus(1, DateTimeUnit.MONTH)
-                                else -> anchorDate.minus(1, DateTimeUnit.YEAR)
-                            }
-                        }) {
-                            Icon(painterResource(R.drawable.baseline_arrow_back_24), stringResource(R.string.nav_prev))
-                        }
+                    Text(headerLabel, style = MaterialTheme.typography.titleMedium, modifier = Modifier.widthIn(min = 140.dp), textAlign = TextAlign.Center)
 
-                        Text(headerLabel, style = MaterialTheme.typography.titleMedium, modifier = Modifier.widthIn(min = 140.dp), textAlign = TextAlign.Center)
+                    val nextDate = when(selectedTab) {
+                        0 -> anchorDate.plus(1, DateTimeUnit.DAY)
+                        1 -> anchorDate.plus(1, DateTimeUnit.WEEK)
+                        2 -> anchorDate.plus(1, DateTimeUnit.MONTH)
+                        else -> anchorDate.plus(1, DateTimeUnit.YEAR)
+                    }
 
-                        val nextDate = when(selectedTab) {
+                    IconButton(onClick = {
+                        anchorDate = when(selectedTab) {
                             0 -> anchorDate.plus(1, DateTimeUnit.DAY)
                             1 -> anchorDate.plus(1, DateTimeUnit.WEEK)
                             2 -> anchorDate.plus(1, DateTimeUnit.MONTH)
                             else -> anchorDate.plus(1, DateTimeUnit.YEAR)
                         }
-
-                        IconButton(onClick = {
-                            anchorDate = when(selectedTab) {
-                                0 -> anchorDate.plus(1, DateTimeUnit.DAY)
-                                1 -> anchorDate.plus(1, DateTimeUnit.WEEK)
-                                2 -> anchorDate.plus(1, DateTimeUnit.MONTH)
-                                else -> anchorDate.plus(1, DateTimeUnit.YEAR)
-                            }
-                        }, enabled = nextDate <= Clock.System.todayIn(TimeZone.currentSystemDefault())) {
-                            Icon(painterResource(R.drawable.outline_arrow_forward_24), stringResource(R.string.nav_next))
-                        }
+                    }, enabled = nextDate <= Clock.System.todayIn(TimeZone.currentSystemDefault())) {
+                        Icon(painterResource(R.drawable.outline_arrow_forward_24), stringResource(R.string.nav_next))
                     }
+                }
 
-                    Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(16.dp))
 
+                val hasData = dataState.chartData.any { it.second != null }
+                if (hasData) {
                     Row(verticalAlignment = Alignment.Bottom) {
                         val formatVal = { v: Double -> if (config.useDecimals) v.round(1).toString() else v.toLong().toStringCommas() }
                         val avgString = if(config == HealthMetricConfig.HEART_RATE) {
@@ -328,42 +394,55 @@ fun BarChartDetails(
                     }
                 }
 
-                item {
-                    Spacer(Modifier.height(32.dp))
-                    if (config.isLineChart) {
-                        GenericLineChart(
-                            data = dataState.chartData,
-                            secondaryData = dataState.secondaryChartData,
-                            goalValue = config.dailyGoal,
-                            secondaryGoal = config.secondaryGoal,
-                            lineColor = MaterialTheme.colorScheme.primary,
-                            secondaryLineColor = MaterialTheme.colorScheme.tertiary,
-                            goalColor = MaterialTheme.colorScheme.secondary
-                        )
-                    } else {
-                        GenericBarChart(
-                            data = dataState.chartData.map { it.first to (it.second?.toLong() ?: 0L) },
-                            totalBarCount = dataState.totalBarCount,
-                            goalValue = config.dailyGoal.toLong(),
-                            barColor = MaterialTheme.colorScheme.primary,
-                            goalColor = MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                    Spacer(Modifier.height(32.dp))
-                }
+                Spacer(Modifier.height(24.dp))
 
+                if (!hasData) {
+                    Box(Modifier.fillMaxWidth().height(180.dp), contentAlignment = Alignment.Center) {
+                        Text(stringResource(R.string.no_data_available), color = MaterialTheme.colorScheme.outline)
+                    }
+                } else if (config.isLineChart) {
+                    GenericLineChart(
+                        data = dataState.chartData,
+                        secondaryData = dataState.secondaryChartData,
+                        goalValue = config.dailyGoal,
+                        secondaryGoal = config.secondaryGoal,
+                        lineColor = MaterialTheme.colorScheme.primary,
+                        secondaryLineColor = MaterialTheme.colorScheme.tertiary,
+                        goalColor = MaterialTheme.colorScheme.secondary
+                    )
+                } else {
+                    GenericBarChart(
+                        data = dataState.chartData.map { it.first to (it.second?.toLong() ?: 0L) },
+                        totalBarCount = dataState.totalBarCount,
+                        goalValue = config.dailyGoal.toLong(),
+                        barColor = MaterialTheme.colorScheme.primary,
+                        goalColor = MaterialTheme.colorScheme.secondary
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+            }
+
+            LazyColumn(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp + padding.calculateRightPadding(LayoutDirection.Ltr),
+                    bottom = 24.dp + padding.calculateBottomPadding()
+                )
+            ) {
                 itemsIndexed(dataState.historyItems) { idx, item ->
                     Card(Modifier.padding(vertical = 2.dp), shape = verticalSegmentedCardShape(idx, dataState.historyItems.size)) {
                         ListItem({
-                            Text(item.label)
+                            Text(item.label, style = MaterialTheme.typography.bodyLarge)
                         }, trailingContent = {
-                            Row {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 if(item.isGoalMet) {
                                     IconCheck()
+                                    Spacer(Modifier.width(4.dp))
                                 }
                                 val format = { v: Double -> if (item.useDecimals) v.toStringDigits(1) else v.toLong().toStringCommas() }
                                 val valueString = if (item.secondaryValue != null) "${format(item.value)}/${format(item.secondaryValue)}" else format(item.value)
-                                Text("$valueString ${item.unit}")
+                                Text("$valueString ${item.unit}", style = MaterialTheme.typography.bodyLarge)
                             }
                         }, colors = ListItemDefaults.colors(containerColor = Color.Transparent))
                     }
@@ -389,11 +468,26 @@ fun GenericLineChart(
     val maxChartValue = (allValues.maxOrNull() ?: goalValue).coerceAtLeast(goalValue * 1.2).coerceAtLeast(10.0)
     val labelColor = LocalContentColor.current.copy(alpha = 0.6f)
 
-    Box(modifier = Modifier.fillMaxWidth().height(220.dp)) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val width = size.width
+    val chartHeight = 180.dp
+    val xAxisHeight = 24.dp
+    val sideLabelWidth = 40.dp
+
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth().height(chartHeight)) {
+        val density = LocalDensity.current
+        val fullWidthPx = with(density) { maxWidth.toPx() }
+        val sideLabelWidthPx = with(density) { sideLabelWidth.toPx() }
+        val chartWidthPx = fullWidthPx - sideLabelWidthPx
+        val actualChartHeightPx = with(density) { (chartHeight - xAxisHeight).toPx() }
+
+        val spacing = chartWidthPx / (data.size - 1).coerceAtLeast(1)
+
+        Canvas(modifier = Modifier.fillMaxSize().padding(end = sideLabelWidth, bottom = xAxisHeight)) {
             val height = size.height
-            val spacing = width / (data.size - 1).coerceAtLeast(1)
+            val width = size.width
+
+            // Axis lines
+            drawLine(color = labelColor.copy(alpha = 0.15f), start = Offset(0f, height), end = Offset(width, height), strokeWidth = 1.dp.toPx())
+            drawLine(color = labelColor.copy(alpha = 0.15f), start = Offset(width, 0f), end = Offset(width, height), strokeWidth = 1.dp.toPx())
 
             val drawSeries = { series: List<Pair<String, Double?>>, color: Color ->
                 var lastValidPoint: Offset? = null
@@ -413,21 +507,92 @@ fun GenericLineChart(
             }
 
             // Goal lines
-            val drawGoal = { goal: Double, color: Color ->
+            val drawGoal = { goal: Double, color: Color, isSecondary: Boolean ->
                 val gy = height - (goal.toFloat() / maxChartValue.toFloat() * height).coerceIn(0f, height)
-                drawLine(color = color, start = Offset(0f, gy), end = Offset(width, gy), strokeWidth = 1.dp.toPx())
+                drawLine(
+                    color = color,
+                    start = Offset(0f, gy),
+                    end = Offset(width, gy),
+                    strokeWidth = 1.dp.toPx(),
+                    pathEffect = if (isSecondary) PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f) else null
+                )
             }
 
-            drawGoal(goalValue, goalColor)
-            secondaryGoal?.let { drawGoal(it, goalColor.copy(alpha = 0.5f)) }
+            drawGoal(goalValue, goalColor, false)
+            secondaryGoal?.let { drawGoal(it, goalColor.copy(alpha = 0.5f), true) }
 
             drawSeries(data, lineColor)
             secondaryData?.let { drawSeries(it, secondaryLineColor) }
         }
 
-        Text(text = maxChartValue.toLong().toStringCommas(), color = labelColor, fontSize = 10.sp, modifier = Modifier.align(Alignment.TopEnd))
-        Text(text = goalValue.toLong().toStringCommas(), color = lineColor, fontSize = 10.sp, modifier = Modifier.align(Alignment.CenterEnd).padding(top = 40.dp))
-        Text(text = "0", color = labelColor, fontSize = 10.sp, modifier = Modifier.align(Alignment.BottomEnd))
+        // X-axis labels
+        data.forEachIndexed { index, pair ->
+            if (pair.first.isNotEmpty()) {
+                val x = index * spacing
+                Text(
+                    text = pair.first,
+                    color = labelColor,
+                    fontSize = 10.sp,
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .offset(x = with(density) { x.toDp() })
+                        .layout { measurable, constraints ->
+                            val placeable = measurable.measure(constraints)
+                            layout(placeable.width, placeable.height) {
+                                placeable.placeRelative(-(placeable.width / 2), 0)
+                            }
+                        }
+                )
+            }
+        }
+
+        // Y-axis labels
+        val format = { v: Double -> if (v >= 10000) (v / 1000).round(0).toString() + "k" else v.toLong().toStringCommas() }
+
+        Text(
+            text = format(maxChartValue),
+            color = labelColor,
+            fontSize = 10.sp,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .width(sideLabelWidth)
+                .padding(start = 4.dp)
+        )
+
+        val goalY = (1f - (goalValue.toFloat() / maxChartValue.toFloat())) * actualChartHeightPx
+        Text(
+            text = format(goalValue),
+            color = goalColor,
+            fontSize = 10.sp,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .width(sideLabelWidth)
+                .offset(y = with(density) { goalY.toDp() })
+                .layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
+                    layout(placeable.width, placeable.height) {
+                        placeable.placeRelative(0, -(placeable.height / 2))
+                    }
+                }
+                .padding(start = 4.dp)
+        )
+
+        Text(
+            text = "0",
+            color = labelColor,
+            fontSize = 10.sp,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .width(sideLabelWidth)
+                .offset(y = with(density) { actualChartHeightPx.toDp() })
+                .layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
+                    layout(placeable.width, placeable.height) {
+                        placeable.placeRelative(0, -(placeable.height / 2))
+                    }
+                }
+                .padding(start = 4.dp)
+        )
     }
 }
 
@@ -443,12 +608,27 @@ fun GenericBarChart(
     val maxChartValue = (maxValueFound.toFloat() * 1.2f).coerceAtLeast(goalValue * 1.2f).coerceAtLeast(10f)
     val labelColor = LocalContentColor.current.copy(alpha = 0.6f)
 
-    Box(modifier = Modifier.fillMaxWidth().height(220.dp)) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val width = size.width
+    val chartHeight = 180.dp
+    val xAxisHeight = 24.dp
+    val sideLabelWidth = 40.dp
+
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth().height(chartHeight)) {
+        val density = LocalDensity.current
+        val fullWidthPx = with(density) { maxWidth.toPx() }
+        val sideLabelWidthPx = with(density) { sideLabelWidth.toPx() }
+        val chartWidthPx = fullWidthPx - sideLabelWidthPx
+        val actualChartHeightPx = with(density) { (chartHeight - xAxisHeight).toPx() }
+
+        val barWidth = with(density) { 6.dp.toPx() }
+        val spacing = (chartWidthPx - (totalBarCount * barWidth)) / (totalBarCount + 1).coerceAtLeast(1)
+
+        Canvas(modifier = Modifier.fillMaxSize().padding(end = sideLabelWidth, bottom = xAxisHeight)) {
             val height = size.height
-            val barWidth = 6.dp.toPx()
-            val spacing = (width - (totalBarCount * barWidth)) / (totalBarCount + 1).coerceAtLeast(1)
+            val width = size.width
+
+            // Axis lines
+            drawLine(color = labelColor.copy(alpha = 0.15f), start = Offset(0f, height), end = Offset(width, height), strokeWidth = 1.dp.toPx())
+            drawLine(color = labelColor.copy(alpha = 0.15f), start = Offset(width, 0f), end = Offset(width, height), strokeWidth = 1.dp.toPx())
 
             val goalY = height - (goalValue.toFloat() / maxChartValue * height).coerceIn(0f, height)
             drawLine(color = goalColor, start = Offset(0f, goalY), end = Offset(width, goalY), strokeWidth = 1.dp.toPx())
@@ -467,8 +647,73 @@ fun GenericBarChart(
             }
         }
 
-        Text(text = maxChartValue.toLong().toStringCommas(), color = labelColor, fontSize = 10.sp, modifier = Modifier.align(Alignment.TopEnd))
-        Text(text = goalValue.toStringCommas(), color = barColor, fontSize = 10.sp, modifier = Modifier.align(Alignment.CenterEnd).padding(top = 40.dp))
-        Text(text = "0", color = labelColor, fontSize = 10.sp, modifier = Modifier.align(Alignment.BottomEnd))
+        // X-axis labels
+        data.forEachIndexed { index, pair ->
+            if (pair.first.isNotEmpty()) {
+                val x = spacing + index * (barWidth + spacing) + barWidth / 2
+                Text(
+                    text = pair.first,
+                    color = labelColor,
+                    fontSize = 10.sp,
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .offset(x = with(density) { x.toDp() })
+                        .layout { measurable, constraints ->
+                            val placeable = measurable.measure(constraints)
+                            layout(placeable.width, placeable.height) {
+                                placeable.placeRelative(-(placeable.width / 2), 0)
+                            }
+                        }
+                )
+            }
+        }
+
+        // Y-axis labels
+        val format = { v: Double -> if (v >= 10000) (v / 1000).round(0).toString() + "k" else v.toLong().toStringCommas() }
+
+        Text(
+            text = format(maxChartValue.toDouble()),
+            color = labelColor,
+            fontSize = 10.sp,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .width(sideLabelWidth)
+                .padding(start = 4.dp)
+        )
+
+        val goalY = (1f - (goalValue.toFloat() / maxChartValue.toFloat())) * actualChartHeightPx
+        Text(
+            text = format(goalValue.toDouble()),
+            color = goalColor,
+            fontSize = 10.sp,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .width(sideLabelWidth)
+                .offset(y = with(density) { goalY.toDp() })
+                .layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
+                    layout(placeable.width, placeable.height) {
+                        placeable.placeRelative(0, -(placeable.height / 2))
+                    }
+                }
+                .padding(start = 4.dp)
+        )
+
+        Text(
+            text = "0",
+            color = labelColor,
+            fontSize = 10.sp,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .width(sideLabelWidth)
+                .offset(y = with(density) { actualChartHeightPx.toDp() })
+                .layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
+                    layout(placeable.width, placeable.height) {
+                        placeable.placeRelative(0, -(placeable.height / 2))
+                    }
+                }
+                .padding(start = 4.dp)
+        )
     }
 }

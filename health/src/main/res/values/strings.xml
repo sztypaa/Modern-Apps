@@ -15,14 +15,15 @@
     <string name="nav_next">Next</string>
 
     <!-- BarChartDetails – date header format strings -->
-    <string name="week_of">Week of %1$s</string>
+    <string name="week_range">%1$s – %2$s</string>
+    <string name="no_data_available">No data available for this period</string>
 
     <!-- BarChartDetails – history list labels -->
     <string name="history_day_label">Day %1$d</string>
     <string name="history_month_label">Month %1$d</string>
 
     <!-- BarChartDetails – unit suffix -->
-    <string name="per_day_avg"> per day (avg)</string>
+    <string name="per_day_avg">\u0020per day (avg)</string>
 
     <!-- HealthMetricConfig titles -->
     <string name="metric_energy_burned">Energy Burned</string>
