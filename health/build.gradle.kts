@@ -15,6 +15,8 @@ dependencies {
 
     implementation(libs.androidx.work.runtime.ktx)
 
+    implementation("com.google.fhir:fhir-model:1.0.0-beta02")
+
     // room
     implementRoom(libs)
 }

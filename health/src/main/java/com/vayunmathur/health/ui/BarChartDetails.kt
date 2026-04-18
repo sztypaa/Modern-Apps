@@ -60,9 +60,9 @@ import com.vayunmathur.health.util.HealthAPI
 import com.vayunmathur.health.R
 import com.vayunmathur.health.Route
 import com.vayunmathur.health.data.RecordType
-import com.vayunmathur.health.data.displayString
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.res.stringResource
+import com.vayunmathur.health.util.displayString
 import com.vayunmathur.library.ui.IconCheck
 import com.vayunmathur.library.ui.IconNavigation
 import com.vayunmathur.library.util.Tuple4

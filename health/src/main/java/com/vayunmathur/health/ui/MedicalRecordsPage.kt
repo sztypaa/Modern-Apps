@@ -30,12 +30,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.feature.ExperimentalPersonalHealthRecordApi
 import androidx.health.connect.client.records.MedicalResource
+import com.google.fhir.model.r4b.Patient
 import com.vayunmathur.library.util.NavBackStack
 import com.vayunmathur.health.util.HealthAPI
 import com.vayunmathur.health.R
 import com.vayunmathur.health.Route
-import com.vayunmathur.health.data.Patient
-import com.vayunmathur.health.data.displayString
 import com.vayunmathur.library.ui.IconNavigation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -74,8 +73,8 @@ fun MedicalRecordsPage(backStack: NavBackStack<Route>) {
 
 @Composable
 fun PatientCard(patient: Patient) {
-    val nameString = patient.name.firstOrNull()?.displayString()
-    val addressString = patient.address.firstOrNull()?.displayString()
+    val nameString = patient.name.firstOrNull()?.text?.value
+    val addressString = patient.address.firstOrNull()?.text?.value
     Card(Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -91,9 +90,9 @@ fun PatientCard(patient: Patient) {
             Column {
                 Text(nameString ?: stringResource(R.string.unknown), style = MaterialTheme.typography.titleLarge)
                 if (patient.gender != null)
-                    Text(patient.gender.displayString(), style = MaterialTheme.typography.bodyMedium)
+                    Text(patient.gender!!.value!!.getDisplay()!!, style = MaterialTheme.typography.bodyMedium)
                 if (patient.birthDate != null)
-                    Text(patient.birthDate.displayString(), style = MaterialTheme.typography.bodyMedium)
+                    Text(patient.birthDate!!.value.toString(), style = MaterialTheme.typography.bodyMedium)
                 if (addressString != null)
                     Text(addressString, style = MaterialTheme.typography.bodyMedium)
             }
