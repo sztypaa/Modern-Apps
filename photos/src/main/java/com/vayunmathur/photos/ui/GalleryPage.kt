@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -57,7 +58,7 @@ fun GalleryPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
     val allPhotos by viewModel.data<Photo>().collectAsState()
     val photos by remember { derivedStateOf { allPhotos.filter { !it.isTrashed } } }
     val context = LocalContext.current
-    var columnCount by remember { mutableFloatStateOf(3f) }
+    var columnCount by rememberSaveable { mutableFloatStateOf(3f) }
 
     val selectedIds = remember { mutableStateListOf<Long>() }
     val isSelectionMode by remember { derivedStateOf { selectedIds.isNotEmpty() } }
