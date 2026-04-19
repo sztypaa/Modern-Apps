@@ -127,7 +127,7 @@ suspend fun syncPhotos(context: Context, database: PhotoDatabase, uris: List<Uri
 
     if (toDelete.isNotEmpty()) {
         toDelete.chunked(900).forEach { chunk ->
-            photoDao.observeNothing(SimpleSQLiteQuery("DELETE FROM Photo WHERE id IN (${chunk.joinToString(",")})"))
+            photoDao.deleteByIds(chunk)
         }
     }
 

@@ -2,12 +2,16 @@ package com.vayunmathur.photos.data
 
 import androidx.room.Dao
 import androidx.room.Database
+import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import com.vayunmathur.library.util.TrueDao
 
 @Dao
-interface PhotoDao: TrueDao<Photo>
+interface PhotoDao: TrueDao<Photo> {
+    @Query("DELETE FROM Photo WHERE id IN (:ids)")
+    suspend fun deleteByIds(ids: List<Long>)
+}
 
 @Database(entities = [Photo::class], version = 4)
 abstract class PhotoDatabase : RoomDatabase() {

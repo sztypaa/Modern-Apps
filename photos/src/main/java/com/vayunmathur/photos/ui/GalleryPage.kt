@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -44,6 +45,7 @@ import com.vayunmathur.photos.NavigationBar
 import com.vayunmathur.photos.Route
 import com.vayunmathur.photos.data.Photo
 import com.vayunmathur.photos.util.ImageLoader
+import com.vayunmathur.photos.util.SyncWorker
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.MonthNames
@@ -57,6 +59,12 @@ fun GalleryPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
     val allPhotos by viewModel.data<Photo>().collectAsState()
     val photos by remember { derivedStateOf { allPhotos.filter { !it.isTrashed } } }
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        SyncWorker.runOnce(context)
+        SyncWorker.enqueue(context)
+    }
+
     var columnCount by remember { mutableFloatStateOf(3f) }
 
     val selectedIds = remember { mutableStateListOf<Long>() }
@@ -65,6 +73,7 @@ fun GalleryPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
     val trashLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             selectedIds.clear()
+            SyncWorker.runOnce(context)
         }
     }
 

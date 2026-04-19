@@ -32,7 +32,6 @@ import com.vayunmathur.photos.ui.MapPage
 import com.vayunmathur.photos.ui.PhotoPage
 import com.vayunmathur.photos.ui.TrashPage
 import com.vayunmathur.photos.util.ImageLoader
-import com.vayunmathur.photos.util.SyncWorker
 import kotlinx.serialization.Serializable
 import com.vayunmathur.library.R as LibraryR
 
@@ -43,8 +42,6 @@ class MainActivity : ComponentActivity() {
         val db = buildDatabase<PhotoDatabase>(listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4))
         val viewModel = DatabaseViewModel(db, Photo::class to db.photoDao())
         ImageLoader.init(this)
-        SyncWorker.runOnce(this)
-        SyncWorker.enqueue(this)
         setContent {
             DynamicTheme {
                 if(Build.VERSION.SDK_INT >= 33) {
