@@ -203,10 +203,10 @@ fun TemporaryLinkCard(platform: Platform, viewModel: DatabaseViewModel, temporar
 @Composable
 fun WaypointCard(backStack: NavBackStack<Route>, waypoint: Waypoint, users: List<User>) {
     val usersWithin = users.filter { it.locationName == waypoint.name }
-    val usersString = usersWithin.joinToString { it.name } + when(usersWithin.size) {
+    val usersString = when(usersWithin.size) {
         0 -> stringResource(R.string.nobody_here)
-        1 -> stringResource(R.string.user_is_here)
-        else -> stringResource(R.string.users_are_here)
+        1 -> stringResource(R.string.user_is_here, usersWithin.first().name)
+        else -> stringResource(R.string.users_are_here, usersWithin.joinToString { it.name })
     }
     Card {
         ListItem(

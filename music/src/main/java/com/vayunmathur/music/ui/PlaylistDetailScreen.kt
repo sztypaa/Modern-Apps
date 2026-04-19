@@ -115,7 +115,7 @@ fun PlaylistDetailScreen(backStack: NavBackStack<Route>, viewModel: DatabaseView
                             )
                         }
                     }, Modifier, {Text(stringResource(R.string.label_playlist))}, {
-                        Text("${musicInPlaylist.size} songs")
+                        Text(stringResource(R.string.num_songs_format, musicInPlaylist.size))
                     })
                 }
             }

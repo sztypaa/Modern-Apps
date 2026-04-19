@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Contacts</string>
     <string name="contact_not_found">Contact not found</string>
+    <string name="name_nickname_format">%1$s (%2$s)</string>
+    <string name="contact_photo_description">%1$s photo</string>
     <string name="favorite">Favorite</string>
     <string name="share_contact">Share Contact</string>
     <string name="about_name">About %1$s</string>

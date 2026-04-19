@@ -77,7 +77,7 @@ fun AlbumDetailScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewMod
                     ListItem({
                         Text(album.name, style = MaterialTheme.typography.titleLarge)
                     }, Modifier, {Text(stringResource(R.string.label_album))}, {
-                        Text("${album.artistString(viewModel)}\nJan 2016 • ${musicInAlbum.size} songs • 1:25:02")
+                        Text(stringResource(R.string.album_info_format, album.artistString(viewModel), "Jan 2016", musicInAlbum.size, "1:25:02"))
                     })
                 }
             }

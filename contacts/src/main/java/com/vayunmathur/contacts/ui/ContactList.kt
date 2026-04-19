@@ -332,8 +332,7 @@ fun ContactItem(
             modifier = modifier
                 .clip(RoundedCornerShape(16.dp, 16.dp, if(hasDropdown) 0.dp else 16.dp, if(hasDropdown) 0.dp else 16.dp)),
             headlineContent = {
-                var nameString = contact.name.value
-                if(contact.nickname.value.isNotBlank()) nameString += " (${contact.nickname.value})"
+                val nameString = if(contact.nickname.value.isNotBlank()) stringResource(R.string.name_nickname_format, contact.name.value, contact.nickname.value) else contact.name.value
                 Text(
                     text = nameString,
                     style = MaterialTheme.typography.bodyLarge,
@@ -348,7 +347,7 @@ fun ContactItem(
                     avatarBitmap?.let { bitmap ->
                         Image(
                             bitmap = bitmap.asImageBitmap(),
-                            contentDescription = "${contact.name} photo",
+                            contentDescription = stringResource(R.string.contact_photo_description, contact.name.value),
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clip(CircleShape)

@@ -35,6 +35,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.changedToUp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.vayunmathur.library.ui.IconClose
@@ -83,7 +84,7 @@ fun GalleryPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
                 val date = Instant.fromEpochMilliseconds(it.date).toLocalDateTime(TimeZone.currentSystemDefault())
                 LocalDate(date.year, date.month, 1)
             }.toSortedMap(Comparator<LocalDate>(LocalDate::compareTo).reversed()).mapKeys {
-                MonthNames.ENGLISH_ABBREVIATED.names[it.key.month.ordinal] + " " + it.key.year
+                context.getString(com.vayunmathur.photos.R.string.month_year_format, MonthNames.ENGLISH_ABBREVIATED.names[it.key.month.ordinal], it.key.year)
             }.mapValues { pair -> pair.value.sortedByDescending { it.date } }
         }
     }
@@ -92,7 +93,7 @@ fun GalleryPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
         topBar = {
             if (isSelectionMode) {
                 TopAppBar(
-                    title = { Text("${selectedIds.size} selected") },
+                    title = { Text(stringResource(com.vayunmathur.photos.R.string.items_selected, selectedIds.size)) },
                     navigationIcon = {
                         IconButton(onClick = { selectedIds.clear() }) {
                             IconClose()

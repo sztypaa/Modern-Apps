@@ -84,7 +84,7 @@ fun LiteRTChatUi(backStack: NavBackStack<Route>, conversationId: Long, viewModel
                 isRecording = true
             } catch (e: Exception) {
                 scope.launch {
-                    snackbarHostState.showSnackbar("Mic error: ${e.localizedMessage}")
+                    snackbarHostState.showSnackbar(context.getString(R.string.mic_error_format, e.localizedMessage ?: ""))
                 }
             }
         }
@@ -119,8 +119,9 @@ fun LiteRTChatUi(backStack: NavBackStack<Route>, conversationId: Long, viewModel
             Scaffold(
                 snackbarHost = { SnackbarHost(snackbarHostState) },
                 topBar = {
+                    val newConv = stringResource(R.string.new_conversation)
                     CenterAlignedTopAppBar(
-                        title = { Text(activeConversation?.title ?: "New Conversation", fontWeight = FontWeight.Bold) },
+                        title = { Text(activeConversation?.title ?: newConv, fontWeight = FontWeight.Bold) },
                         actions = { if (conversationId != 0L) IconButton({ backStack.reset(Route.ConversationPage(0)) }) { IconAdd() } },
                         navigationIcon = { if (navType == NavigationSuiteType.None) IconButton({ scope.launch { drawerState.open() } }) { IconMenu() } }
                     )
@@ -145,10 +146,11 @@ fun LiteRTChatUi(backStack: NavBackStack<Route>, conversationId: Long, viewModel
                         },
                         onSend = {
                             if (isRecording) { audioRecorder?.stop(); audioRecorder = null; isRecording = false }
+                            val newConv = context.getString(R.string.new_conversation)
                             scope.launch {
                                 var currentId = conversationId
                                 if (currentId == 0L) {
-                                    currentId = viewModel.upsert(Conversation("New Conversation"))
+                                    currentId = viewModel.upsert(Conversation(newConv))
                                     backStack.reset(Route.ConversationPage(currentId))
                                 }
                                 viewModel.upsert(Message(currentId, inputText, "user", selectedImageFiles.map { it.absolutePath }, recordedAudioFile != null))

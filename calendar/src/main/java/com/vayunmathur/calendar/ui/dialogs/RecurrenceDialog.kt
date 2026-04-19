@@ -108,7 +108,7 @@ fun RecurrenceDialog(backStack: NavBackStack<Route>, resultKey: String, startDat
                         { intervalStr = it },
                         leadingIcon = {Text(stringResource(R.string.every))},
                         trailingIcon = {
-                            Text("$freq ▼  ", Modifier.clickable{
+                            Text(stringResource(R.string.dropdown_freq_format, freq), Modifier.clickable{
                                 openDropdown = true
                             })
                             DropdownMenu(openDropdown, onDismissRequest = { openDropdown = false }) {
@@ -156,7 +156,7 @@ fun RecurrenceDialog(backStack: NavBackStack<Route>, resultKey: String, startDat
                             Text(ordinal(startDate.day))
                         }
                         SegmentedButton(monthlyType == 1, {monthlyType = 1}, shape = SegmentedButtonDefaults.itemShape(1, 2)) {
-                            Text("${ordinal((startDate.day-1)/7+1)} ${startDate.dayOfWeek.name.take(3).capitalcase()}")
+                            Text(stringResource(R.string.monthly_nth_day_format, ordinal((startDate.day-1)/7+1), startDate.dayOfWeek.name.take(3).capitalcase()))
                         }
                     }
                 }

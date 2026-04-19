@@ -129,7 +129,7 @@ fun CalendarScreen(viewModel: CalendarViewModel, backStack: NavBackStack<Route>)
                         Modifier.clickable { backStack.add(Route.Calendar.GotoDialog(dateViewing)) },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("$mon ${visibleSunday.year}", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.month_year_format, mon, visibleSunday.year), fontWeight = FontWeight.Bold)
                         Icon(painterResource(R.drawable.arrow_drop_down_24px), null)
                     }
                 }, actions = {

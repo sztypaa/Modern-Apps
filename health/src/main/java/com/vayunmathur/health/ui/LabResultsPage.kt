@@ -83,8 +83,8 @@ fun LabResultsPage(backStack: NavBackStack<Route>) {
     if (showInstallDialog) {
         AlertDialog(
             onDismissRequest = { showInstallDialog = false },
-            title = { Text("OpenAssistant Required") },
-            text = { Text("The OpenAssistant app is required for offline, secure, medical document extraction. Please install it from GitHub.") },
+            title = { Text(stringResource(R.string.open_assistant_required)) },
+            text = { Text(stringResource(R.string.open_assistant_rationale)) },
             confirmButton = {
                 TextButton(onClick = {
                     val intent = Intent(Intent.ACTION_VIEW,
@@ -92,12 +92,12 @@ fun LabResultsPage(backStack: NavBackStack<Route>) {
                     context.startActivity(intent)
                     showInstallDialog = false
                 }) {
-                    Text("View on GitHub")
+                    Text(stringResource(R.string.view_on_github))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showInstallDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -261,19 +261,19 @@ fun ObservationCard(observation: Observation) {
             )
             Spacer(Modifier.width(16.dp))
             Column {
-                Text(observation.code.text?.value ?: "Unknown Test", style = MaterialTheme.typography.titleLarge)
-                Text("Status: ${observation.status.value?.getDisplay() ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
+                Text(observation.code.text?.value ?: stringResource(R.string.unknown), style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.status_format, observation.status.value?.getDisplay() ?: stringResource(R.string.unknown)), style = MaterialTheme.typography.bodyMedium)
 
                 val valueDisplay = when (val v = observation.value) {
                     is Observation.Value.Quantity -> {
                         val q = v.value
-                        "${q.value?.value ?: ""} ${q.unit?.value ?: ""}"
+                        stringResource(R.string.value_unit_space_format, q.value?.value?.toString() ?: "", q.unit?.value ?: "")
                     }
                     is Observation.Value.String -> v.value.value
                     else -> null
                 }
                 if (valueDisplay != null) {
-                    Text("Result: $valueDisplay", style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    Text(stringResource(R.string.result_format, valueDisplay), style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                 }
 
                 val dateDisplay = when (val eff = observation.effective) {
@@ -281,7 +281,7 @@ fun ObservationCard(observation: Observation) {
                     else -> null
                 }
                 if (dateDisplay != null) {
-                    Text("Date: $dateDisplay", style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(R.string.date_format_label, dateDisplay), style = MaterialTheme.typography.bodySmall)
                 }
             }
         }

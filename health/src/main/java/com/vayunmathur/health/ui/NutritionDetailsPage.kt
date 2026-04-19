@@ -13,9 +13,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.vayunmathur.health.R
 import com.vayunmathur.health.Route
 import com.vayunmathur.health.data.RecordType
 import com.vayunmathur.health.util.HealthAPI
@@ -87,7 +89,7 @@ fun NutritionDetailsPage(backStack: NavBackStack<Route>) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nutrition Details") },
+                title = { Text(stringResource(R.string.label_nutrition_details)) },
                 navigationIcon = { IconNavigation(backStack) }
             )
         }
@@ -113,17 +115,17 @@ fun NutritionDetailsPage(backStack: NavBackStack<Route>) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = if (day == today) "Today" else day.displayString(),
+                            text = if (day == today) stringResource(R.string.label_today) else day.displayString(),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.secondary
                         )
                         Text(
-                            text = "${totalCalories.round(0).toLong()} kcal",
+                            text = stringResource(R.string.unit_kcal_format, totalCalories.round(0).toLong().toString()),
                             style = MaterialTheme.typography.displayMedium,
                             fontWeight = FontWeight.Light
                         )
                         Text(
-                            text = "Total energy intake",
+                            text = stringResource(R.string.total_energy_intake),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.outline
                         )
@@ -154,7 +156,7 @@ fun NutrientProgressCard(nutrient: NutrientDV, start: Instant, end: Instant) {
             ) {
                 Text(text = nutrient.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                 Text(
-                    text = "${currentAmount.round(1)} / ${nutrient.dailyValue.round(0).toLong()} ${nutrient.unit}",
+                    text = stringResource(R.string.nutrient_progress_format, currentAmount.round(1).toString(), nutrient.dailyValue.round(0).toLong(), nutrient.unit),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
