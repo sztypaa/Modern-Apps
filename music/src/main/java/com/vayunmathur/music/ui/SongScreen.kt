@@ -2,6 +2,7 @@ package com.vayunmathur.music.ui
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -271,21 +272,25 @@ fun LyricsView(lyrics: List<LyricLine>, currentIndex: Int) {
 fun parseLyrics(lrcContent: String): List<LyricLine> {
     val lines = mutableListOf<LyricLine>()
     // Regex to match [mm:ss.xx] text
-    val lyricPattern = Regex("\\[(\\d{2}):(\\d{2})\\.(\\d{2,3})\\](.*)")
+    val lyricPattern = Regex("\\[(\\d{2}):(\\d{2})\\.(\\d{2,3})](.*)")
 
     lrcContent.lines().forEach { line ->
-        val match = lyricPattern.find(line)
-        if (match != null) {
-            val min = match.groupValues[1].toLong()
-            val sec = match.groupValues[2].toLong()
-            val ms = match.groupValues[3].toLong()
-            val text = match.groupValues[4].trim()
+        try {
+            val match = lyricPattern.find(line)
+            if (match != null) {
+                val min = match.groupValues[1].toLong()
+                val sec = match.groupValues[2].toLong()
+                val ms = match.groupValues[3].toLong()
+                val text = match.groupValues[4].trim()
 
-            // Convert to total milliseconds
-            val timestamp = (min * 60 * 1000) + (sec * 1000) + (if (match.groupValues[3].length == 2) ms * 10 else ms)
-            if (text.isNotEmpty()) {
-                lines.add(LyricLine(timestamp, text))
+                // Convert to total milliseconds
+                val timestamp = (min * 60 * 1000) + (sec * 1000) + (if (match.groupValues[3].length == 2) ms * 10 else ms)
+                if (text.isNotEmpty()) {
+                    lines.add(LyricLine(timestamp, text))
+                }
             }
+        } catch (e: Exception) {
+            Log.e("SongScreen", "Error parsing lyric line: $line", e)
         }
     }
     return lines.sortedBy { it.timestamp }
@@ -301,24 +306,17 @@ fun getLyricsFromContentUri(context: Context, contentUri: Uri): String? {
     var tempFile: File? = null
     try {
         tempFile = File.createTempFile("temp_music", ".m4a", context.cacheDir)
-        context.contentResolver.openInputStream(contentUri).use { inputStream ->
+        context.contentResolver.openInputStream(contentUri)?.use { inputStream ->
             FileOutputStream(tempFile).use { outputStream ->
-                val buffer = ByteArray(8192)
-                var bytesRead: Int
-                while ((inputStream!!.read(buffer).also { bytesRead = it }) != -1) {
-                    outputStream.write(buffer, 0, bytesRead)
-                }
+                inputStream.copyTo(outputStream)
             }
         }
         val f = AudioFileIO.read(tempFile)
-        val tag = f.tag
-        return tag.getFirst(FieldKey.LYRICS)
+        return f.tag?.getFirst(FieldKey.LYRICS)
     } catch (e: Exception) {
-        e.printStackTrace()
+        Log.e("SongScreen", "Error getting lyrics from content URI: $contentUri", e)
         return null
     } finally {
-        if (tempFile != null && tempFile.exists()) {
-            tempFile.delete()
-        }
+        tempFile?.takeIf { it.exists() }?.delete()
     }
 }

@@ -2,6 +2,7 @@ package com.vayunmathur.calendar.util
 import android.app.Application
 import android.content.ContentValues
 import android.provider.CalendarContract
+import android.util.Log
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,7 +17,7 @@ import com.vayunmathur.calendar.data.Event
 import com.vayunmathur.calendar.data.Calendar
 
 
-class ContactViewModel(application: Application) : AndroidViewModel(application) {
+class CalendarViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _events = MutableStateFlow<List<Event>>(emptyList())
     val events: StateFlow<List<Event>> = _events.asStateFlow()
@@ -62,7 +63,11 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
         // write to the provider's Calendars.VISIBLE field for that calendar
         val values = ContentValues().apply { put(CalendarContract.Calendars.VISIBLE, if (visible) 1 else 0) }
         val uri = CalendarContract.Calendars.CONTENT_URI
-        app.contentResolver.update(uri, values, "${CalendarContract.Calendars._ID} = ?", arrayOf(calendarId.toString()))
+        try {
+            app.contentResolver.update(uri, values, "${CalendarContract.Calendars._ID} = ?", arrayOf(calendarId.toString()))
+        } catch (e: Exception) {
+            Log.e("CalendarViewModel", "Error setting calendar visibility", e)
+        }
 
         // refresh cached calendars and visibility map
         val loaded = Calendar.getAllCalendars(app)
@@ -87,16 +92,26 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
         val app = getApplication<Application>()
         val uri = CalendarContract.Events.CONTENT_URI
         return if (eventId == null) {
-            val newUri = app.contentResolver.insert(uri, values)
-            // refresh events
-            _events.value = Event.getAllEvents(app)
-            updateWidgets()
-            newUri?.lastPathSegment?.toLongOrNull()
+            try {
+                val newUri = app.contentResolver.insert(uri, values)
+                // refresh events
+                _events.value = Event.getAllEvents(app)
+                updateWidgets()
+                newUri?.lastPathSegment?.toLongOrNull()
+            } catch (e: Exception) {
+                Log.e("CalendarViewModel", "Error inserting event", e)
+                null
+            }
         } else {
-            app.contentResolver.update(uri, values, "${CalendarContract.Events._ID} = ?", arrayOf(eventId.toString()))
-            _events.value = Event.getAllEvents(app)
-            updateWidgets()
-            eventId
+            try {
+                app.contentResolver.update(uri, values, "${CalendarContract.Events._ID} = ?", arrayOf(eventId.toString()))
+                _events.value = Event.getAllEvents(app)
+                updateWidgets()
+                eventId
+            } catch (e: Exception) {
+                Log.e("CalendarViewModel", "Error updating event", e)
+                null
+            }
         }
     }
 
@@ -105,7 +120,11 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
         val app = getApplication<Application>()
         val values = ContentValues().apply { put(CalendarContract.Calendars.CALENDAR_COLOR, colorInt) }
         val uri = CalendarContract.Calendars.CONTENT_URI
-        app.contentResolver.update(uri, values, "${CalendarContract.Calendars._ID} = ?", arrayOf(calendarId.toString()))
+        try {
+            app.contentResolver.update(uri, values, "${CalendarContract.Calendars._ID} = ?", arrayOf(calendarId.toString()))
+        } catch (e: Exception) {
+            Log.e("CalendarViewModel", "Error setting calendar color", e)
+        }
 
         // refresh cached calendars and visibility map (color is read from provider)
         val loaded = Calendar.getAllCalendars(app)
@@ -122,7 +141,11 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
             put(CalendarContract.Calendars.NAME, newDisplayName)
         }
         val uri = CalendarContract.Calendars.CONTENT_URI
-        app.contentResolver.update(uri, values, "${CalendarContract.Calendars._ID} = ?", arrayOf(calendarId.toString()))
+        try {
+            app.contentResolver.update(uri, values, "${CalendarContract.Calendars._ID} = ?", arrayOf(calendarId.toString()))
+        } catch (e: Exception) {
+            Log.e("CalendarViewModel", "Error renaming calendar", e)
+        }
 
         val loaded = Calendar.getAllCalendars(app)
         _calendars.value = loaded
@@ -136,8 +159,9 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
         val uri = CalendarContract.Calendars.CONTENT_URI
         try {
             app.contentResolver.delete(uri, "${CalendarContract.Calendars._ID} = ?", arrayOf(calendarId.toString()))
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             // ignore deletion errors, we'll refresh list anyway
+            Log.e("CalendarViewModel", "Error deleting calendar", e)
         }
 
         val loaded = Calendar.getAllCalendars(app)

@@ -37,7 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vayunmathur.library.util.NavBackStack
-import com.vayunmathur.calendar.util.ContactViewModel
+import com.vayunmathur.calendar.util.CalendarViewModel
 import com.vayunmathur.calendar.Route
 import com.vayunmathur.calendar.R
 import com.vayunmathur.library.ui.IconAdd
@@ -47,7 +47,7 @@ import com.vayunmathur.library.ui.IconNavigation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(viewModel: ContactViewModel, backStack: NavBackStack<Route>) {
+fun SettingsScreen(viewModel: CalendarViewModel, backStack: NavBackStack<Route>) {
     val calendars by viewModel.calendars.collectAsState()
     val visibility by viewModel.calendarVisibility.collectAsState()
 

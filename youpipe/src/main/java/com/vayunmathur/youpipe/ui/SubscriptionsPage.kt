@@ -1,5 +1,6 @@
 package com.vayunmathur.youpipe.ui
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -67,16 +68,24 @@ fun SubscriptionsPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewMod
 
     val filePickerActivityContract = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if(uri != null) {
-            val channelURLs = Json.parseToJsonElement(context.contentResolver.openInputStream(uri)!!.bufferedReader().readText()).jsonObject["subscriptions"]!!.jsonArray.map {
-                it.jsonObject["url"]!!.jsonPrimitive.content
-            }
-            coroutineScope.launch(Dispatchers.IO) {
-                progress = 0f
-                isLoading = true
-                val subs = channelURLs.map(::channelURLtoID).map { getChannelInfo(it) }.map(ChannelInfo::toSubscription)
-                viewModel.replaceAll(subs)
-                isLoading = false
-                setupHourlyTask(context)
+            try {
+                val channelURLs = Json.parseToJsonElement(context.contentResolver.openInputStream(uri)!!.bufferedReader().readText()).jsonObject["subscriptions"]!!.jsonArray.map {
+                    it.jsonObject["url"]!!.jsonPrimitive.content
+                }
+                coroutineScope.launch(Dispatchers.IO) {
+                    progress = 0f
+                    isLoading = true
+                    try {
+                        val subs = channelURLs.map(::channelURLtoID).map { getChannelInfo(it) }.map(ChannelInfo::toSubscription)
+                        viewModel.replaceAll(subs)
+                    } catch (e: Exception) {
+                        Log.e("SubscriptionsPage", "Error processing subscriptions from file", e)
+                    }
+                    isLoading = false
+                    setupHourlyTask(context)
+                }
+            } catch (e: Exception) {
+                Log.e("SubscriptionsPage", "Error reading subscriptions file from URI: $uri", e)
             }
         }
     }

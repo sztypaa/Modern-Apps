@@ -1,6 +1,7 @@
 package com.vayunmathur.calendar.data
 import android.content.Context
 import android.provider.CalendarContract
+import android.util.Log
 
 data class Calendar(
     val id: Long,
@@ -25,17 +26,25 @@ data class Calendar(
                 CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL,
                 CalendarContract.Calendars.VISIBLE
             )
-            val cursor = context.contentResolver.query(uri, projection, null, null, null)
-            cursor?.use {
-                while (it.moveToNext()) {
-                    val id = it.getLong(it.getColumnIndexOrThrow(CalendarContract.Calendars._ID))
-                    val account = it.getString(it.getColumnIndexOrThrow(CalendarContract.Calendars.ACCOUNT_NAME)) ?: ""
-                    val display = it.getString(it.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME)) ?: ""
-                    val color = it.getInt(it.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_COLOR))
-                    val access = it.getInt(it.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL))
-                    val visible = it.getInt(it.getColumnIndexOrThrow(CalendarContract.Calendars.VISIBLE)) == 1
-                    list.add(Calendar(id, account, display, color, access, visible))
+            try {
+                val cursor = context.contentResolver.query(uri, projection, null, null, null)
+                cursor?.use {
+                    while (it.moveToNext()) {
+                        try {
+                            val id = it.getLong(it.getColumnIndexOrThrow(CalendarContract.Calendars._ID))
+                            val account = it.getString(it.getColumnIndexOrThrow(CalendarContract.Calendars.ACCOUNT_NAME)) ?: ""
+                            val display = it.getString(it.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME)) ?: ""
+                            val color = it.getInt(it.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_COLOR))
+                            val access = it.getInt(it.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL))
+                            val visible = it.getInt(it.getColumnIndexOrThrow(CalendarContract.Calendars.VISIBLE)) == 1
+                            list.add(Calendar(id, account, display, color, access, visible))
+                        } catch (e: Exception) {
+                            Log.e("Calendar", "Error constructing calendar from cursor", e)
+                        }
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e("Calendar", "Error querying calendars", e)
             }
             return list
         }

@@ -15,7 +15,8 @@ import com.vayunmathur.library.util.IntentLauncher
 import com.vayunmathur.library.util.MainNavigation
 import com.vayunmathur.library.util.buildDatabase
 import com.vayunmathur.library.util.rememberNavBackStack
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import java.io.File
 import com.vayunmathur.openassistant.data.AppDatabase
@@ -39,13 +40,16 @@ class MainActivity : ComponentActivity() {
         val viewModel = DatabaseViewModel(db, Conversation::class to db.conversationDao(), Message::class to db.messageDao())
 
         val oldModelFile = File(applicationContext.getExternalFilesDir(null)!!, "model.litertlm")
-        if(oldModelFile.exists()) {
-            oldModelFile.delete()
-            runBlocking {
-                ds.setBoolean("dbSetupComplete", false)
-            }
-        }
+        
         setContent {
+            LaunchedEffect(Unit) {
+                if(oldModelFile.exists()) {
+                    withContext(Dispatchers.IO) {
+                        oldModelFile.delete()
+                        ds.setBoolean("dbSetupComplete", false)
+                    }
+                }
+            }
             DynamicTheme {
                 InitialDownloadChecker(ds, listOf(
                     Triple("https://huggingface.co/samirsayyed/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it.litertlm", "gemma4.litertlm", "Model"),

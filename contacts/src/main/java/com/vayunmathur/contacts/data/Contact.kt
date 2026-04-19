@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.ContactsContract.Profile
+import android.util.Log
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
 import kotlinx.datetime.LocalDate
@@ -371,23 +372,30 @@ data class Contact(
                 ContactsContract.RawContacts.ACCOUNT_NAME,
                 ContactsContract.RawContacts.ACCOUNT_TYPE,
             )
-            val cursor = contentResolver.query(uri, projection, if(contactId == null) null else "${ContactsContract.Contacts._ID} = ?", listOfNotNull(contactId?.toString()).toTypedArray(), null)
-
             val contacts = mutableListOf<Contact>()
+            try {
+                val cursor = contentResolver.query(uri, projection, if(contactId == null) null else "${ContactsContract.Contacts._ID} = ?", listOfNotNull(contactId?.toString()).toTypedArray(), null)
 
-            cursor?.use {
-                while (it.moveToNext()) {
-                    val id = it.getLong(it.getColumnIndexOrThrow(ContactsContract.RawContacts._ID))
-                    val displayName = it.getStringOrNull(it.getColumnIndexOrThrow(ContactsContract.RawContacts.DISPLAY_NAME_PRIMARY))
-                    val isFavorite = it.getInt(it.getColumnIndexOrThrow(ContactsContract.RawContacts.STARRED)) == 1
-                    val accountName = it.getStringOrNull(it.getColumnIndexOrThrow(ContactsContract.RawContacts.ACCOUNT_NAME))
-                    val accountType = it.getStringOrNull(it.getColumnIndexOrThrow(ContactsContract.RawContacts.ACCOUNT_TYPE))
+                cursor?.use {
+                    while (it.moveToNext()) {
+                        try {
+                            val id = it.getLong(it.getColumnIndexOrThrow(ContactsContract.RawContacts._ID))
+                            val displayName = it.getStringOrNull(it.getColumnIndexOrThrow(ContactsContract.RawContacts.DISPLAY_NAME_PRIMARY))
+                            val isFavorite = it.getInt(it.getColumnIndexOrThrow(ContactsContract.RawContacts.STARRED)) == 1
+                            val accountName = it.getStringOrNull(it.getColumnIndexOrThrow(ContactsContract.RawContacts.ACCOUNT_NAME))
+                            val accountType = it.getStringOrNull(it.getColumnIndexOrThrow(ContactsContract.RawContacts.ACCOUNT_TYPE))
 
-                    var details = getDetails(context, id, false)
-                    details = processDetails(details, displayName) ?: continue
+                            var details = getDetails(context, id, false)
+                            details = processDetails(details, displayName) ?: continue
 
-                    contacts += Contact(id, accountType, accountName, isFavorite, details)
+                            contacts += Contact(id, accountType, accountName, isFavorite, details)
+                        } catch (e: Exception) {
+                            Log.e("Contact", "Error constructing contact from cursor", e)
+                        }
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e("Contact", "Error querying contacts", e)
             }
             return contacts
         }
@@ -412,18 +420,26 @@ fun getDetails(context: Context, id: Long, isProfile: Boolean = false): ContactD
 
     fun <T: ContactDetail<T>> queryData(projection: List<String>, mimeType: String, datumFromCursor: (Cursor) -> T?): List<T> {
         val data = mutableListOf<T>()
-        contentResolver.query(
-            if(isProfile) Uri.withAppendedPath(Profile.CONTENT_URI, ContactsContract.Contacts.Data.CONTENT_DIRECTORY) else ContactsContract.Data.CONTENT_URI,
-            projection.toTypedArray(),
-            "${ContactsContract.Data.RAW_CONTACT_ID} = ? AND ${ContactsContract.Data.MIMETYPE} = ?",
-            arrayOf(contactId, mimeType),
-            null
-        )?.use { cursor ->
-            while (cursor.moveToNext()) {
-                datumFromCursor(cursor)?.let {
-                    data.add(it)
+        try {
+            contentResolver.query(
+                if(isProfile) Uri.withAppendedPath(Profile.CONTENT_URI, ContactsContract.Contacts.Data.CONTENT_DIRECTORY) else ContactsContract.Data.CONTENT_URI,
+                projection.toTypedArray(),
+                "${ContactsContract.Data.RAW_CONTACT_ID} = ? AND ${ContactsContract.Data.MIMETYPE} = ?",
+                arrayOf(contactId, mimeType),
+                null
+            )?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    try {
+                        datumFromCursor(cursor)?.let {
+                            data.add(it)
+                        }
+                    } catch (e: Exception) {
+                        Log.e("Contact", "Error constructing contact detail from cursor", e)
+                    }
                 }
             }
+        } catch (e: Exception) {
+            Log.e("Contact", "Error querying contact details for mimetype: $mimeType", e)
         }
         return data
     }

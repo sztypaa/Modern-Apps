@@ -30,7 +30,6 @@ import com.vayunmathur.music.Route
 import com.vayunmathur.music.data.Music
 import com.vayunmathur.music.data.Playlist
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 @Composable
 fun PlaylistScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
@@ -50,7 +49,7 @@ fun PlaylistScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel)
             }, {
                 Route.PlaylistDetail(it)
             }, leadingContent = { playlist ->
-                val songIds = remember { runBlocking { viewModel.getMatches<Playlist, Music>(playlist.id) } }
+                val songIds by viewModel.getMatchesState<Playlist, Music>(playlist.id)
                 val allMusic by viewModel.data<Music>().collectAsState()
                 val musicUris = allMusic.filter { it.id in songIds }.map { it.uri.toUri() }
                 AlbumArt(musicUris, Modifier.size(40.dp))

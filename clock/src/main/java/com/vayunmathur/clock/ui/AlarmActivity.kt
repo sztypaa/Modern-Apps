@@ -28,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -40,7 +41,8 @@ import com.vayunmathur.library.ui.DynamicTheme
 import com.vayunmathur.library.ui.IconPause
 import com.vayunmathur.library.util.buildDatabase
 import com.vayunmathur.library.util.getNullable
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import com.vayunmathur.clock.util.AlarmReceiver
@@ -63,9 +65,13 @@ class AlarmActivity : ComponentActivity() {
         val db = buildDatabase<ClockDatabase>()
         startForegroundService(Intent(this, AlarmSoundService::class.java))
 
-        val alarm = runBlocking { db.alarmDao().getNullable(alarmId) }
-
         setContent {
+            val alarm by androidx.compose.runtime.produceState<com.vayunmathur.clock.data.Alarm?>(initialValue = null) {
+                value = withContext(Dispatchers.IO) {
+                    db.alarmDao().getNullable(alarmId)
+                }
+            }
+
             DynamicTheme {
                 AlarmRingingScreen(
                     alarmTime = alarm?.time?.toString() ?: "--:--",

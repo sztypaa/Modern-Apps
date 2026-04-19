@@ -3,6 +3,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.database.getLongOrNull
 import androidx.core.net.toUri
 import androidx.exifinterface.media.ExifInterface
@@ -90,9 +91,19 @@ suspend fun syncPhotos(context: Context, database: PhotoDatabase, uris: List<Uri
     // 1. Get all IDs currently in MediaStore to detect deletions
     val allMediaStoreIds = mutableSetOf<Long>()
     fun collectIds(baseUri: Uri) {
-        context.contentResolver.query(baseUri, arrayOf(MediaStore.MediaColumns._ID), null, null, null)?.use { cursor ->
-            val idCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
-            while (cursor.moveToNext()) allMediaStoreIds.add(cursor.getLong(idCol))
+        try {
+            context.contentResolver.query(baseUri, arrayOf(MediaStore.MediaColumns._ID), null, null, null)?.use { cursor ->
+                val idCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
+                while (cursor.moveToNext()) {
+                    try {
+                        allMediaStoreIds.add(cursor.getLong(idCol))
+                    } catch (e: Exception) {
+                        Log.e("SyncWorker", "Error reading ID from MediaStore cursor", e)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("SyncWorker", "Error querying MediaStore for IDs: $baseUri", e)
         }
     }
     collectIds(MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
@@ -158,35 +169,47 @@ suspend fun syncPhotos(context: Context, database: PhotoDatabase, uris: List<Uri
         val baseUri = if (isVideo) MediaStore.Video.Media.EXTERNAL_CONTENT_URI else MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 
         while (cursor.moveToNext()) {
-            val id = cursor.getLong(idColumn)
-            val name = cursor.getString(nameColumn)
-            val dateTaken = cursor.getLongOrNull(dateTakenColumn)
-            val date = if (dateTaken != null && dateTaken > 0) dateTaken else (cursor.getLong(dateAddedColumn) * 1000)
-            val dateModified = cursor.getLong(dateModifiedColumn)
-            val width = cursor.getInt(widthColumn)
-            val height = cursor.getInt(heightColumn)
-            val contentUri = ContentUris.withAppendedId(baseUri, id).toString()
-            val videoData = if (isVideo) VideoData(cursor.getLong(durationColumn)) else null
+            try {
+                val id = cursor.getLong(idColumn)
+                val name = cursor.getString(nameColumn)
+                val dateTaken = cursor.getLongOrNull(dateTakenColumn)
+                val date = if (dateTaken != null && dateTaken > 0) dateTaken else (cursor.getLong(dateAddedColumn) * 1000)
+                val dateModified = cursor.getLong(dateModifiedColumn)
+                val width = cursor.getInt(widthColumn)
+                val height = cursor.getInt(heightColumn)
+                val contentUri = ContentUris.withAppendedId(baseUri, id).toString()
+                val videoData = if (isVideo) VideoData(cursor.getLong(durationColumn)) else null
 
-            val existing = existingPhotos[id]
-            if (existing == null || existing.date != date || existing.uri != contentUri || existing.videoData != videoData || existing.width != width || existing.height != height || existing.dateModified != dateModified) {
-                newOrUpdatedPhotos += Photo(id, name, contentUri, date, width, height, dateModified, existing?.exifSet ?: false, existing?.lat, existing?.long, videoData)
+                val existing = existingPhotos[id]
+                if (existing == null || existing.date != date || existing.uri != contentUri || existing.videoData != videoData || existing.width != width || existing.height != height || existing.dateModified != dateModified) {
+                    newOrUpdatedPhotos += Photo(id, name, contentUri, date, width, height, dateModified, existing?.exifSet ?: false, existing?.lat, existing?.long, videoData)
+                }
+            } catch (e: Exception) {
+                Log.e("SyncWorker", "Error processing photo/video from cursor", e)
             }
         }
     }
 
     // Query MediaStore for the specific selection (generation or IDs)
-    context.contentResolver.query(
-        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-        arrayOf(MediaStore.Images.Media._ID, MediaStore.Images.Media.DISPLAY_NAME, MediaStore.Images.Media.DATE_TAKEN, MediaStore.Images.Media.DATE_ADDED, MediaStore.Images.Media.WIDTH, MediaStore.Images.Media.HEIGHT, MediaStore.Images.Media.DATE_MODIFIED),
-        selection, null, null
-    )?.use { processCursor(it, false) }
+    try {
+        context.contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            arrayOf(MediaStore.Images.Media._ID, MediaStore.Images.Media.DISPLAY_NAME, MediaStore.Images.Media.DATE_TAKEN, MediaStore.Images.Media.DATE_ADDED, MediaStore.Images.Media.WIDTH, MediaStore.Images.Media.HEIGHT, MediaStore.Images.Media.DATE_MODIFIED),
+            selection, null, null
+        )?.use { processCursor(it, false) }
+    } catch (e: Exception) {
+        Log.e("SyncWorker", "Error querying MediaStore for images", e)
+    }
 
-    context.contentResolver.query(
-        MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-        arrayOf(MediaStore.Video.Media._ID, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.DATE_TAKEN, MediaStore.Video.Media.DATE_ADDED, MediaStore.Video.Media.WIDTH, MediaStore.Video.Media.HEIGHT, MediaStore.Video.Media.DURATION, MediaStore.Video.Media.DATE_MODIFIED),
-        selection, null, null
-    )?.use { processCursor(it, true) }
+    try {
+        context.contentResolver.query(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            arrayOf(MediaStore.Video.Media._ID, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.DATE_TAKEN, MediaStore.Video.Media.DATE_ADDED, MediaStore.Video.Media.WIDTH, MediaStore.Video.Media.HEIGHT, MediaStore.Video.Media.DURATION, MediaStore.Video.Media.DATE_MODIFIED),
+            selection, null, null
+        )?.use { processCursor(it, true) }
+    } catch (e: Exception) {
+        Log.e("SyncWorker", "Error querying MediaStore for videos", e)
+    }
 
     if (newOrUpdatedPhotos.isNotEmpty()) {
         photoDao.upsertAll(newOrUpdatedPhotos)
@@ -196,7 +219,7 @@ suspend fun syncPhotos(context: Context, database: PhotoDatabase, uris: List<Uri
 suspend fun setExifData(photos: List<Photo>, database: PhotoDatabase, context: Context) = coroutineScope {
     val photoDao = database.photoDao()
     val ps = photos.filter { !it.exifSet }.sortedByDescending { it.date }
-    ps.chunked(50).forEachIndexed { index, photosChunk ->
+    ps.chunked(50).forEach { photosChunk ->
         val newPhotos = photosChunk.map { photo ->
             async(Dispatchers.IO) {
                 try {
@@ -212,7 +235,7 @@ suspend fun setExifData(photos: List<Photo>, database: PhotoDatabase, context: C
                         listOf(lat, long)
                     } ?: listOf(null, null)
                     photo.copy(exifSet = true, lat = lat, long = long)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     photo.copy(exifSet = true) // Mark as set even on error to avoid retry every time
                 }
             }

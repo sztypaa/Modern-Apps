@@ -1,29 +1,24 @@
 package com.vayunmathur.findfamily.util
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import android.os.Build
 import android.provider.ContactsContract
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.PermissionChecker
-import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
-import kotlinx.coroutines.launch
-import kotlin.io.encoding.Base64
 import com.vayunmathur.findfamily.R
 
 class Platform(private val context: Context) {
     @SuppressLint("Range")
     @Composable
     fun requestPickContact(callback: (String, String?)->Unit): ()->Unit {
-        val coroutine = rememberCoroutineScope()
-        if(Build.VERSION.SDK_INT >= 37) {
+//        val coroutine = rememberCoroutineScope()
+//        if(Build.VERSION.SDK_INT >= 37) {
 //            // Launcher for the Contact Picker intent
 //            val pickContact = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
 //                if (it.resultCode == Activity.RESULT_OK) {
@@ -107,20 +102,24 @@ class Platform(private val context: Context) {
 //                // Launch the picker
 //                pickContact.launch(pickContactIntent)
 //            }
-            return{}
-        } else {
+//            return{}
+//        } else {
             val launcher =
                 rememberLauncherForActivityResult(ActivityResultContracts.PickContact()) { uri ->
                     if (uri == null) return@rememberLauncherForActivityResult
-                    val cur = context.contentResolver.query(uri, null, null, null)!!
-                    if (cur.moveToFirst()) {
-                        val name =
-                            cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
-                        val photo =
-                            cur.getStringOrNull(cur.getColumnIndex(ContactsContract.Contacts.PHOTO_URI))
-                        callback(name, photo)
+                    try {
+                        val cur = context.contentResolver.query(uri, null, null, null)!!
+                        if (cur.moveToFirst()) {
+                            val name =
+                                cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
+                            val photo =
+                                cur.getStringOrNull(cur.getColumnIndex(ContactsContract.Contacts.PHOTO_URI))
+                            callback(name, photo)
+                        }
+                        cur.close()
+                    } catch (e: Exception) {
+                        Log.e("Platform", "Error querying contact from picker URI: $uri", e)
                     }
-                    cur.close()
                 }
             val permissionLauncher =
                 rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -139,7 +138,7 @@ class Platform(private val context: Context) {
                     permissionLauncher.launch(Manifest.permission.READ_CONTACTS)
                 }
             }
-        }
+//        }
     }
 
     fun copy(content: String) {

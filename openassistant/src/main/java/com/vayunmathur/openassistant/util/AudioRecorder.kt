@@ -5,6 +5,7 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.net.Uri
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,7 +48,7 @@ class WavRecorder(val context: Context, val outputFile: File, val scope: Corouti
         isRecording = false
         audioRecord?.apply {
             if (state == AudioRecord.STATE_INITIALIZED) {
-                try { stop() } catch(e: Exception) {}
+                try { stop() } catch(_: Exception) {}
             }
             release()
         }
@@ -98,8 +99,12 @@ class WavRecorder(val context: Context, val outputFile: File, val scope: Corouti
 
 fun copyUriToFile(context: Context, uri: Uri): File {
     val tempFile = File(context.cacheDir, "img_${Clock.System.now().toEpochMilliseconds()}_${UUID.randomUUID()}.jpg")
-    context.contentResolver.openInputStream(uri)?.use { input ->
-        FileOutputStream(tempFile).use { output -> input.copyTo(output) }
+    try {
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            FileOutputStream(tempFile).use { output -> input.copyTo(output) }
+        }
+    } catch (e: Exception) {
+        Log.e("AudioRecorder", "Error copying URI to file: $uri", e)
     }
     return tempFile
 }

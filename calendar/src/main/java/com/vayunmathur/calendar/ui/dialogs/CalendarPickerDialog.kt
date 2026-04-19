@@ -23,7 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vayunmathur.library.util.NavBackStack
-import com.vayunmathur.calendar.util.ContactViewModel
+import com.vayunmathur.calendar.util.CalendarViewModel
 import com.vayunmathur.calendar.Route
 import com.vayunmathur.library.util.LocalNavResultRegistry
 import kotlinx.coroutines.launch
@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 fun CalendarPickerDialog(backStack: NavBackStack<Route>, resultKey: String) {
     val registry = LocalNavResultRegistry.current
     val scope = rememberCoroutineScope()
-    val vm: ContactViewModel = viewModel()
+    val vm: CalendarViewModel = viewModel()
     val calendars = vm.calendars.collectAsState().value
 
     // group calendars by accountName and filter editable ones (canModify)

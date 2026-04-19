@@ -5,21 +5,41 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
-import android.os.ParcelFileDescriptor
-import android.os.ResultReceiver
-import androidx.core.content.FileProvider
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.health.connect.client.feature.ExperimentalPersonalHealthRecordApi
 import androidx.health.connect.client.records.MedicalResource
 import com.google.fhir.model.r4b.Observation
@@ -35,6 +55,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import androidx.core.net.toUri
+import androidx.core.graphics.createBitmap
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPersonalHealthRecordApi::class)
 @Composable
@@ -65,7 +87,8 @@ fun LabResultsPage(backStack: NavBackStack<Route>) {
             text = { Text("The OpenAssistant app is required for offline, secure, medical document extraction. Please install it from GitHub.") },
             confirmButton = {
                 TextButton(onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/vayun-mathur/Modern-Apps"))
+                    val intent = Intent(Intent.ACTION_VIEW,
+                        "https://github.com/vayun-mathur/Modern-Apps".toUri())
                     context.startActivity(intent)
                     showInstallDialog = false
                 }) {
@@ -277,23 +300,28 @@ private fun isOpenAssistantInstalled(context: Context): Boolean {
 private fun convertPdfToImages(context: Context, uri: Uri): List<String> {
     val imagePaths = mutableListOf<String>()
     try {
-        val parcelFileDescriptor = context.contentResolver.openFileDescriptor(uri, "r") ?: return emptyList()
-        val renderer = PdfRenderer(parcelFileDescriptor)
-        for (i in 0 until renderer.pageCount) {
-            val page = renderer.openPage(i)
-            val bitmap = Bitmap.createBitmap(page.width, page.height, Bitmap.Config.ARGB_8888)
-            page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-            val file = File(context.cacheDir, "pdf_page_$i.png")
-            val out = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-            out.close()
-            page.close()
-            imagePaths.add(file.absolutePath)
+        context.contentResolver.openFileDescriptor(uri, "r")?.use { parcelFileDescriptor ->
+            val renderer = PdfRenderer(parcelFileDescriptor)
+            for (i in 0 until renderer.pageCount) {
+                try {
+                    Log.d("LabResultsPage", "Rendering PDF page $i")
+                    val page = renderer.openPage(i)
+                    val bitmap = createBitmap(page.width, page.height)
+                    page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                    val file = File(context.cacheDir, "pdf_page_$i.png")
+                    FileOutputStream(file).use { out ->
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                    }
+                    page.close()
+                    imagePaths.add(file.absolutePath)
+                } catch (e: Exception) {
+                    Log.e("LabResultsPage", "Error rendering PDF page $i", e)
+                }
+            }
+            renderer.close()
         }
-        renderer.close()
-        parcelFileDescriptor.close()
     } catch (e: Exception) {
-        e.printStackTrace()
+        Log.e("LabResultsPage", "Error opening PDF file descriptor for URI: $uri", e)
     }
     return imagePaths
 }

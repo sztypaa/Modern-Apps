@@ -25,13 +25,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vayunmathur.library.util.NavBackStack
-import com.vayunmathur.calendar.util.ContactViewModel
+import com.vayunmathur.calendar.util.CalendarViewModel
 import com.vayunmathur.calendar.R
 import com.vayunmathur.calendar.Route
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsChangeColorDialog(viewModel: ContactViewModel, backStack: NavBackStack<Route>, calendarId: Long) {
+fun SettingsChangeColorDialog(viewModel: CalendarViewModel, backStack: NavBackStack<Route>, calendarId: Long) {
     val calendars by viewModel.calendars.collectAsState()
     val cal = calendars.find { it.id == calendarId } ?: run {
         backStack.pop()

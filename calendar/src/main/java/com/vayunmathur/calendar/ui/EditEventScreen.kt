@@ -39,12 +39,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.glance.LocalContext
 import com.vayunmathur.library.util.NavBackStack
-import com.vayunmathur.calendar.util.ContactViewModel
+import com.vayunmathur.calendar.util.CalendarViewModel
 import com.vayunmathur.calendar.R
 import com.vayunmathur.calendar.util.RRule
 import com.vayunmathur.calendar.util.RecurrenceParams
@@ -52,7 +52,7 @@ import com.vayunmathur.calendar.Route
 import com.vayunmathur.library.ui.IconNavigation
 import com.vayunmathur.library.ui.IconSave
 import com.vayunmathur.library.util.ResultEffect
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
@@ -79,7 +79,7 @@ private const val KEY_TIMEZONE = "EditEvent.timezone"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditEventScreen(viewModel: ContactViewModel, editRoute: Route.EditEvent, backStack: NavBackStack<Route>) {
+fun EditEventScreen(viewModel: CalendarViewModel, editRoute: Route.EditEvent, backStack: NavBackStack<Route>) {
     val eventId = editRoute.id
     val events by viewModel.events.collectAsState()
     val calendars by viewModel.calendars.collectAsState()

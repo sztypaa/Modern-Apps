@@ -65,7 +65,7 @@ import com.vayunmathur.calendar.Route
 import com.vayunmathur.calendar.data.Calendar
 import com.vayunmathur.calendar.data.Event
 import com.vayunmathur.calendar.data.Instance
-import com.vayunmathur.calendar.util.ContactViewModel
+import com.vayunmathur.calendar.util.CalendarViewModel
 import com.vayunmathur.library.ui.IconAdd
 import com.vayunmathur.library.ui.IconSettings
 import com.vayunmathur.library.util.NavBackStack
@@ -86,7 +86,7 @@ import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun CalendarScreen(viewModel: ContactViewModel, backStack: NavBackStack<Route>) {
+fun CalendarScreen(viewModel: CalendarViewModel, backStack: NavBackStack<Route>) {
     val context = LocalContext.current
     val events by viewModel.events.collectAsState()
     val calendarsList by viewModel.calendars.collectAsState()

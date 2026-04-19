@@ -1,11 +1,12 @@
 package com.vayunmathur.music.data
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.vayunmathur.library.util.DatabaseItem
 import com.vayunmathur.library.util.DatabaseViewModel
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -17,15 +18,19 @@ data class Album(
 ): DatabaseItem {
     @Composable
     fun artistString(viewModel: DatabaseViewModel): String {
-        return remember {
-            val artistIDs = runBlocking {
-                viewModel.getMatches<Album, Artist>(id)
+        val artistIDs by viewModel.getMatchesState<Album, Artist>(id)
+        val artists by viewModel.data<Artist>().collectAsState()
+        
+        return remember(artistIDs, artists) {
+            if (artistIDs.size > 2) {
+                "Various Artists"
+            } else if (artistIDs.isEmpty()) {
+                ""
+            } else {
+                artistIDs.mapNotNull { artistId -> 
+                    artists.find { it.id == artistId }?.name 
+                }.joinToString()
             }
-            if(artistIDs.size > 2) {
-                return@remember "Various Artists"
-            }
-            val artists = viewModel.data<Artist>().value
-            artistIDs.joinToString { id -> artists.find { it.id == id }!!.name }
         }
     }
 }

@@ -42,7 +42,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.json.Json
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
@@ -59,6 +58,7 @@ import kotlin.reflect.KClass
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
+import androidx.core.content.edit
 
 
 class DatabaseViewModel(val database: RoomDatabase, vararg daos: Pair<KClass<*>, TrueDao<*>>, val matchingDao: MatchingDao? = null) : ViewModel() {
@@ -68,8 +68,8 @@ class DatabaseViewModel(val database: RoomDatabase, vararg daos: Pair<KClass<*>,
         val classAIndex = daos.keys.indexOf(A::class)
         val classBIndex = daos.keys.indexOf(B::class)
         val type = min(classAIndex, classBIndex) + 100 * max(classAIndex, classBIndex)
-        val pairs = if(classAIndex < classBIndex) pairs else pairs.map { it.second to it.first }
-        matchingDao!!.upsert(pairs.map { (a, b) -> ManyManyMatching(a.id, b.id, type) })
+        val orderedPairs = if(classAIndex < classBIndex) pairs else pairs.map { it.second to it.first }
+        matchingDao!!.upsert(orderedPairs.map { (a, b) -> ManyManyMatching(a.id, b.id, type) })
     }
 
     inline fun <reified A: DatabaseItem, reified B: DatabaseItem> addPairsAsync(pairs: List<Pair<A, B>>) {
@@ -123,8 +123,9 @@ class DatabaseViewModel(val database: RoomDatabase, vararg daos: Pair<KClass<*>,
         val type = min(classAIndex, classBIndex) + 100 * max(classAIndex, classBIndex)
 
         val matches by matchesStateFlow!!.collectAsState()
-        return remember { derivedStateOf {
-            if(classAIndex < classBIndex) matches.filter { it.leftID == a && it.type == type }.map { it.rightID } else matches.filter { it.rightID == a && it.type == type }.map { it.leftID }
+        return remember(a, matches) { derivedStateOf {
+            if(classAIndex < classBIndex) matches.filter { it.leftID == a && it.type == type }.map { it.rightID } 
+            else matches.filter { it.rightID == a && it.type == type }.map { it.leftID }
         } }
     }
 
@@ -457,10 +458,10 @@ class BiometricDatabaseHelper(val context: Context) {
         val iv = cipher.iv
 
         val prefs = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
-        prefs.edit()
-            .putString(passphraseKey, Base64.encodeToString(encryptedBytes, Base64.NO_WRAP))
-            .putString(ivKey, Base64.encodeToString(iv, Base64.NO_WRAP))
-            .apply()
+        prefs.edit {
+                putString(passphraseKey, Base64.encodeToString(encryptedBytes, Base64.NO_WRAP))
+                    .putString(ivKey, Base64.encodeToString(iv, Base64.NO_WRAP))
+        }
 
         return passphrase
     }

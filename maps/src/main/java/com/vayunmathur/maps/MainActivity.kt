@@ -22,11 +22,10 @@ import com.vayunmathur.maps.R
 import com.vayunmathur.maps.ui.DownloadedMapsPage
 import com.vayunmathur.maps.ui.MapPage
 import com.vayunmathur.maps.ui.SearchPage
-import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.Serializable
 import org.maplibre.android.log.Logger
 import java.io.File
 import com.vayunmathur.maps.util.SelectedFeatureViewModel
+import kotlinx.serialization.Serializable
 
 fun ensurePmtilesReady(context: Context): String {
     val fileName = "world_z0-6.pmtiles"
@@ -50,14 +49,7 @@ class MainActivity : ComponentActivity() {
         val ds = DataStoreUtils.getInstance(this)
         ensurePmtilesReady(this)
         Logger.setVerbosity(Logger.INFO)
-        runBlocking {
-//            File(getExternalFilesDir(null)!!, "edges_zone_35.bin").delete()
-//            File(getExternalFilesDir(null)!!, "amenities.db").delete()
-//            ds.setBoolean("dbSetupComplete", false)
-//            ds.setBoolean("done_edges_zone_35.bin", false)
-//            ds.setBoolean("done_edges.bin", false)
-        }
-//        finish()
+
         setContent {
             DynamicTheme {
                 InitialDownloadChecker(ds, listOf(

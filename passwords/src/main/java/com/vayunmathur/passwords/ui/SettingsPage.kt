@@ -3,6 +3,7 @@ package com.vayunmathur.passwords.ui
 import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -115,9 +116,20 @@ private data class ImportResult(val inserted: Int, val skipped: Int)
 
 private suspend fun importBitwardenCsvFromUri(contentResolver: ContentResolver, uri: Uri, viewModel: DatabaseViewModel): ImportResult {
     return kotlinx.coroutines.withContext(Dispatchers.IO) {
-        val inputStream = contentResolver.openInputStream(uri) ?: throw Exception("Unable to open selected file")
+        val inputStream = try {
+            contentResolver.openInputStream(uri)
+        } catch (e: Exception) {
+            Log.e("SettingsPage", "Error opening input stream for URI: $uri", e)
+            null
+        } ?: throw Exception("Unable to open selected file")
+        
         val csvReader = CsvReader(CsvReaderContext())
-        val rows = csvReader.readAll(inputStream)
+        val rows = try {
+            csvReader.readAll(inputStream)
+        } catch (e: Exception) {
+            Log.e("SettingsPage", "Error reading CSV from input stream", e)
+            emptyList<List<String>>()
+        }
         if (rows.isEmpty()) return@withContext ImportResult(0, 0)
 
         // First row is header - map column indices

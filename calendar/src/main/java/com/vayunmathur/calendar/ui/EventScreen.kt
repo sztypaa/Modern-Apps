@@ -21,25 +21,25 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.glance.LocalContext
-import com.vayunmathur.library.util.NavBackStack
-import com.vayunmathur.calendar.util.ContactViewModel
-import com.vayunmathur.calendar.data.Instance
 import com.vayunmathur.calendar.R
 import com.vayunmathur.calendar.Route
+import com.vayunmathur.calendar.data.Instance
+import com.vayunmathur.calendar.util.CalendarViewModel
 import com.vayunmathur.library.ui.IconDelete
 import com.vayunmathur.library.ui.IconEdit
 import com.vayunmathur.library.ui.IconNavigation
+import com.vayunmathur.library.util.NavBackStack
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.format
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventScreen(viewModel: ContactViewModel, instance: Instance, backStack: NavBackStack<Route>) {
+fun EventScreen(viewModel: CalendarViewModel, instance: Instance, backStack: NavBackStack<Route>) {
     val events by viewModel.events.collectAsState()
     val calendars by viewModel.calendars.collectAsState()
 

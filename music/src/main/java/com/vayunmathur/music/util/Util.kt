@@ -6,7 +6,10 @@ import android.graphics.Canvas
 import android.graphics.Rect
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import android.util.Size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,21 +18,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.core.graphics.createBitmap
 import coil.compose.AsyncImage
-import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.library.util.NavBackStack
+import com.vayunmathur.music.R
+import com.vayunmathur.music.Route
 import com.vayunmathur.music.data.Album
 import com.vayunmathur.music.data.Artist
 import com.vayunmathur.music.data.Music
-import com.vayunmathur.music.data.Playlist
-import com.vayunmathur.music.R
-import com.vayunmathur.music.Route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import androidx.core.graphics.createBitmap
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.ui.res.painterResource
 
 fun getThumbnail(context: Context, uri: Uri): Bitmap? {
     return try {
@@ -38,19 +37,28 @@ fun getThumbnail(context: Context, uri: Uri): Bitmap? {
             Size(300, 300),
             null
         )
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         null // Fallback to a placeholder
     }
 }
 
 fun albumArtistPairs(music: List<Music>, artists: List<Artist>, albums: List<Album>): List<Pair<Album, Artist>> {
     val albumArtistPairs = mutableListOf<Pair<Album, Artist>>()
-    for(music in music) {
-        val album = albums.firstOrNull { it.id == music.albumId } ?: continue
-        val artist = artists.firstOrNull { it.id == music.artistId } ?: continue
-        albumArtistPairs += Pair(album, artist)
+    for(song in music) {
+        val album = albums.find { it.id == song.albumId }
+        val artist = artists.find { it.id == song.artistId }
+        
+        if (album != null && artist != null) {
+            albumArtistPairs += Pair(album, artist)
+        } else {
+            // Detailed logging for failures
+            if (album == null) Log.w("MusicUtil", "Song '${song.title}' has albumId ${song.albumId} but no matching album found")
+            if (artist == null) Log.w("MusicUtil", "Song '${song.title}' has artistId ${song.artistId} but no matching artist found")
+        }
     }
-    return albumArtistPairs.distinct()
+    val distinctPairs = albumArtistPairs.distinct()
+    Log.d("MusicUtil", "Computed ${distinctPairs.size} unique album-artist pairs from ${music.size} songs")
+    return distinctPairs
 }
 
 suspend fun getAlbums(context: Context): List<Album> = withContext(Dispatchers.IO) {
@@ -65,28 +73,36 @@ suspend fun getAlbums(context: Context): List<Album> = withContext(Dispatchers.I
     // Filter to only get music files
     val sortOrder = "${MediaStore.Audio.Albums.ALBUM} ASC"
 
-    context.contentResolver.query(
-        MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-        projection,
-        null,
-        null,
-        sortOrder
-    )?.use { cursor ->
-        val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID)
-        val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM)
+    try {
+        context.contentResolver.query(
+            MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+            projection,
+            null,
+            null,
+            sortOrder
+        )?.use { cursor ->
+            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID)
+            val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM)
 
-        while (cursor.moveToNext()) {
-            val id = cursor.getLong(idColumn)
-            val title = cursor.getString(titleColumn)
+            while (cursor.moveToNext()) {
+                try {
+                    val id = cursor.getLong(idColumn)
+                    val title = cursor.getString(titleColumn)
 
-            // Construct the actual File URI
-            val contentUri = ContentUris.withAppendedId(
-                MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                id
-            ).toString()
+                    // Construct the actual File URI
+                    val contentUri = ContentUris.withAppendedId(
+                        MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                        id
+                    ).toString()
 
-            musicList.add(Album(id, title, contentUri))
+                    musicList.add(Album(id, title, contentUri))
+                } catch (e: Exception) {
+                    Log.e("MusicUtil", "Error constructing album from cursor", e)
+                }
+            }
         }
+    } catch (e: Exception) {
+        Log.e("MusicUtil", "Error querying albums", e)
     }
     return@withContext musicList
 }
@@ -102,28 +118,36 @@ suspend fun getArtists(context: Context): List<Artist> = withContext(Dispatchers
     // Filter to only get music files
     val sortOrder = "${MediaStore.Audio.Artists.ARTIST} ASC"
 
-    context.contentResolver.query(
-        MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
-        projection,
-        null,
-        null,
-        sortOrder
-    )?.use { cursor ->
-        val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID)
-        val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST)
+    try {
+        context.contentResolver.query(
+            MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
+            projection,
+            null,
+            null,
+            sortOrder
+        )?.use { cursor ->
+            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID)
+            val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST)
 
-        while (cursor.moveToNext()) {
-            val id = cursor.getLong(idColumn)
-            val title = cursor.getString(titleColumn)
+            while (cursor.moveToNext()) {
+                try {
+                    val id = cursor.getLong(idColumn)
+                    val title = cursor.getString(titleColumn)
 
-            // Construct the actual File URI
-            val contentUri = ContentUris.withAppendedId(
-                MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
-                id
-            ).toString()
+                    // Construct the actual File URI
+                    val contentUri = ContentUris.withAppendedId(
+                        MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
+                        id
+                    ).toString()
 
-            musicList.add(Artist(id, title, contentUri))
+                    musicList.add(Artist(id, title, contentUri))
+                } catch (e: Exception) {
+                    Log.e("MusicUtil", "Error constructing artist from cursor", e)
+                }
+            }
         }
+    } catch (e: Exception) {
+        Log.e("MusicUtil", "Error querying artists", e)
     }
     return@withContext musicList
 }

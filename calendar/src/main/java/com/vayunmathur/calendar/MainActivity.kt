@@ -51,7 +51,7 @@ import com.vayunmathur.calendar.util.RecurrenceParams
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import com.vayunmathur.calendar.data.Instance
-import com.vayunmathur.calendar.util.ContactViewModel
+import com.vayunmathur.calendar.util.CalendarViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -167,7 +167,7 @@ sealed interface Route: NavKey {
 
 @Composable
 fun Navigation(initialRoute: Route?) {
-    val viewModel: ContactViewModel = viewModel()
+    val viewModel: CalendarViewModel = viewModel()
     val backStack = rememberNavBackStack(listOfNotNull(Route.Calendar, initialRoute))
     LaunchedEffect(initialRoute) {
         if(initialRoute != null) {

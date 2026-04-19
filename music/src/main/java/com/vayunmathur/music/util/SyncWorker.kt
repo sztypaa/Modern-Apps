@@ -3,6 +3,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -91,15 +92,25 @@ suspend fun syncMusic(context: Context, database: MusicDatabase, viewModel: Data
 
     // 1. Get all current IDs in MediaStore to handle deletions correctly
     val allMediaStoreIds = mutableSetOf<Long>()
-    context.contentResolver.query(
-        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-        arrayOf(MediaStore.Audio.Media._ID),
-        "${MediaStore.Audio.Media.IS_MUSIC} != 0",
-        null,
-        null
-    )?.use { cursor ->
-        val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
-        while (cursor.moveToNext()) allMediaStoreIds.add(cursor.getLong(idCol))
+    try {
+        context.contentResolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            arrayOf(MediaStore.Audio.Media._ID),
+            "${MediaStore.Audio.Media.IS_MUSIC} != 0",
+            null,
+            null
+        )?.use { cursor ->
+            val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
+            while (cursor.moveToNext()) {
+                try {
+                    allMediaStoreIds.add(cursor.getLong(idCol))
+                } catch (e: Exception) {
+                    Log.e("MusicSyncWorker", "Error reading music ID from cursor", e)
+                }
+            }
+        }
+    } catch (e: Exception) {
+        Log.e("MusicSyncWorker", "Error querying MediaStore for music IDs", e)
     }
 
     // 2. Handle deletions
@@ -140,31 +151,39 @@ suspend fun syncMusic(context: Context, database: MusicDatabase, viewModel: Data
         else -> "${MediaStore.Audio.Media.IS_MUSIC} != 0"
     }
 
-    context.contentResolver.query(
-        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-        projection,
-        selection,
-        null,
-        null
-    )?.use { cursor ->
-        val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
-        val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
-        val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
-        val albumColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
-        val artistIDColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID)
-        val albumIDColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
+    try {
+        context.contentResolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            selection,
+            null,
+            null
+        )?.use { cursor ->
+            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
+            val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
+            val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
+            val albumColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
+            val artistIDColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID)
+            val albumIDColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
 
-        while (cursor.moveToNext()) {
-            val id = cursor.getLong(idColumn)
-            val title = cursor.getString(titleColumn)
-            val artist = cursor.getString(artistColumn)
-            val album = cursor.getString(albumColumn)
-            val artistID = cursor.getLong(artistIDColumn)
-            val albumID = cursor.getLong(albumIDColumn)
-            val contentUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id).toString()
+            while (cursor.moveToNext()) {
+                try {
+                    val id = cursor.getLong(idColumn)
+                    val title = cursor.getString(titleColumn)
+                    val artist = cursor.getString(artistColumn)
+                    val album = cursor.getString(albumColumn)
+                    val artistID = cursor.getLong(artistIDColumn)
+                    val albumID = cursor.getLong(albumIDColumn)
+                    val contentUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id).toString()
 
-            musicList.add(Music(id, title, artist, artistID, album, albumID, contentUri))
+                    musicList.add(Music(id, title, artist, artistID, album, albumID, contentUri))
+                } catch (e: Exception) {
+                    Log.e("MusicSyncWorker", "Error constructing music from cursor", e)
+                }
+            }
         }
+    } catch (e: Exception) {
+        Log.e("MusicSyncWorker", "Error querying MediaStore for music", e)
     }
 
     if (uris == null && lastGeneration == 0L) {
@@ -185,6 +204,11 @@ suspend fun syncMusic(context: Context, database: MusicDatabase, viewModel: Data
     val allAlbums = database.albumDao().getAll<Album>()
     val allArtists = database.artistDao().getAll<Artist>()
     
+    Log.d("MusicSyncWorker", "Rebuilding matchings: Music=${allMusic.size}, Albums=${allAlbums.size}, Artists=${allArtists.size}")
+    
+    val pairs = albumArtistPairs(allMusic, allArtists, allAlbums)
+    Log.d("MusicSyncWorker", "Rebuilding matchings: ${pairs.size} pairs found")
+    
     viewModel.clearMatchings<Album, Artist>()
-    viewModel.addPairs(albumArtistPairs(allMusic, allArtists, allAlbums))
+    viewModel.addPairs(pairs)
 }

@@ -1,9 +1,11 @@
 package com.vayunmathur.contacts.util
 import android.app.Application
-import android.content.ContentProviderOperation
 import android.provider.ContactsContract
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.vayunmathur.contacts.data.Contact
+import com.vayunmathur.contacts.data.ContactDetails
 import com.vayunmathur.library.util.DataStoreUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -16,8 +18,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.vayunmathur.contacts.data.Contact
-import com.vayunmathur.contacts.data.ContactDetails
 
 data class ContactAccount(val name: String, val type: String)
 
@@ -56,19 +56,32 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
                 ContactsContract.RawContacts.ACCOUNT_NAME,
                 ContactsContract.RawContacts.ACCOUNT_TYPE
             )
-            val cursor = app.contentResolver.query(uri, projection, null, null, null)
             val accountSet = mutableSetOf<ContactAccount>()
-            cursor?.use {
-                while (it.moveToNext()) {
-                    val name = it.getString(0) ?: ""
-                    val type = it.getString(1) ?: ""
-                    accountSet.add(ContactAccount(name, type))
+            try {
+                val cursor = app.contentResolver.query(uri, projection, null, null, null)
+                cursor?.use {
+                    while (it.moveToNext()) {
+                        try {
+                            val name = it.getString(0) ?: ""
+                            val type = it.getString(1) ?: ""
+                            accountSet.add(ContactAccount(name, type))
+                        } catch (e: Exception) {
+                            Log.e("ContactViewModel", "Error reading account from cursor", e)
+                        }
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e("ContactViewModel", "Error querying raw contacts for accounts", e)
             }
             // Also include any accounts from DataStore that might not have contacts yet
-            val savedAccounts = dataStore.getString("extra_accounts")?.split(",")?.filter { it.isNotEmpty() }?.map { 
-                val parts = it.split("|")
-                ContactAccount(parts[0], parts.getOrElse(1) { "com.vayunmathur.contacts.local" })
+            val savedAccounts = dataStore.getString("extra_accounts")?.split(",")?.filter { it.isNotEmpty() }?.mapNotNull { 
+                try {
+                    val parts = it.split("|")
+                    ContactAccount(parts[0], parts.getOrElse(1) { "com.vayunmathur.contacts.local" })
+                } catch (e: Exception) {
+                    Log.e("ContactViewModel", "Error parsing extra account: $it", e)
+                    null
+                }
             } ?: emptyList()
             
             _accounts.value = (accountSet + savedAccounts).toList().sortedBy { it.name }

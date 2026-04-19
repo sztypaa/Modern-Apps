@@ -2,6 +2,7 @@ package com.vayunmathur.contacts.ui
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -38,13 +39,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,23 +55,21 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.scale
-import com.vayunmathur.library.util.NavBackStack
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import com.vayunmathur.contacts.R
+import com.vayunmathur.contacts.Route
 import com.vayunmathur.contacts.data.CDKEmail
 import com.vayunmathur.contacts.data.CDKEvent
 import com.vayunmathur.contacts.data.CDKNickname
 import com.vayunmathur.contacts.data.CDKPhone
 import com.vayunmathur.contacts.data.CDKStructuredPostal
 import com.vayunmathur.contacts.data.Contact
-import com.vayunmathur.contacts.util.ContactAccount
 import com.vayunmathur.contacts.data.ContactDetail
 import com.vayunmathur.contacts.data.ContactDetails
-import com.vayunmathur.contacts.util.ContactViewModel
 import com.vayunmathur.contacts.data.Event
 import com.vayunmathur.contacts.data.Name
 import com.vayunmathur.contacts.data.Nickname
@@ -78,10 +77,11 @@ import com.vayunmathur.contacts.data.Note
 import com.vayunmathur.contacts.data.Organization
 import com.vayunmathur.contacts.data.PhoneNumber
 import com.vayunmathur.contacts.data.Photo
-import com.vayunmathur.contacts.R
-import com.vayunmathur.contacts.Route
+import com.vayunmathur.contacts.util.ContactAccount
+import com.vayunmathur.contacts.util.ContactViewModel
 import com.vayunmathur.library.ui.IconClose
 import com.vayunmathur.library.ui.IconEdit
+import com.vayunmathur.library.util.NavBackStack
 import com.vayunmathur.library.util.ResultEffect
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
@@ -115,12 +115,16 @@ fun EditContactPage(backStack: NavBackStack<Route>, viewModel: ContactViewModel,
 
     val pickMedia = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val bitmap = BitmapFactory.decodeStream(inputStream).scale(500, 500)
-            val baos = Buffer()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos.outputStream())
-            val value = Base64.encode(baos.readByteArray())
-            photo = photo?.withValue(value) ?: Photo(0, value)
+            try {
+                val inputStream = context.contentResolver.openInputStream(uri)
+                val bitmap = BitmapFactory.decodeStream(inputStream).scale(500, 500)
+                val baos = Buffer()
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos.outputStream())
+                val value = Base64.encode(baos.readByteArray())
+                photo = photo?.withValue(value) ?: Photo(0, value)
+            } catch (e: Exception) {
+                Log.e("EditContactPage", "Error processing picked media from URI: $uri", e)
+            }
         }
     }
     val phoneNumbers = remember { 
@@ -332,7 +336,6 @@ fun EditContactPage(backStack: NavBackStack<Route>, viewModel: ContactViewModel,
 @Composable
 fun AccountChooser(
     accountName: String,
-    accountType: String,
     accounts: List<ContactAccount>,
     onAccountChange: (String, String) -> Unit
 ) {
@@ -340,7 +343,7 @@ fun AccountChooser(
     val onDevice = stringResource(R.string.on_device)
     Box(Modifier.fillMaxWidth()) {
         OutlinedTextField(
-            value = if (accountName.isEmpty()) onDevice else accountName,
+            value = accountName.ifEmpty { onDevice },
             onValueChange = {},
             readOnly = true,
             label = { Text(stringResource(R.string.account)) },

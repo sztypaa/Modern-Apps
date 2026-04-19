@@ -45,31 +45,29 @@ class PlaybackManager private constructor(context: Context) {
         val controllerFuture = MediaController.Builder(appContext, sessionToken).buildAsync()
 
         controllerFuture.addListener({
-            controller = controllerFuture.get().apply {
-                addListener(object : Player.Listener {
-                    override fun onIsPlayingChanged(playing: Boolean) {
-                        _isPlaying.value = playing
-                    }
-                    override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                        _currentMediaItem.value = mediaItem
-                    }
+            try {
+                controller = controllerFuture.get().apply {
+                    addListener(object : Player.Listener {
+                        override fun onIsPlayingChanged(playing: Boolean) {
+                            _isPlaying.value = playing
+                        }
+                        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                            _currentMediaItem.value = mediaItem
+                        }
 
-//                    override fun onPlaybackStateChanged(state: Int) {
-//                        if (state == Player.STATE_READY) {
-//                            _duration.value = duration.coerceAtLeast(0L)
-//                        }
-//                    }
+                        override fun onShuffleModeEnabledChanged(enabled: Boolean) {
+                            _shuffleMode.value = enabled
+                        }
 
-                    override fun onShuffleModeEnabledChanged(enabled: Boolean) {
-                        _shuffleMode.value = enabled
-                    }
-
-                    override fun onRepeatModeChanged(mode: Int) {
-                        _repeatMode.value = mode
-                    }
-                })
+                        override fun onRepeatModeChanged(mode: Int) {
+                            _repeatMode.value = mode
+                        }
+                    })
+                }
+                startProgressUpdateLoop()
+            } catch (e: Exception) {
+                android.util.Log.e("PlaybackManager", "Error initializing MediaController", e)
             }
-            startProgressUpdateLoop()
         }, MoreExecutors.directExecutor())
     }
 
