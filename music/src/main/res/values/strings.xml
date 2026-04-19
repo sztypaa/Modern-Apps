@@ -21,8 +21,11 @@
 
     <!-- Detail screen overlines / section headers -->
     <string name="label_album">Album</string>
+    <string name="album_info_format">%1$s\n%2$s • %3$d songs • %4$s</string>
     <string name="label_artist">Artist</string>
+    <string name="artist_info_format">%1$d songs • %2$s</string>
     <string name="label_playlist">Playlist</string>
+    <string name="num_songs_format">%1$d songs</string>
     <string name="label_play">Play</string>
     <string name="label_shuffle">Shuffle</string>
     <string name="label_songs">Songs</string>

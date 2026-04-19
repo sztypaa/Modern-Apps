@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">OpenAssistant</string>
-    <string name="recording">Recording...</string>
-    <string name="message_placeholder">Message...</string>
+    <string name="recording">Recording&#8230;</string>
+    <string name="message_placeholder">Message&#8230;</string>
     <string name="voice_message">Voice Message</string>
+    <string name="mic_error_format">Mic error: %1$s</string>
+    <string name="new_conversation">New Conversation</string>
     <string name="perm_desc_inference">Allows other apps to access the on-device AI inference service for extracting structured data.</string>
 </resources>

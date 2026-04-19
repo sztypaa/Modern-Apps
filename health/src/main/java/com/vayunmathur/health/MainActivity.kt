@@ -9,6 +9,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -96,8 +97,11 @@ val PERMISSIONS = CLASSES.map { HealthPermission.getReadPermission(it) }.toSet()
     HealthPermissions.READ_MEDICAL_DATA_VACCINES,
     HealthPermissions.READ_MEDICAL_DATA_VISITS,
     HealthPermissions.READ_MEDICAL_DATA_VITAL_SIGNS,
-    HealthPermissions.WRITE_MEDICAL_DATA
-) } else {setOf()}
+    HealthPermissions.WRITE_MEDICAL_DATA,
+    "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND"
+) } else {
+    setOf("android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND")
+}
 
 
 class MainActivity : ComponentActivity() {

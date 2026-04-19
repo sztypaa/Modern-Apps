@@ -39,8 +39,8 @@
     <string name="request_from">Request from %1$s</string>
     <string name="expires">Expires %1$s</string>
     <string name="nobody_here">nobody is currently here</string>
-    <string name="user_is_here"> is currently here</string>
-    <string name="users_are_here"> are currently here</string>
+    <string name="user_is_here">%1$s is currently here</string>
+    <string name="users_are_here">%1$s are currently here</string>
     <string name="last_updated_never">Never</string>
     <string name="since_just_now">Since just now</string>
     <string name="since_minutes_ago">Since %1$d minutes ago</string>

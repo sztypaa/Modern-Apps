@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -35,6 +36,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.changedToUp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.vayunmathur.library.ui.IconClose
@@ -45,6 +47,7 @@ import com.vayunmathur.photos.NavigationBar
 import com.vayunmathur.photos.Route
 import com.vayunmathur.photos.data.Photo
 import com.vayunmathur.photos.util.ImageLoader
+import com.vayunmathur.photos.util.SyncWorker
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.MonthNames
@@ -60,12 +63,18 @@ fun GalleryPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
     val context = LocalContext.current
     var columnCount by rememberSaveable { mutableFloatStateOf(3f) }
 
+    LaunchedEffect(Unit) {
+        SyncWorker.runOnce(context)
+        SyncWorker.enqueue(context)
+    }
+
     val selectedIds = remember { mutableStateListOf<Long>() }
     val isSelectionMode by remember { derivedStateOf { selectedIds.isNotEmpty() } }
 
     val trashLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             selectedIds.clear()
+            SyncWorker.runOnce(context)
         }
     }
 
@@ -75,7 +84,7 @@ fun GalleryPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
                 val date = Instant.fromEpochMilliseconds(it.date).toLocalDateTime(TimeZone.currentSystemDefault())
                 LocalDate(date.year, date.month, 1)
             }.toSortedMap(Comparator<LocalDate>(LocalDate::compareTo).reversed()).mapKeys {
-                MonthNames.ENGLISH_ABBREVIATED.names[it.key.month.ordinal] + " " + it.key.year
+                context.getString(com.vayunmathur.photos.R.string.month_year_format, MonthNames.ENGLISH_ABBREVIATED.names[it.key.month.ordinal], it.key.year)
             }.mapValues { pair -> pair.value.sortedByDescending { it.date } }
         }
     }
@@ -84,7 +93,7 @@ fun GalleryPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
         topBar = {
             if (isSelectionMode) {
                 TopAppBar(
-                    title = { Text("${selectedIds.size} selected") },
+                    title = { Text(stringResource(com.vayunmathur.photos.R.string.items_selected, selectedIds.size)) },
                     navigationIcon = {
                         IconButton(onClick = { selectedIds.clear() }) {
                             IconClose()

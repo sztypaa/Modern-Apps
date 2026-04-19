@@ -104,13 +104,14 @@ fun dateRangeString(context: Context, startDate: LocalDate, endDate: LocalDate, 
         if(startDate.toEpochDays() + 1 == endDate.toEpochDays()) {
             startDate.format(dateFormat)
         } else {
-            "${startDate.format(dateFormat)} - ${endDate.format(dateFormat)}"
+            context.getString(R.string.date_range_format, startDate.format(dateFormat), endDate.format(dateFormat))
         }
     } else {
+        val timeFmt = if(DateFormat.is24HourFormat(context)) timeFormat24 else timeFormat12
         if(startDate == endDate) {
-            "${startDate.format(dateFormat)} • ${startTime.format(if(DateFormat.is24HourFormat(context)) timeFormat24 else timeFormat12)} - ${endTime.format(if(DateFormat.is24HourFormat(context)) timeFormat24 else timeFormat12)}"
+            context.getString(R.string.date_time_range_format, startDate.format(dateFormat), startTime.format(timeFmt), endTime.format(timeFmt))
         } else {
-            "${startDate.format(dateFormat)}, ${startTime.format(if(DateFormat.is24HourFormat(context)) timeFormat24 else timeFormat12)} - ${endDate.format(dateFormat)}, ${endTime.format(if(DateFormat.is24HourFormat(context)) timeFormat24 else timeFormat12)}"
+            context.getString(R.string.full_date_time_range_format, startDate.format(dateFormat), startTime.format(timeFmt), endDate.format(dateFormat), endTime.format(timeFmt))
         }
     }
 }

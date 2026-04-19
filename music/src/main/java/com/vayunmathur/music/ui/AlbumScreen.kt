@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -21,6 +22,7 @@ import com.vayunmathur.library.util.BottomNavBar
 import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.music.util.AlbumArt
 import com.vayunmathur.music.util.PlaybackManager
+import com.vayunmathur.music.util.SyncWorker
 import com.vayunmathur.music.R
 import com.vayunmathur.music.Route
 import com.vayunmathur.music.data.Album
@@ -29,6 +31,12 @@ import com.vayunmathur.music.data.Album
 fun AlbumScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
     val context = LocalContext.current
     val playbackManager = remember { PlaybackManager.getInstance(context) }
+
+    LaunchedEffect(Unit) {
+        SyncWorker.runOnce(context)
+        SyncWorker.enqueue(context)
+    }
+
     Scaffold(bottomBar = {
         BottomNavBar(backStack, listOf(
             BottomBarItem(stringResource(R.string.nav_home), Route.Home, R.drawable.baseline_library_music_24),

@@ -36,7 +36,6 @@ import com.vayunmathur.music.ui.SongScreen
 import com.vayunmathur.music.ui.dialogs.AddToPlaylistDialog
 import kotlinx.serialization.Serializable
 import com.vayunmathur.music.util.PlaybackManager
-import com.vayunmathur.music.util.SyncWorker
 
 class MainActivity : ComponentActivity() {
     var controller: MediaController? = null
@@ -97,11 +96,6 @@ sealed interface Route: NavKey {
 
 @Composable
 fun Navigation(viewModel: DatabaseViewModel) {
-    val context = LocalContext.current
-    LaunchedEffect(Unit) {
-        SyncWorker.runOnce(context)
-        SyncWorker.enqueue(context)
-    }
     val backStack = rememberNavBackStack<Route>(Route.Home)
     MainNavigation(backStack) {
         entry<Route.Home> {

@@ -39,6 +39,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -88,6 +89,11 @@ import kotlin.time.Instant
 @Composable
 fun CalendarScreen(viewModel: CalendarViewModel, backStack: NavBackStack<Route>) {
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.loadData()
+    }
+
     val events by viewModel.events.collectAsState()
     val calendarsList by viewModel.calendars.collectAsState()
     val calendars = calendarsList.associateBy { it.id }
@@ -123,7 +129,7 @@ fun CalendarScreen(viewModel: CalendarViewModel, backStack: NavBackStack<Route>)
                         Modifier.clickable { backStack.add(Route.Calendar.GotoDialog(dateViewing)) },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("$mon ${visibleSunday.year}", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.month_year_format, mon, visibleSunday.year), fontWeight = FontWeight.Bold)
                         Icon(painterResource(R.drawable.arrow_drop_down_24px), null)
                     }
                 }, actions = {

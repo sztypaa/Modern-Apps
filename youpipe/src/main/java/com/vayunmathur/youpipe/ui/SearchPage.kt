@@ -24,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
@@ -163,6 +164,7 @@ fun SearchPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
 
 @Composable
 fun ChannelItem(backStack: NavBackStack<Route>, channelInfo: ChannelInfo) {
+    val context = LocalContext.current
     ListItem({
         Text(channelInfo.name, style = MaterialTheme.typography.titleMedium)
     }, Modifier.clickable {
@@ -170,7 +172,7 @@ fun ChannelItem(backStack: NavBackStack<Route>, channelInfo: ChannelInfo) {
     }, {
 
     }, {
-        Text(stringResource(R.string.subscribers_count, countString(channelInfo.subscribers)))
+        Text(stringResource(R.string.subscribers_count, countString(context, channelInfo.subscribers)))
     }, {
         AsyncImage(
             model = channelInfo.avatar,

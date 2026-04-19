@@ -37,8 +37,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
         _lastViewedDate.value = d
     }
 
-    init {
-        // load events and calendars at startup
+    fun loadData() {
         viewModelScope.launch {
             val app = getApplication<Application>()
             _events.value = Event.getAllEvents(app)
@@ -50,6 +49,10 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
             val visMap = loaded.associate { cal -> cal.id to cal.visible }
             _calendarVisibility.value = visMap
         }
+    }
+
+    init {
+        loadData()
     }
 
     fun updateWidgets() {

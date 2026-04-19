@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -151,14 +152,14 @@ fun StopwatchPage(backStack: NavBackStack<Route>) {
                     val centiseconds = (countingTime.inWholeMilliseconds % 1000) / 10
 
                     Text(
-                        text = "$minutes:${seconds.toString().padStart(2, '0')}",
+                        text = stringResource(R.string.stopwatch_time_format, minutes, seconds),
                         style = MaterialTheme.typography.displayLarge.copy(
                             fontSize = 84.sp,
                             fontWeight = FontWeight.Normal
                         )
                     )
                     Text(
-                        text = centiseconds.toString().padStart(2, '0'),
+                        text = stringResource(R.string.duration_ms_format, 0, centiseconds), // Reusing format for just centiseconds
                         style = MaterialTheme.typography.headlineMedium.copy(
                             color = Color.Gray,
                             fontWeight = FontWeight.Light
@@ -209,24 +210,25 @@ fun StopwatchPage(backStack: NavBackStack<Route>) {
 
 @Composable
 fun LapRow(number: Int, color: Color, split: Duration, total: Duration) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text("# $number", color = color, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
-        Text(formatDuration(split), color = color, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
-        Text(formatDuration(total), color = color, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+        Text(stringResource(R.string.lap_number_format, number), color = color, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+        Text(formatDuration(context, split), color = color, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+        Text(formatDuration(context, total), color = color, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
     }
 }
 
-fun formatDuration(d: Duration): String {
+fun formatDuration(context: android.content.Context, d: Duration): String {
     val m = d.inWholeMinutes
     val s = d.inWholeSeconds % 60
     val ms = (d.inWholeMilliseconds % 1000) / 10
     if(m == 0L) {
-        return "${s}.${ms.toString().padStart(2, '0')}"
+        return context.getString(R.string.duration_ms_format, s, ms)
     }
-    return "$m:${s.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}"
+    return context.getString(R.string.duration_m_s_ms_format, m, s, ms)
 }

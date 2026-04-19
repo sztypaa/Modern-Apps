@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -48,6 +49,7 @@ import com.vayunmathur.photos.NavigationBar
 import com.vayunmathur.photos.Route
 import com.vayunmathur.photos.data.Photo
 import com.vayunmathur.photos.util.ImageLoader
+import com.vayunmathur.photos.util.SyncWorker
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.MonthNames
@@ -59,26 +61,33 @@ import kotlin.time.Instant
 @Composable
 fun TrashPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
     val allPhotos by viewModel.data<Photo>().collectAsState()
-    val trashedPhotos by remember(allPhotos) { derivedStateOf { allPhotos.filter { it.isTrashed } } }
+    val trashedPhotos by remember { derivedStateOf { allPhotos.filter { it.isTrashed } } }
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        SyncWorker.runOnce(context)
+        SyncWorker.enqueue(context)
+    }
+
     var columnCount by remember { mutableFloatStateOf(3f) }
 
     val selectedIds = remember { mutableStateListOf<Long>() }
     val isSelectionMode by remember { derivedStateOf { selectedIds.isNotEmpty() } }
 
-    val mediaLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+    val trashLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             selectedIds.clear()
+            SyncWorker.runOnce(context)
         }
     }
 
-    val photosGroupedByMonth by remember(trashedPhotos) {
+    val photosGroupedByMonth by remember {
         derivedStateOf {
             trashedPhotos.groupBy {
                 val date = Instant.fromEpochMilliseconds(it.date).toLocalDateTime(TimeZone.currentSystemDefault())
                 LocalDate(date.year, date.month, 1)
             }.toSortedMap(Comparator<LocalDate>(LocalDate::compareTo).reversed()).mapKeys {
-                MonthNames.ENGLISH_ABBREVIATED.names[it.key.month.ordinal] + " " + it.key.year
+                context.getString(com.vayunmathur.photos.R.string.month_year_format, MonthNames.ENGLISH_ABBREVIATED.names[it.key.month.ordinal], it.key.year)
             }.mapValues { pair -> pair.value.sortedByDescending { it.date } }
         }
     }
@@ -87,7 +96,7 @@ fun TrashPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
         topBar = {
             if (isSelectionMode) {
                 TopAppBar(
-                    title = { Text("${selectedIds.size} selected") },
+                    title = { Text(stringResource(com.vayunmathur.photos.R.string.items_selected, selectedIds.size)) },
                     navigationIcon = {
                         IconButton(onClick = { selectedIds.clear() }) {
                             IconClose()
@@ -97,14 +106,14 @@ fun TrashPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
                         IconButton(onClick = {
                             val uris = trashedPhotos.filter { it.id in selectedIds }.map { it.uri.toUri() }
                             val pendingIntent = MediaStore.createTrashRequest(context.contentResolver, uris, false)
-                            mediaLauncher.launch(IntentSenderRequest.Builder(pendingIntent.intentSender).build())
+                            trashLauncher.launch(IntentSenderRequest.Builder(pendingIntent.intentSender).build())
                         }) {
                             IconUnarchive() // Restore icon
                         }
                         IconButton(onClick = {
                             val uris = trashedPhotos.filter { it.id in selectedIds }.map { it.uri.toUri() }
                             val pendingIntent = MediaStore.createDeleteRequest(context.contentResolver, uris)
-                            mediaLauncher.launch(IntentSenderRequest.Builder(pendingIntent.intentSender).build())
+                            trashLauncher.launch(IntentSenderRequest.Builder(pendingIntent.intentSender).build())
                         }) {
                             IconDelete() // Permanent delete icon
                         }
@@ -118,7 +127,7 @@ fun TrashPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
                             IconButton(onClick = {
                                 val uris = trashedPhotos.map { it.uri.toUri() }
                                 val pendingIntent = MediaStore.createDeleteRequest(context.contentResolver, uris)
-                                mediaLauncher.launch(IntentSenderRequest.Builder(pendingIntent.intentSender).build())
+                                trashLauncher.launch(IntentSenderRequest.Builder(pendingIntent.intentSender).build())
                             }) {
                                 IconDelete()
                             }

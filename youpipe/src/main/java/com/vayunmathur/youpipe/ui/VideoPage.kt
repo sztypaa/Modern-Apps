@@ -274,10 +274,11 @@ fun VideoPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, vide
 
 @Composable
 fun VideoDetails(backStack: NavBackStack<Route>, videoData: VideoData) {
+    val context = LocalContext.current
     ListItem({
         Text(videoData.title, style = MaterialTheme.typography.titleMedium)
     }, Modifier, {}, {
-        Text("${videoData.author} | ${countString(videoData.views)} views | ${uploadTimeAgo(videoData.uploadDate)}")
+        Text(stringResource(R.string.video_info_format, videoData.author, countString(context, videoData.views), uploadTimeAgo(context, videoData.uploadDate)))
     }, {
         AsyncImage(
             model = videoData.authorThumbnail,
@@ -327,44 +328,44 @@ fun CommentItem(c: Comment) {
     })
 }
 
-fun uploadTimeAgo(date: Instant): String {
+fun uploadTimeAgo(context: android.content.Context, date: Instant): String {
     val now = Clock.System.now()
     return when(val duration = now - date) {
-        in 0.minutes..5.minutes -> "Just now"
-        in 5.minutes..1.hours -> "${duration.inWholeMinutes} minutes ago"
-        in 1.hours..24.hours -> "${duration.inWholeHours} hours ago"
-        else -> uploadTimeAgo(date.toLocalDateTime(TimeZone.currentSystemDefault()).date)
+        in 0.minutes..5.minutes -> context.getString(R.string.time_ago_just_now)
+        in 5.minutes..1.hours -> context.getString(R.string.time_ago_minutes, duration.inWholeMinutes.toInt())
+        in 1.hours..24.hours -> context.getString(R.string.time_ago_hours, duration.inWholeHours.toInt())
+        else -> uploadTimeAgo(context, date.toLocalDateTime(TimeZone.currentSystemDefault()).date)
     }
 }
 
-fun uploadTimeAgo(date: LocalDate): String {
+fun uploadTimeAgo(context: android.content.Context, date: LocalDate): String {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
     val period = date.periodUntil(now.date)
     return if(period.years > 0) {
-        "${period.years} years ago"
+        context.getString(R.string.time_ago_years, period.years)
     } else if(period.months > 0) {
-        "${period.months} months ago"
+        context.getString(R.string.time_ago_months, period.months)
     } else if(period.days > 0) {
-        "${period.days} days ago"
+        context.getString(R.string.time_ago_days, period.days)
     } else {
         throw IllegalStateException("Should have been found by uploadTimeAgo")
     }
 }
 
-fun countString(count: Long): String {
+fun countString(context: android.content.Context, count: Long): String {
     val digits = count.toString().length
     return when(digits) {
         in 0..3 -> count.toString()
-        4 -> "${(count / 1000.0).round(2)}K"
-        5 -> "${(count / 1000.0).round(1)}K"
-        6 -> "${(count / 1000)}K"
-        7 -> "${(count / 1000000.0).round(2)}M"
-        8 -> "${(count / 1000000.0).round(1)}M"
-        9 -> "${(count / 1000000)}M"
-        10 -> "${(count / 1000000000.0).round(2)}B"
-        11 -> "${(count / 1000000000.0).round(1)}B"
-        12 -> "${(count / 1000000000)}B"
-        else -> "$count"
+        4 -> context.getString(R.string.count_k_format, (count / 1000.0).round(2).toString())
+        5 -> context.getString(R.string.count_k_format, (count / 1000.0).round(1).toString())
+        6 -> context.getString(R.string.count_k_format, (count / 1000).toString())
+        7 -> context.getString(R.string.count_m_format, (count / 1000000.0).round(2).toString())
+        8 -> context.getString(R.string.count_m_format, (count / 1000000.0).round(1).toString())
+        9 -> context.getString(R.string.count_m_format, (count / 1000000).toString())
+        10 -> context.getString(R.string.count_b_format, (count / 1000000000.0).round(2).toString())
+        11 -> context.getString(R.string.count_b_format, (count / 1000000000.0).round(1).toString())
+        12 -> context.getString(R.string.count_b_format, (count / 1000000000).toString())
+        else -> count.toString()
     }
 }
 

@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vayunmathur.library.util.NavBackStack
@@ -108,6 +109,7 @@ fun ChannelPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, ch
 
 @Composable
 fun VideoItem(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, videoInfo: VideoInfo, showAuthor: Boolean) {
+    val context = LocalContext.current
     val historyItem by viewModel.getNullable<HistoryVideo>(videoInfo.videoID)
     val timeWatched = historyItem?.progress ?: 0
     val percentWatched = timeWatched.toDouble() / videoInfo.duration.toDouble()
@@ -140,7 +142,7 @@ fun VideoItem(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, vide
                         Text(videoInfo.author, style = MaterialTheme.typography.bodySmall)
                     }
                     Text(
-                        "${countString(videoInfo.views)} views | ${uploadTimeAgo(videoInfo.uploadDate)}",
+                        stringResource(R.string.video_stat_format, countString(context, videoInfo.views), uploadTimeAgo(context, videoInfo.uploadDate)),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -151,12 +153,13 @@ fun VideoItem(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel, vide
 
 @Composable
 fun ChannelHeader(channelInfo: ChannelInfo) {
+    val context = LocalContext.current
     ListItem({
         Text(channelInfo.name, style = MaterialTheme.typography.titleLarge)
     }, Modifier, {
 
     }, {
-        Text(stringResource(R.string.channel_info, countString(channelInfo.subscribers), channelInfo.videos))
+        Text(stringResource(R.string.channel_info, countString(context, channelInfo.subscribers), channelInfo.videos))
     }, {
         AsyncImage(
             model = channelInfo.avatar,

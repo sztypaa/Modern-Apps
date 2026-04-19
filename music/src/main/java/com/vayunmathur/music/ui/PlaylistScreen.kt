@@ -8,6 +8,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -25,6 +26,7 @@ import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.library.util.NavBackStack
 import com.vayunmathur.music.util.AlbumArt
 import com.vayunmathur.music.util.PlaybackManager
+import com.vayunmathur.music.util.SyncWorker
 import com.vayunmathur.music.R
 import com.vayunmathur.music.Route
 import com.vayunmathur.music.data.Music
@@ -36,6 +38,12 @@ fun PlaylistScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel)
     val context = LocalContext.current
     val playbackManager = remember { PlaybackManager.getInstance(context) }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        SyncWorker.runOnce(context)
+        SyncWorker.enqueue(context)
+    }
+
     Scaffold(bottomBar = {
         BottomNavBar(backStack, listOf(
             BottomBarItem(stringResource(R.string.nav_home), Route.Home, R.drawable.baseline_library_music_24),

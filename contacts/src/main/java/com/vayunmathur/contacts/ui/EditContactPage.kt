@@ -225,7 +225,7 @@ fun EditContactPage(backStack: NavBackStack<Route>, viewModel: ContactViewModel,
             Spacer(Modifier.height(24.dp))
             
             if (contact == null) {
-                AccountChooser(accountName, accountType, accounts) { name, type ->
+                AccountChooser(accountName, accounts) { name, type ->
                     accountName = name
                     accountType = type
                 }

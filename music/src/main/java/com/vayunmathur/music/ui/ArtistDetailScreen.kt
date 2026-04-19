@@ -107,7 +107,7 @@ fun ArtistDetailScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewMo
                     ListItem({
                         Text(artist.name, style = MaterialTheme.typography.titleLarge)
                     }, Modifier, {Text(stringResource(R.string.label_artist))}, {
-                        Text("${artistsMusic.size} songs • 1:25:02")
+                        Text(stringResource(R.string.artist_info_format, artistsMusic.size, "1:25:02"))
                     })
                 }
             }

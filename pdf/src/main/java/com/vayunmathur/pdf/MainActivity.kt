@@ -629,19 +629,6 @@ fun PdfViewerScreen(pdfDocument: EditablePdfDocument) {
                             changesMade = true
                         }
                     },
-                    appendContextMenuComponents = {
-//                        val selection = pdfState.currentSelection
-//                        item("hjdfhdjsf", "Copy Image", null) {
-//
-//                        }
-//                        if (selection is ImageSelection) {
-//                            item("copy_image", "Copy Image", null) {
-//                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-//                                val clip = ClipData.newPlainText("PDF Image", "Image selected")
-//                                clipboard.setPrimaryClip(clip)
-//                            }
-//                        }
-                    }
                 ) { uri ->
                     val intent = Intent(Intent.ACTION_VIEW, uri)
                     context.startActivity(intent)

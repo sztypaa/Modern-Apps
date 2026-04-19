@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -43,6 +44,7 @@ import com.vayunmathur.library.util.BottomNavBar
 import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.music.util.AlbumArt
 import com.vayunmathur.music.util.PlaybackManager
+import com.vayunmathur.music.util.SyncWorker
 import com.vayunmathur.music.util.AddToPlaylistButton
 import com.vayunmathur.music.R
 import com.vayunmathur.music.Route
@@ -54,6 +56,11 @@ import kotlin.random.Random
 fun HomeScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
     val context = LocalContext.current
     val playbackManager = remember { PlaybackManager.getInstance(context) }
+
+    LaunchedEffect(Unit) {
+        SyncWorker.runOnce(context)
+        SyncWorker.enqueue(context)
+    }
 
     Scaffold(bottomBar = {
         BottomNavBar(backStack, listOf(

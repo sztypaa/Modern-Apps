@@ -267,7 +267,7 @@ fun ProfileHeader(contact: Contact) {
                     mutableStateOf<Bitmap>(BitmapFactory.decodeByteArray(Base64.decode(it.photo), 0, Base64.decode(it.photo).size)) }
                 Image(
                     bitmap = bitmap.asImageBitmap(),
-                    contentDescription = "${contact.name} photo",
+                    contentDescription = stringResource(R.string.contact_photo_description, contact.name.value),
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -290,8 +290,7 @@ fun ProfileHeader(contact: Contact) {
 
         Spacer(modifier = Modifier.size(16.dp))
 
-        var nameString = contact.name.value
-        if(contact.nickname.value.isNotBlank()) nameString += " (${contact.nickname.value})"
+        val nameString = if(contact.nickname.value.isNotBlank()) stringResource(R.string.name_nickname_format, contact.name.value, contact.nickname.value) else contact.name.value
 
         Text(
             text = nameString,

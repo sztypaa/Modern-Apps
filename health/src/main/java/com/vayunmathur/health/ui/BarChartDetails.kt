@@ -206,7 +206,7 @@ fun BarChartDetails(
                     if (hour % 6 == 0) {
                         val amPm = if (hour < 12) "AM" else "PM"
                         val h = if (hour % 12 == 0) 12 else hour % 12
-                        "$h $amPm"
+                        context.getString(R.string.hour_am_pm_format, h, amPm)
                     } else ""
                 }
                 1 -> { // Weekly
@@ -232,7 +232,7 @@ fun BarChartDetails(
                         if (hour % 6 == 0) {
                             val amPm = if (hour < 12) "AM" else "PM"
                             val h = if (hour % 12 == 0) 12 else hour % 12
-                            "$h $amPm"
+                            context.getString(R.string.hour_am_pm_format, h, amPm)
                         } else ""
                     }
                     1 -> { // Weekly
@@ -258,7 +258,7 @@ fun BarChartDetails(
                 1 -> startTime.plus(index.toLong(), DateTimeUnit.DAY, tz).toLocalDateTime(tz).dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
                 2 -> {
                     val date = startTime.plus(index.toLong(), DateTimeUnit.DAY, tz).toLocalDateTime(tz).date
-                    "${date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} ${date.day}"
+                    context.getString(R.string.month_year_format, date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }, date.day)
                 }
                 else -> {
                     val date = startTime.plus(index.toLong(), DateTimeUnit.MONTH, tz).toLocalDateTime(tz).date
@@ -324,8 +324,9 @@ fun BarChartDetails(
                         val end = start.plus(6, DateTimeUnit.DAY)
                         stringResource(R.string.week_range, start.displayString(), end.displayString())
                     }
-                    2 -> "${anchorDate.month.name.lowercase().replaceFirstChar { it.uppercase() }} ${anchorDate.year}"
+                    2 -> stringResource(R.string.month_year_format, anchorDate.month.name.lowercase().replaceFirstChar { it.uppercase() }, anchorDate.year)
                     else -> anchorDate.year.toString()
+                }
                 }
 
                 Row(
@@ -372,9 +373,9 @@ fun BarChartDetails(
                     Row(verticalAlignment = Alignment.Bottom) {
                         val formatVal = { v: Double -> if (config.useDecimals) v.round(1).toString() else v.toLong().toStringCommas() }
                         val avgString = if(config == HealthMetricConfig.HEART_RATE) {
-                            "${formatVal(dataState.primaryRange?.start ?: 0.0)} - ${formatVal(dataState.primaryRange?.endInclusive ?: 0.0)}"
+                            stringResource(R.string.dash_value_format, formatVal(dataState.primaryRange?.start ?: 0.0), formatVal(dataState.primaryRange?.endInclusive ?: 0.0))
                         } else if (dataState.secondaryAverage != null && config.isDualSeries) {
-                            "${formatVal(dataState.dailyAverage)}/${formatVal(dataState.secondaryAverage!!)}"
+                            stringResource(R.string.slash_value_format, formatVal(dataState.dailyAverage), formatVal(dataState.secondaryAverage!!))
                         } else {
                             formatVal(dataState.dailyAverage)
                         }
@@ -386,7 +387,7 @@ fun BarChartDetails(
                         )
                         val perDayAvg = stringResource(R.string.per_day_avg)
                         Text(
-                            text = " ${config.unit}${if (selectedTab != 0 && !config.isLineChart) perDayAvg else ""}",
+                            text = if (selectedTab != 0 && !config.isLineChart) stringResource(R.string.unit_per_day_avg_format, config.unit, perDayAvg) else stringResource(R.string.unit_only_format, config.unit),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(bottom = 12.dp, start = 4.dp),
                             color = LocalContentColor.current.copy(alpha = 0.6f)
@@ -441,8 +442,8 @@ fun BarChartDetails(
                                     Spacer(Modifier.width(4.dp))
                                 }
                                 val format = { v: Double -> if (item.useDecimals) v.toStringDigits(1) else v.toLong().toStringCommas() }
-                                val valueString = if (item.secondaryValue != null) "${format(item.value)}/${format(item.secondaryValue)}" else format(item.value)
-                                Text("$valueString ${item.unit}", style = MaterialTheme.typography.bodyLarge)
+                                val valueString = if (item.secondaryValue != null) stringResource(R.string.slash_value_format, format(item.value), format(item.secondaryValue)) else format(item.value)
+                                Text(stringResource(R.string.value_unit_space_format, valueString, item.unit), style = MaterialTheme.typography.bodyLarge)
                             }
                         }, colors = ListItemDefaults.colors(containerColor = Color.Transparent))
                     }
@@ -547,7 +548,7 @@ fun GenericLineChart(
         }
 
         // Y-axis labels
-        val format = { v: Double -> if (v >= 10000) (v / 1000).round(0).toString() + "k" else v.toLong().toStringCommas() }
+        val format = { v: Double -> if (v >= 10000) context.getString(R.string.k_format, (v / 1000).round(0).toString()) else v.toLong().toStringCommas() }
 
         Text(
             text = format(maxChartValue),
@@ -669,7 +670,7 @@ fun GenericBarChart(
         }
 
         // Y-axis labels
-        val format = { v: Double -> if (v >= 10000) (v / 1000).round(0).toString() + "k" else v.toLong().toStringCommas() }
+        val format = { v: Double -> if (v >= 10000) context.getString(R.string.k_format, (v / 1000).round(0).toString()) else v.toLong().toStringCommas() }
 
         Text(
             text = format(maxChartValue.toDouble()),
