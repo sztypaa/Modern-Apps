@@ -11,9 +11,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -31,28 +31,28 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.vayunmathur.library.util.NavBackStack
 import coil.compose.AsyncImage
-import com.vayunmathur.findfamily.util.Networking
-import com.vayunmathur.findfamily.Route
 import com.vayunmathur.findfamily.R
+import com.vayunmathur.findfamily.Route
 import com.vayunmathur.findfamily.data.Coord
-import com.vayunmathur.findfamily.data.LocationValue
-import com.vayunmathur.findfamily.data.LocationValueDao
 import com.vayunmathur.findfamily.data.RequestStatus
 import com.vayunmathur.findfamily.data.User
 import com.vayunmathur.findfamily.data.Waypoint
 import com.vayunmathur.findfamily.data.getLatestMap
 import com.vayunmathur.findfamily.data.radians
 import com.vayunmathur.findfamily.data.toPosition
+import com.vayunmathur.findfamily.util.Networking
 import com.vayunmathur.library.ui.invisibleClickable
 import com.vayunmathur.library.util.DatabaseViewModel
+import com.vayunmathur.library.util.NavBackStack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -119,87 +119,102 @@ fun MapView(
         }
     }
 
-
     var sizeInDp by remember { mutableStateOf(DpOffset(0.dp, 0.dp)) }
     val density = LocalDensity.current
-    
-    Box(Modifier.fillMaxSize().onGloballyPositioned { coordinates ->
-        // Size is in Pixels
-        val sizePx = coordinates.size
 
-        // Convert Pixels to DP
-        sizeInDp = with(density) {
-            DpOffset(
-                x = sizePx.width.toDp()/2,
-                y = sizePx.height.toDp()/2
-            )
-        }
-    }) {
-        MaplibreMap(
-            Modifier,
-            BaseStyle.Uri("https://tiles.openfreemap.org/styles/liberty"),
-            camera,
-            0f..20f,
-            options = MapOptions(
-                gestureOptions = GestureOptions(
-                    isRotateEnabled = false,
-                    isScrollEnabled = true,
-                    isTiltEnabled = false,
-                    isZoomEnabled = true
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Box(Modifier.fillMaxSize().onGloballyPositioned { coordinates ->
+            // Size is in Pixels
+            val sizePx = coordinates.size
+
+            // Convert Pixels to DP
+            sizeInDp = with(density) {
+                DpOffset(
+                    x = sizePx.width.toDp() / 2,
+                    y = sizePx.height.toDp() / 2
+                )
+            }
+        }) {
+            MaplibreMap(
+                Modifier,
+                BaseStyle.Uri("https://tiles.openfreemap.org/styles/liberty"),
+                camera,
+                0f..20f,
+                options = MapOptions(
+                    gestureOptions = GestureOptions(
+                        isRotateEnabled = false,
+                        isScrollEnabled = true,
+                        isTiltEnabled = false,
+                        isZoomEnabled = true
+                    ),
+                    ornamentOptions = OrnamentOptions.AllDisabled
                 ),
-                ornamentOptions = OrnamentOptions.AllDisabled
-            ),
-            onMapClick = { _, offset ->
-                backStack.reset(Route.MainPage)
-                ClickResult.Pass
-            },
-        )
+                onMapClick = { _, _ ->
+                    backStack.reset(Route.MainPage)
+                    ClickResult.Pass
+                },
+            )
 
-        if(initialized) {
-            key(camera.position, sizeInDp) {
-                Canvas(Modifier.fillMaxSize()) {
-                    val allWaypoints = if(selectedWaypoint?.waypoint?.id == 0L) (waypoints + selectedWaypoint.waypoint) else waypoints
-                    for (waypoint in allWaypoints) {
-                        val radiusMeters = if(selectedWaypoint?.waypoint == waypoint) selectedWaypoint.range else waypoint.range
-                        val coord = if(selectedWaypoint?.waypoint == waypoint) {
-                            val c = camera.projection!!.positionFromScreenLocation(sizeInDp).toCoord()
-                            selectedWaypoint.onMoveWaypoint(c)
-                            c
-                        } else waypoint.coord
-                        val center = camera.projection!!.screenLocationFromPosition(coord.toPosition())
-                        if(center !in size.toDpSize()) continue
-                        val circumferenceAtLatitude =
-                            40_075_000 * cos(radians(waypoint.coord.lat))
-                        val radiusInDegrees = 360 * radiusMeters / circumferenceAtLatitude
-                        val edgePoint = camera.projection!!.screenLocationFromPosition(
-                            Position(coord.lon + radiusInDegrees, coord.lat)
-                        )
-                        val radiusPx = abs((center.x - edgePoint.x).toPx())
-                        drawCircleWithBorder(
-                            center.toOffset(this),
-                            Color(0x80Add8e6),
-                            Color(0xffAdd8e6),
-                            radiusPx
-                        )
+            if (initialized) {
+                key(camera.position, sizeInDp) {
+                    Canvas(Modifier.fillMaxSize()) {
+                        val allWaypoints =
+                            if (selectedWaypoint?.waypoint?.id == 0L) (waypoints + selectedWaypoint.waypoint) else waypoints
+                        for (waypoint in allWaypoints) {
+                            val radiusMeters =
+                                if (selectedWaypoint?.waypoint == waypoint) selectedWaypoint.range else waypoint.range
+                            val coord = if (selectedWaypoint?.waypoint == waypoint) {
+                                val c = camera.projection!!.positionFromScreenLocation(sizeInDp)
+                                    .toCoord()
+                                selectedWaypoint.onMoveWaypoint(c)
+                                c
+                            } else waypoint.coord
+                            val center =
+                                camera.projection!!.screenLocationFromPosition(coord.toPosition())
+                            if (center !in size.toDpSize()) continue
+                            val circumferenceAtLatitude =
+                                40_075_000 * cos(radians(waypoint.coord.lat))
+                            val radiusInDegrees = 360 * radiusMeters / circumferenceAtLatitude
+                            val edgePoint = camera.projection!!.screenLocationFromPosition(
+                                Position(coord.lon + radiusInDegrees, coord.lat)
+                            )
+                            val radiusPx = abs((center.x - edgePoint.x).toPx())
+                            drawCircleWithBorder(
+                                center.toOffset(this),
+                                Color(0x80Add8e6),
+                                Color(0xffAdd8e6),
+                                radiusPx
+                            )
+                        }
                     }
                 }
                 for (user in users) {
-                    if(selectedUser != null && user.id != selectedUser.user.id) continue
+                    if (selectedUser != null && user.id != selectedUser.user.id) continue
                     val position = userPositions[user.id]?.coord?.toPosition() ?: continue
                     val center =
-                        camera.projection!!.screenLocationFromPosition(position) - DpOffset(35.dp, 35.dp)
+                        camera.projection!!.screenLocationFromPosition(position) - DpOffset(
+                            35.dp,
+                            35.dp
+                        )
 
                     Box(Modifier.offset(center.x, center.y)) {
-                        UserPicture(user, 70.dp, selectedUser != null && !selectedUser.isShowingPresent) {
-                            if(navEnabled) {
+                        UserPicture(
+                            user,
+                            70.dp,
+                            selectedUser != null && !selectedUser.isShowingPresent
+                        ) {
+                            if (navEnabled) {
                                 backStack.add(Route.UserPage(user.id))
                             }
                         }
                     }
                 }
-                if(selectedUser != null && !selectedUser.isShowingPresent && selectedUser.historicalPosition != null) {
+                if (selectedUser != null && !selectedUser.isShowingPresent && selectedUser.historicalPosition != null) {
                     val center =
-                        camera.projection!!.screenLocationFromPosition(selectedUser.historicalPosition) - DpOffset(35.dp, 35.dp)
+                        camera.projection!!.screenLocationFromPosition(selectedUser.historicalPosition) - DpOffset(
+                            35.dp,
+                            35.dp
+                        )
 
                     Box(Modifier.offset(center.x, center.y)) {
                         UserPicture(selectedUser.user, 70.dp)
