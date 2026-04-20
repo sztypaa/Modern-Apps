@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Word Maker</string>
+    <string name="all_levels_completed">所有关卡已完成</string>
+    <string name="stay_tuned_new_levels">敬请关注未来更新中的新关卡</string>
+    <string name="error_parse_level">解析关卡数据失败。</string>
+    <string name="error_load_level">加载关卡数据失败：%1$s</string>
+    <string name="level_number">第 %1$d 关</string>
+    <string name="next_level">下一关</string>
+    <string name="close">关闭</string>
+    <string name="bonus_words">奖励词汇</string>
+</resources>

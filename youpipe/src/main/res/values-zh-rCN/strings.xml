@@ -1,0 +1,34 @@
+<resources>
+    <string name="app_name">YouPipe</string>
+    <string name="title_history">历史记录</string>
+    <string name="label_search">搜索</string>
+    <string name="subscribers_count">%1$s 订阅者</string>
+    <string name="title_create_subscription_category">创建订阅分类</string>
+    <string name="title_update_subscription_category">更新订阅分类</string>
+    <string name="label_category_name">分类名称</string>
+    <string name="label_select_subscriptions">选择订阅：</string>
+    <string name="action_create">创建</string>
+    <string name="action_update">更新</string>
+    <string name="video_load_error">视频加载错误 - Youtube 可能已阻止来自此 IP 的匿名访问</string>
+    <string name="action_go_back">返回</string>
+    <string name="label_comments">评论</string>
+    <string name="label_related_videos">相关视频</string>
+    <string name="title_subscriptions">订阅</string>
+    <string name="label_groups">分组：</string>
+    <string name="label_all_subscriptions">所有订阅</string>
+    <string name="label_channels">频道：</string>
+    <string name="video_info_format">%1$s | %2$s 次播放 | %3$s</string>
+    <string name="time_ago_just_now">刚刚</string>
+    <string name="time_ago_minutes">%1$d 分钟前</string>
+    <string name="time_ago_hours">%1$d 小时前</string>
+    <string name="time_ago_days">%1$d 天前</string>
+    <string name="time_ago_months">%1$d 个月前</string>
+    <string name="time_ago_years">%1$d 年前</string>
+    <string name="count_k_format">%1$s千</string>
+    <string name="count_m_format">%1$s百万</string>
+    <string name="count_b_format">%1$s十亿</string>
+    <string name="action_subscribe">订阅</string>
+    <string name="action_unsubscribe">取消订阅</string>
+    <string name="channel_info">%1$s 订阅者 | %2$s 个视频</string>
+    <string name="video_stat_format">%1$s 次播放 | %2$s</string>
+</resources>

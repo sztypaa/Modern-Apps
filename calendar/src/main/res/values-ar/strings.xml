@@ -1,0 +1,82 @@
+<resources>
+    <string name="app_name">التقويم</string>
+
+    <!-- Common actions -->
+    <string name="ok">موافق</string>
+    <string name="cancel">إلغاء</string>
+    <string name="close">إغلاق</string>
+    <string name="delete">حذف</string>
+    <string name="rename">إعادة تسمية</string>
+    <string name="create">إنشاء</string>
+    <string name="remove">إزالة</string>
+    <string name="search">بحث</string>
+
+    <!-- Event display -->
+    <string name="no_title">(بدون عنوان)</string>
+    <string name="event_not_found">الحدث غير موجود</string>
+    <string name="month_year_format">%1$s %2$d</string>
+    <string name="date_range_format">%1$s - %2$s</string>
+    <string name="date_time_range_format">%1$s • %2$s - %3$s</string>
+    <string name="full_date_time_range_format">%1$s، %2$s - %3$s، %4$s</string>
+
+    <!-- Hour labels in calendar grid -->
+    <string name="twelve_am">12 ص</string>
+    <string name="hour_am">%1$d ص</string>
+    <string name="twelve_pm">12 م</string>
+    <string name="hour_pm">%1$d م</string>
+
+    <!-- Edit event screen -->
+    <string name="label_title">العنوان</string>
+    <string name="label_description">الوصف</string>
+    <string name="label_location">الموقع</string>
+    <string name="select_calendar">اختر التقويم</string>
+    <string name="all_day">طوال اليوم</string>
+    <string name="does_not_repeat">لا يتكرر</string>
+    <string name="repeats">يتكرر</string>
+
+    <!-- Settings screen -->
+    <string name="settings">الإعدادات</string>
+    <string name="no_account">(بدون حساب)</string>
+    <string name="calendar_id_label">المعرف: %1$d</string>
+
+    <!-- Calendar picker dialog -->
+    <string name="choose_calendar">اختر تقويماً</string>
+    <string name="local_account">(محلي)</string>
+
+    <!-- Date picker dialog -->
+    <string name="go_to_date">انتقال إلى تاريخ</string>
+
+    <!-- Recurrence dialog -->
+    <string name="repeat">تكرار</string>
+    <string name="every">كل</string>
+    <string name="dropdown_freq_format">%1$s ▼</string>
+    <string name="monthly_nth_day_format">%1$s %2$s</string>
+    <string name="on_days_of_week">في أيام الأسبوع</string>
+    <string name="monthly_type">النوع الشهري</string>
+    <string name="end">ينتهي</string>
+    <string name="never">أبداً</string>
+    <string name="count">العدد</string>
+    <string name="until">حتى</string>
+    <string name="until_date">حتى: %1$s</string>
+
+    <!-- Add calendar dialog -->
+    <string name="new_local_calendar">تقويم محلي جديد</string>
+    <string name="calendar_name">اسم التقويم</string>
+    <string name="choose_color">اختر لوناً:</string>
+
+    <!-- Change color dialog -->
+    <string name="change_color_for">تغيير اللون لـ \"%1$s\"</string>
+    <string name="change_color">تغيير اللون</string>
+
+    <!-- Delete calendar dialog -->
+    <string name="delete_calendar">حذف التقويم</string>
+    <string name="delete_calendar_confirm">هل أنت متأكد أنك تريد حذف \"%1$s\"؟ سيؤدي ذلك إلى إزالة جميع الأحداث في التقويم.</string>
+    <string name="this_calendar">هذا التقويم</string>
+
+    <!-- Rename calendar dialog -->
+    <string name="rename_calendar">إعادة تسمية التقويم</string>
+    <string name="new_name">الاسم الجديد</string>
+
+    <!-- Timezone picker dialog -->
+    <string name="choose_timezone">اختر المنطقة الزمنية</string>
+</resources>

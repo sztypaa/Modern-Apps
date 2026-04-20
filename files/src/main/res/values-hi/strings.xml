@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">फाइलें</string>
+    <string name="enable_notifications">सूचनाएं सक्षम करें?</string>
+    <string name="notification_permission_rationale">सूचनाएं चालू करने से आप बैकग्राउंड क्रियाओं जैसे फाइलों को ज़िप और अनज़िप करने की प्रगति देख सकेंगे।</string>
+    <string name="enable">सक्षम करें</string>
+    <string name="skip">छोड़ें</string>
+    <string name="grant_all_files_access">सभी फाइलों तक पहुंच प्रदान करें</string>
+    <string name="archive_selection">चयन को आर्काइव करें</string>
+    <string name="zip_file_name_label">ज़िप फाइल का नाम</string>
+    <string name="archiving_started">आर्काइविंग शुरू हुई&#8230;</string>
+    <string name="archive">आर्काइव</string>
+    <string name="cancel">रद्द करें</string>
+    <string name="unzipping_started_to">%1$s में अनज़िपिंग शुरू हुई</string>
+    <string name="move_failed">स्थानांतरण विफल: %1$s</string>
+    <string name="could_not_open_zip">ज़िप नहीं खोल सका: %1$s</string>
+    <string name="no_app_found_to_open_file">इस फाइल को खोलने के लिए कोई ऐप नहीं मिला</string>
+    <string name="zip_browse_only">ज़िप के अंदर फाइलें देखना केवल ब्राउज़िंग तक सीमित है</string>
+    <string name="file_fallback">फाइल</string>
+    <string name="unzip_channel_name">अनज़िप ऑपरेशन</string>
+    <string name="unzipping">अनज़िप हो रहा है&#8230;</string>
+    <string name="zip_channel_name">ज़िप ऑपरेशन</string>
+    <string name="archiving">आर्काइव हो रहा है&#8230;</string>
+</resources>

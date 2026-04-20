@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">OpenAssistant</string>
+    <string name="recording">रिकॉर्डिंग&#8230;</string>
+    <string name="message_placeholder">संदेश&#8230;</string>
+    <string name="voice_message">वॉयस मैसेज</string>
+    <string name="mic_error_format">माइक एरर: %1$s</string>
+    <string name="new_conversation">नई बातचीत</string>
+    <string name="perm_desc_inference">अन्य ऐप्स को संरचित डेटा निकालने के लिए ऑन-डिवाइस AI अनुमान सेवा तक पहुँचने की अनुमति देता है।</string>
+</resources>

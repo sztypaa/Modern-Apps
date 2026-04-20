@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Échecs</string>
+    <string name="start_new_game">Commencer une nouvelle partie</string>
+    <string name="play_as">"Jouer en tant que    "</string>
+    <string name="color_white">Blancs</string>
+    <string name="color_black">Noirs</string>
+    <string name="difficulty_easy">Facile</string>
+    <string name="difficulty_medium">Moyen</string>
+    <string name="difficulty_hard">Difficile</string>
+    <string name="difficulty_master">Maître</string>
+    <string name="start_game">Lancer la partie</string>
+    <string name="new_game">Nouvelle partie</string>
+    <string name="two_player_local">2 joueurs (local)</string>
+    <string name="human_vs_ai">Humain vs IA</string>
+    <string name="promote_pawn">Promouvoir le pion</string>
+    <string name="check">Échec !</string>
+    <string name="checkmate_wins">Échec et mat ! Les %1$s gagnent.</string>
+</resources>

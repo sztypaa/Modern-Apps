@@ -1,0 +1,158 @@
+<resources>
+    <string name="app_name">الصحة</string>
+
+    <!-- MainActivity -->
+    <string name="grant_permissions">منح الأذونات</string>
+
+    <!-- BarChartDetails – tabs -->
+    <string name="tab_day">يوم</string>
+    <string name="tab_week">أسبوع</string>
+    <string name="tab_month">شهر</string>
+    <string name="tab_year">سنة</string>
+
+    <!-- BarChartDetails – navigation icon content descriptions -->
+    <string name="nav_prev">السابق</string>
+    <string name="nav_next">التالي</string>
+
+    <!-- BarChartDetails – date header format strings -->
+    <string name="week_range">%1$s – %2$s</string>
+    <string name="no_data_available">لا توجد بيانات متاحة لهذه الفترة</string>
+
+    <!-- BarChartDetails – history list labels -->
+    <string name="history_day_label">يوم %1$d</string>
+    <string name="history_month_label">شهر %1$d</string>
+
+    <!-- BarChartDetails – unit suffix -->
+    <string name="per_day_avg">يومياً (متوسط)</string>
+    <string name="unit_per_day_avg_format">\u0020%1$s\u0020%2$s</string>
+    <string name="unit_only_format">\u0020%1$s</string>
+    <string name="hour_am_pm_format">%1$d %2$s</string>
+    <string name="value_unit_space_format">%1$s %2$s</string>
+    <string name="k_format">%1$s ألف</string>
+
+    <!-- HealthMetricConfig titles -->
+    <string name="metric_energy_burned">الطاقة المحروقة</string>
+    <string name="metric_active_calories">السعرات النشطة</string>
+    <string name="metric_basal_metabolic_rate">معدل الأيض الأساسي</string>
+    <string name="metric_steps">الخطوات</string>
+    <string name="metric_wheelchair_pushes">دفعات الكرسي المتحرك</string>
+    <string name="metric_distance">المسافة</string>
+    <string name="metric_elevation_gained">الارتفاع المكتسب</string>
+    <string name="metric_floors_climbed">الطوابق المقطوعة</string>
+    <string name="metric_hydration">الترطيب</string>
+    <string name="metric_blood_pressure">ضغط الدم</string>
+    <string name="metric_blood_glucose">جلوكوز الدم</string>
+    <string name="metric_vo2_max">الحد الأقصى لاستهلاك الأكسجين</string>
+    <string name="metric_skin_temp_variation">تغير درجة حرارة الجلد</string>
+    <string name="metric_breathing_rate">معدل التنفس</string>
+    <string name="metric_resting_heart_rate">نبض القلب أثناء الراحة</string>
+    <string name="metric_oxygen_saturation">تشبع الأكسجين</string>
+    <string name="metric_heart_rate_variability">تقلب نبض القلب</string>
+    <string name="metric_heart_rate">نبض القلب</string>
+    <string name="metric_height">الطول</string>
+    <string name="metric_weight">الوزن</string>
+    <string name="metric_body_fat">دهون الجسم</string>
+    <string name="metric_lean_body_mass">كتلة الجسم اللحمية</string>
+    <string name="metric_bone_mass">كتلة العظام</string>
+    <string name="metric_body_water_mass">كتلة ماء الجسم</string>
+
+    <!-- MainPage – section headers -->
+    <string name="section_medical_records">السجلات الطبية</string>
+    <string name="section_activity">النشاط</string>
+    <string name="section_vitals_clinical">المؤشرات الحيوية والسريرية</string>
+    <string name="section_nutrition_today">التغذية (اليوم)</string>
+    <string name="section_body_composition">تركيب الجسم</string>
+
+    <!-- MainPage – mini-card labels -->
+    <string name="label_active">نشط</string>
+    <string name="label_basal">أساسي</string>
+    <string name="label_patients">المرضى</string>
+    <string name="label_immunizations">التحصينات</string>
+    <string name="label_lab_results">نتائج المختبر</string>
+
+    <!-- MainPage – date labels used in GenericCard -->
+    <string name="label_today">اليوم</string>
+    <string name="label_last_night">ليلة أمس</string>
+
+    <!-- MainPage – GenericCard titles -->
+    <string name="label_energy">الطاقة</string>
+    <string name="unit_kcal_format">%1$s سعرة حرارية</string>
+    <string name="value_unit_format">%1$s%2$s</string>
+    <string name="blood_pressure_format">%1$d/%2$d</string>
+    <string name="slash_value_format">%1$s/%2$s</string>
+    <string name="dash_value_format">%1$s - %2$s</string>
+    <string name="plus_value_format">+%1$s</string>
+    <string name="range_format">%1$d-%2$d</string>
+    <string name="hours_minutes_format">%1$d س %2$d د</string>
+    <string name="minutes_format">%1$d د</string>
+    <string name="label_steps">الخطوات</string>
+    <string name="label_wheelchair_pushes">دفعات الكرسي</string>
+    <string name="label_mindfulness">اليقظة</string>
+    <string name="label_elevation">الارتفاع</string>
+    <string name="label_floors">الطوابق</string>
+    <string name="label_distance">المسافة</string>
+    <string name="label_heart_rate">نبض القلب</string>
+    <string name="label_sleep">النوم</string>
+    <string name="label_hydration">الترطيب</string>
+    <string name="label_nutrition">التغذية</string>
+
+    <!-- MainPage – VitalsDashboard labels -->
+    <string name="label_blood_pressure">ضغط الدم</string>
+    <string name="label_blood_glucose">جلوكوز الدم</string>
+    <string name="label_oxygen_saturation">تشبع الأكسجين</string>
+    <string name="label_breathing_rate">معدل التنفس</string>
+    <string name="label_resting_heart_rate">نبض الراحة</string>
+    <string name="label_hrv_rmssd">تقلب النبض (RMSSD)</string>
+    <string name="label_vo2_max">أقصى أكسجين</string>
+    <string name="label_skin_temp_var">تغير حرارة الجلد</string>
+
+    <!-- MainPage – BodyCompositionDashboard labels -->
+    <string name="label_height">الطول</string>
+    <string name="label_weight">الوزن</string>
+    <string name="label_body_fat">دهون الجسم</string>
+    <string name="label_lean_body_mass">كتلة الجسم اللحمية</string>
+    <string name="label_bone_mass">كتلة العظام</string>
+    <string name="label_body_water_mass">ماء الجسم</string>
+
+    <!-- MainPage – NutritionSummaryCard labels -->
+    <string name="label_total_intake">إجمالي المتناول</string>
+    <string name="label_protein">البروتين</string>
+    <string name="label_carbs">الكربوهيدرات</string>
+    <string name="label_fat">الدهون</string>
+
+    <!-- Units -->
+    <string name="unit_bpm">ن/د</string>
+    <string name="unit_mg_dl">مجم/ديسيلتر</string>
+    <string name="unit_percent">٪</string>
+    <string name="unit_brpm">ت/د</string>
+    <string name="unit_ms">ملي ثانية</string>
+    <string name="unit_vo2_max">مل/كجم/د</string>
+    <string name="unit_celsius">°م</string>
+    <string name="unit_cm">سم</string>
+    <string name="unit_kg">كجم</string>
+    <string name="unit_kcal">سعرة</string>
+    <string name="unit_ml">مل</string>
+    <string name="unit_fl">طابق</string>
+    <string name="unit_m">م</string>
+    <string name="unit_km">كم</string>
+    <string name="unit_steps">خطوة</string>
+    <string name="unit_pushes">دفعة</string>
+    <string name="unit_min">دقيقة</string>
+    <string name="unit_cal">سعرة</string>
+    <string name="unit_hr">ساعة</string>
+    <string name="label_blood_pressure_unit">ملم زئبقي</string>
+
+    <!-- MedicalRecordsPage -->
+    <string name="unknown">غير معروف</string>
+    <string name="status_format">الحالة: %1$s</string>
+    <string name="result_format">النتيجة: %1$s</string>
+    <string name="date_format_label">التاريخ: %1$s</string>
+    <string name="open_assistant_required">مطلوب OpenAssistant</string>
+    <string name="open_assistant_rationale">تطبيق OpenAssistant مطلوب لاستخراج الوثائق الطبية بشكل آمن وبدون اتصال. يرجى تثبيته من GitHub.</string>
+    <string name="view_on_github">عرض على GitHub</string>
+
+    <!-- NutritionDetailsPage -->
+    <string name="label_nutrition_details">تفاصيل التغذية</string>
+    <string name="total_energy_intake">إجمالي الطاقة المتناولة</string>
+    <string name="nutrient_progress_format">%1$s / %2$d %3$s</string>
+</resources>

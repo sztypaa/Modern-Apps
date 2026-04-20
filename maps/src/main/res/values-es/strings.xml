@@ -1,0 +1,50 @@
+<resources>
+    <string name="app_name">Mapas</string>
+
+    <!-- BottomSheetContent -->
+    <string name="your_location">Tu ubicación</string>
+    <string name="walk_duration_distance">Caminata %1$s (%2$s km)</string>
+    <string name="transfer">Transbordo</string>
+    <string name="no_route_found">No se ha encontrado ninguna ruta</string>
+    <string name="generating_route">Generando ruta&#8230;</string>
+    <string name="distance_km">%1$s km</string>
+
+    <!-- SearchPage -->
+    <string name="search_nearby">Buscar cerca&#8230;</string>
+    <string name="no_results_found">No se han encontrado resultados en esta zona</string>
+    <string name="type_to_search">Escribe al menos 2 caracteres para buscar</string>
+    <string name="unnamed_amenity">Servicio sin nombre</string>
+    <string name="coordinates">Coordenadas: %1$s, %2$s</string>
+
+    <!-- DownloadedMapsPage -->
+    <string name="downloaded_maps">Mapas descargados</string>
+    <string name="download_offline_map_title">¿Descargar mapa offline?</string>
+    <string name="download_offline_map_text">Estás viendo la Zona %1$d. ¿Quieres descargar el mapa offline de alta resolución y activar la navegación en esta zona?</string>
+    <string name="download">Descargar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete_offline_map_title">¿Eliminar mapa offline?</string>
+    <string name="delete_offline_map_text">¿Estás seguro de que quieres eliminar o cancelar la descarga de la Zona %1$d?</string>
+    <string name="delete">Eliminar</string>
+    <string name="download_progress">%1$d%%</string>
+
+    <!-- RestaurantBottomSheet -->
+    <string name="reviews_summary">%1$s estrellas | %2$s reseñas</string>
+    <string name="directions">Cómo llegar</string>
+    <string name="add_stop_to_route">Añadir parada a la ruta</string>
+    <string name="open_status">Abierto</string>
+    <string name="closed_status">Cerrado</string>
+    <string name="closes_at">Cierra a las %1$s</string>
+    <string name="opens_at">Abre a las %1$s</string>
+    <string name="menu_label">Carta</string>
+
+    <!-- MapPage -->
+    <string name="search_placeholder">Buscar&#8230;</string>
+    <string name="reorder">Reordenar</string>
+    <string name="download_offline_map_text_overview">Estás viendo la Zona %1$d. ¿Quieres descargar el mapa offline de alta resolución para ver más que el mapa general?</string>
+
+    <!-- MainActivity -->
+    <string name="downloading_amenity_database">Descargando base de datos de servicios&#8230;</string>
+    <string name="downloading_navigation_metadata">Descargando metadatos de navegación&#8230;</string>
+    <string name="downloading_road_data">Descargando datos de carreteras&#8230;</string>
+    <string name="grant_location_permission">Conceder permiso de ubicación</string>
+</resources>

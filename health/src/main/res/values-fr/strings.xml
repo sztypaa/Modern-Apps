@@ -1,0 +1,158 @@
+<resources>
+    <string name="app_name">Santé</string>
+
+    <!-- MainActivity -->
+    <string name="grant_permissions">Accorder les autorisations</string>
+
+    <!-- BarChartDetails – tabs -->
+    <string name="tab_day">Jour</string>
+    <string name="tab_week">Semaine</string>
+    <string name="tab_month">Mois</string>
+    <string name="tab_year">Année</string>
+
+    <!-- BarChartDetails – navigation icon content descriptions -->
+    <string name="nav_prev">Précédent</string>
+    <string name="nav_next">Suivant</string>
+
+    <!-- BarChartDetails – date header format strings -->
+    <string name="week_range">%1$s – %2$s</string>
+    <string name="no_data_available">Aucune donnée disponible pour cette période</string>
+
+    <!-- BarChartDetails – history list labels -->
+    <string name="history_day_label">Jour %1$d</string>
+    <string name="history_month_label">Mois %1$d</string>
+
+    <!-- BarChartDetails – unit suffix -->
+    <string name="per_day_avg">par jour (moyenne)</string>
+    <string name="unit_per_day_avg_format">\u0020%1$s\u0020%2$s</string>
+    <string name="unit_only_format">\u0020%1$s</string>
+    <string name="hour_am_pm_format">%1$d %2$s</string>
+    <string name="value_unit_space_format">%1$s %2$s</string>
+    <string name="k_format">%1$sk</string>
+
+    <!-- HealthMetricConfig titles -->
+    <string name="metric_energy_burned">Énergie brûlée</string>
+    <string name="metric_active_calories">Calories actives</string>
+    <string name="metric_basal_metabolic_rate">Métabolisme de base</string>
+    <string name="metric_steps">Pas</string>
+    <string name="metric_wheelchair_pushes">Poussées en fauteuil roulant</string>
+    <string name="metric_distance">Distance</string>
+    <string name="metric_elevation_gained">Dénivelé positif</string>
+    <string name="metric_floors_climbed">Étages montés</string>
+    <string name="metric_hydration">Hydratation</string>
+    <string name="metric_blood_pressure">Pression artérielle</string>
+    <string name="metric_blood_glucose">Glycémie</string>
+    <string name="metric_vo2_max">VO2 Max</string>
+    <string name="metric_skin_temp_variation">Variation temp. cutanée</string>
+    <string name="metric_breathing_rate">Fréquence respiratoire</string>
+    <string name="metric_resting_heart_rate">Fréquence cardiaque au repos</string>
+    <string name="metric_oxygen_saturation">Saturation en oxygène</string>
+    <string name="metric_heart_rate_variability">Variabilité de la fréq. cardiaque</string>
+    <string name="metric_heart_rate">Fréquence cardiaque</string>
+    <string name="metric_height">Taille</string>
+    <string name="metric_weight">Poids</string>
+    <string name="metric_body_fat">Graisse corporelle</string>
+    <string name="metric_lean_body_mass">Masse corporelle maigre</string>
+    <string name="metric_bone_mass">Masse osseuse</string>
+    <string name="metric_body_water_mass">Masse hydrique</string>
+
+    <!-- MainPage – section headers -->
+    <string name="section_medical_records">Dossiers médicaux</string>
+    <string name="section_activity">Activité</string>
+    <string name="section_vitals_clinical">Signes vitaux et cliniques</string>
+    <string name="section_nutrition_today">Nutrition (aujourd\'hui)</string>
+    <string name="section_body_composition">Composition corporelle</string>
+
+    <!-- MainPage – mini-card labels -->
+    <string name="label_active">Active</string>
+    <string name="label_basal">Basale</string>
+    <string name="label_patients">Patients</string>
+    <string name="label_immunizations">Immunisations</string>
+    <string name="label_lab_results">Résultats de labo</string>
+
+    <!-- MainPage – date labels used in GenericCard -->
+    <string name="label_today">Aujourd\'hui</string>
+    <string name="label_last_night">La nuit dernière</string>
+
+    <!-- MainPage – GenericCard titles -->
+    <string name="label_energy">Énergie</string>
+    <string name="unit_kcal_format">%1$s kcal</string>
+    <string name="value_unit_format">%1$s%2$s</string>
+    <string name="blood_pressure_format">%1$d/%2$d</string>
+    <string name="slash_value_format">%1$s/%2$s</string>
+    <string name="dash_value_format">%1$s - %2$s</string>
+    <string name="plus_value_format">+%1$s</string>
+    <string name="range_format">%1$d-%2$d</string>
+    <string name="hours_minutes_format">%1$dh %2$dm</string>
+    <string name="minutes_format">%1$dm</string>
+    <string name="label_steps">Pas</string>
+    <string name="label_wheelchair_pushes">Poussées</string>
+    <string name="label_mindfulness">Pleine conscience</string>
+    <string name="label_elevation">Dénivelé</string>
+    <string name="label_floors">Étages</string>
+    <string name="label_distance">Distance</string>
+    <string name="label_heart_rate">Fréq. cardiaque</string>
+    <string name="label_sleep">Sommeil</string>
+    <string name="label_hydration">Hydratation</string>
+    <string name="label_nutrition">Nutrition</string>
+
+    <!-- MainPage – VitalsDashboard labels -->
+    <string name="label_blood_pressure">Pression artérielle</string>
+    <string name="label_blood_glucose">Glycémie</string>
+    <string name="label_oxygen_saturation">Saturation en oxygène</string>
+    <string name="label_breathing_rate">Fréquence respiratoire</string>
+    <string name="label_resting_heart_rate">Fréq. cardiaque au repos</string>
+    <string name="label_hrv_rmssd">VFC (RMSSD)</string>
+    <string name="label_vo2_max">VO2 Max</string>
+    <string name="label_skin_temp_var">Var. temp. cutanée</string>
+
+    <!-- MainPage – BodyCompositionDashboard labels -->
+    <string name="label_height">Taille</string>
+    <string name="label_weight">Poids</string>
+    <string name="label_body_fat">Graisse corporelle</string>
+    <string name="label_lean_body_mass">Masse maigre</string>
+    <string name="label_bone_mass">Masse osseuse</string>
+    <string name="label_body_water_mass">Masse hydrique</string>
+
+    <!-- MainPage – NutritionSummaryCard labels -->
+    <string name="label_total_intake">Apport total</string>
+    <string name="label_protein">Protéines</string>
+    <string name="label_carbs">Glucides</string>
+    <string name="label_fat">Lipides</string>
+
+    <!-- Units -->
+    <string name="unit_bpm">bpm</string>
+    <string name="unit_mg_dl">mg/dL</string>
+    <string name="unit_percent">%</string>
+    <string name="unit_brpm">rpm</string>
+    <string name="unit_ms">ms</string>
+    <string name="unit_vo2_max">mL/kg/min</string>
+    <string name="unit_celsius">°C</string>
+    <string name="unit_cm">cm</string>
+    <string name="unit_kg">kg</string>
+    <string name="unit_kcal">kcal</string>
+    <string name="unit_ml">mL</string>
+    <string name="unit_fl">étages</string>
+    <string name="unit_m">m</string>
+    <string name="unit_km">km</string>
+    <string name="unit_steps">pas</string>
+    <string name="unit_pushes">poussées</string>
+    <string name="unit_min">min</string>
+    <string name="unit_cal">cal</string>
+    <string name="unit_hr">h</string>
+    <string name="label_blood_pressure_unit">mmHg</string>
+
+    <!-- MedicalRecordsPage -->
+    <string name="unknown">Inconnu</string>
+    <string name="status_format">Statut : %1$s</string>
+    <string name="result_format">Résultat : %1$s</string>
+    <string name="date_format_label">Date : %1$s</string>
+    <string name="open_assistant_required">OpenAssistant requis</string>
+    <string name="open_assistant_rationale">L\'application OpenAssistant est requise pour l\'extraction sécurisée et hors ligne de documents médicaux. Veuillez l\'installer depuis GitHub.</string>
+    <string name="view_on_github">Voir sur GitHub</string>
+
+    <!-- NutritionDetailsPage -->
+    <string name="label_nutrition_details">Détails nutritionnels</string>
+    <string name="total_energy_intake">Apport énergétique total</string>
+    <string name="nutrient_progress_format">%1$s / %2$d %3$s</string>
+</resources>

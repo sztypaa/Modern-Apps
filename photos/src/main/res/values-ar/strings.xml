@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">الصور</string>
+    <string name="title_edit_photo">تعديل الصورة</string>
+    <string name="action_save">حفظ</string>
+    <string name="action_save_as_copy">حفظ كنسخة</string>
+    <string name="action_undo">تراجع</string>
+    <string name="label_gallery">المعرض</string>
+    <string name="label_map">الخريطة</string>
+    <string name="label_trash">سلة المهملات</string>
+    <string name="items_selected">تم اختيار %1$d</string>
+    <string name="month_year_format">%1$s %2$d</string>
+    <string name="taken_on">تاريخ الالتقاط: %1$s</string>
+    <string name="location">الموقع: %1$s</string>
+    <string name="resolution">الدقة: %1$d × %2$d</string>
+    <string name="detecting">جاري الكشف&#8230;</string>
+    <string name="date_format">%1$d %2$s %3$d</string>
+    <string name="grant_image_video_permissions">منح أذونات الصور والفيديو</string>
+    <string name="grant_storage_permission">منح أذونات التخزين</string>
+</resources>

@@ -1,0 +1,158 @@
+<resources>
+    <string name="app_name">健康</string>
+
+    <!-- MainActivity -->
+    <string name="grant_permissions">授予权限</string>
+
+    <!-- BarChartDetails – tabs -->
+    <string name="tab_day">日</string>
+    <string name="tab_week">周</string>
+    <string name="tab_month">月</string>
+    <string name="tab_year">年</string>
+
+    <!-- BarChartDetails – navigation icon content descriptions -->
+    <string name="nav_prev">上一个</string>
+    <string name="nav_next">下一个</string>
+
+    <!-- BarChartDetails – date header format strings -->
+    <string name="week_range">%1$s – %2$s</string>
+    <string name="no_data_available">此期间没有可用数据</string>
+
+    <!-- BarChartDetails – history list labels -->
+    <string name="history_day_label">第 %1$d 天</string>
+    <string name="history_month_label">第 %1$d 月</string>
+
+    <!-- BarChartDetails – unit suffix -->
+    <string name="per_day_avg">每日（平均）</string>
+    <string name="unit_per_day_avg_format">\u0020%1$s\u0020%2$s</string>
+    <string name="unit_only_format">\u0020%1$s</string>
+    <string name="hour_am_pm_format">%1$d %2$s</string>
+    <string name="value_unit_space_format">%1$s %2$s</string>
+    <string name="k_format">%1$s 千</string>
+
+    <!-- HealthMetricConfig titles -->
+    <string name="metric_energy_burned">消耗能量</string>
+    <string name="metric_active_calories">活动热量</string>
+    <string name="metric_basal_metabolic_rate">基础代谢率</string>
+    <string name="metric_steps">步数</string>
+    <string name="metric_wheelchair_pushes">轮椅推行次数</string>
+    <string name="metric_distance">距离</string>
+    <string name="metric_elevation_gained">爬升高度</string>
+    <string name="metric_floors_climbed">已爬楼层</string>
+    <string name="metric_hydration">补水</string>
+    <string name="metric_blood_pressure">血压</string>
+    <string name="metric_blood_glucose">血糖</string>
+    <string name="metric_vo2_max">最大摄氧量</string>
+    <string name="metric_skin_temp_variation">体表温度变化</string>
+    <string name="metric_breathing_rate">呼吸频率</string>
+    <string name="metric_resting_heart_rate">静息心率</string>
+    <string name="metric_oxygen_saturation">血氧饱和度</string>
+    <string name="metric_heart_rate_variability">心率变异性</string>
+    <string name="metric_heart_rate">心率</string>
+    <string name="metric_height">身高</string>
+    <string name="metric_weight">体重</string>
+    <string name="metric_body_fat">体脂率</string>
+    <string name="metric_lean_body_mass">去脂体重</string>
+    <string name="metric_bone_mass">骨质量</string>
+    <string name="metric_body_water_mass">体内水分量</string>
+
+    <!-- MainPage – section headers -->
+    <string name="section_medical_records">医疗记录</string>
+    <string name="section_activity">活动</string>
+    <string name="section_vitals_clinical">生命体征和临床指标</string>
+    <string name="section_nutrition_today">营养（今日）</string>
+    <string name="section_body_composition">身体成分</string>
+
+    <!-- MainPage – mini-card labels -->
+    <string name="label_active">活动</string>
+    <string name="label_basal">基础</string>
+    <string name="label_patients">患者</string>
+    <string name="label_immunizations">免疫接种</string>
+    <string name="label_lab_results">化验结果</string>
+
+    <!-- MainPage – date labels used in GenericCard -->
+    <string name="label_today">今日</string>
+    <string name="label_last_night">昨晚</string>
+
+    <!-- MainPage – GenericCard titles -->
+    <string name="label_energy">能量</string>
+    <string name="unit_kcal_format">%1$s 千卡</string>
+    <string name="value_unit_format">%1$s%2$s</string>
+    <string name="blood_pressure_format">%1$d/%2$d</string>
+    <string name="slash_value_format">%1$s/%2$s</string>
+    <string name="dash_value_format">%1$s - %2$s</string>
+    <string name="plus_value_format">+%1$s</string>
+    <string name="range_format">%1$d-%2$d</string>
+    <string name="hours_minutes_format">%1$d 小时 %2$d 分钟</string>
+    <string name="minutes_format">%1$d 分钟</string>
+    <string name="label_steps">步数</string>
+    <string name="label_wheelchair_pushes">轮椅推行</string>
+    <string name="label_mindfulness">正念</string>
+    <string name="label_elevation">爬升</string>
+    <string name="label_floors">楼层</string>
+    <string name="label_distance">距离</string>
+    <string name="label_heart_rate">心率</string>
+    <string name="label_sleep">睡眠</string>
+    <string name="label_hydration">补水</string>
+    <string name="label_nutrition">营养</string>
+
+    <!-- MainPage – VitalsDashboard labels -->
+    <string name="label_blood_pressure">血压</string>
+    <string name="label_blood_glucose">血糖</string>
+    <string name="label_oxygen_saturation">血氧</string>
+    <string name="label_breathing_rate">呼吸频率</string>
+    <string name="label_resting_heart_rate">静息心率</string>
+    <string name="label_hrv_rmssd">心率变异性</string>
+    <string name="label_vo2_max">最大摄氧量</string>
+    <string name="label_skin_temp_var">体温变化</string>
+
+    <!-- MainPage – BodyCompositionDashboard labels -->
+    <string name="label_height">身高</string>
+    <string name="label_weight">体重</string>
+    <string name="label_body_fat">体脂</string>
+    <string name="label_lean_body_mass">肌肉量</string>
+    <string name="label_bone_mass">骨量</string>
+    <string name="label_body_water_mass">体内水分</string>
+
+    <!-- MainPage – NutritionSummaryCard labels -->
+    <string name="label_total_intake">总摄入</string>
+    <string name="label_protein">蛋白质</string>
+    <string name="label_carbs">碳水</string>
+    <string name="label_fat">脂肪</string>
+
+    <!-- Units -->
+    <string name="unit_bpm">次/分</string>
+    <string name="unit_mg_dl">毫克/分升</string>
+    <string name="unit_percent">%</string>
+    <string name="unit_brpm">次/分</string>
+    <string name="unit_ms">毫秒</string>
+    <string name="unit_vo2_max">毫升/千克/分</string>
+    <string name="unit_celsius">°C</string>
+    <string name="unit_cm">厘米</string>
+    <string name="unit_kg">千克</string>
+    <string name="unit_kcal">千卡</string>
+    <string name="unit_ml">毫升</string>
+    <string name="unit_fl">层</string>
+    <string name="unit_m">米</string>
+    <string name="unit_km">公里</string>
+    <string name="unit_steps">步</string>
+    <string name="unit_pushes">推</string>
+    <string name="unit_min">分</string>
+    <string name="unit_cal">卡</string>
+    <string name="unit_hr">时</string>
+    <string name="label_blood_pressure_unit">毫米汞柱</string>
+
+    <!-- MedicalRecordsPage -->
+    <string name="unknown">未知</string>
+    <string name="status_format">状态：%1$s</string>
+    <string name="result_format">结果：%1$s</string>
+    <string name="date_format_label">日期：%1$s</string>
+    <string name="open_assistant_required">需要 OpenAssistant</string>
+    <string name="open_assistant_rationale">离线、安全地提取医疗文件需要 OpenAssistant 应用。请从 GitHub 安装。</string>
+    <string name="view_on_github">在 GitHub 上查看</string>
+
+    <!-- NutritionDetailsPage -->
+    <string name="label_nutrition_details">营养详情</string>
+    <string name="total_energy_intake">总能量摄入</string>
+    <string name="nutrient_progress_format">%1$s / %2$d %3$s</string>
+</resources>

@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Word Maker</string>
+    <string name="all_levels_completed">Has completado todos los niveles</string>
+    <string name="stay_tuned_new_levels">Permanece atento a los nuevos niveles en futuras actualizaciones</string>
+    <string name="error_parse_level">Error al analizar los datos del nivel.</string>
+    <string name="error_load_level">Error al cargar los datos del nivel: %1$s</string>
+    <string name="level_number">Nivel %1$d</string>
+    <string name="next_level">Siguiente nivel</string>
+    <string name="close">Cerrar</string>
+    <string name="bonus_words">Palabras extra</string>
+</resources>

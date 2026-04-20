@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">पासवर्ड</string>
+    <string name="autofill_service_description">सहेजे गए पासवर्ड के लिए ऑटोफिल सुझाव प्रदान करें</string>
+    <string name="label_name">नाम</string>
+    <string name="label_user_id_email">यूजर आईडी / ईमेल</string>
+    <string name="label_password">पासवर्ड</string>
+    <string name="label_totp_secret">TOTP सीक्रेट</string>
+    <string name="label_add_website">वेबसाइट जोड़ें</string>
+    <string name="title_settings">सेटिंग्स</string>
+    <string name="import_csv_warning">CSV आयात करने से इस ऐप में प्लेनटेक्स्ट क्रेडेंशियल आ जाएंगे। कृपया आयात करने के बाद निर्यात की गई फाइल को हटा दें।</string>
+    <string name="import_bitwarden_csv">Bitwarden (CSV) से आयात करें</string>
+    <string name="section_password">पासवर्ड</string>
+    <string name="section_totp">TOTP</string>
+    <string name="totp_not_configured">(कॉन्फ़िगर नहीं किया गया)</string>
+    <string name="totp_refreshes_in">%1$d सेकंड में रिफ्रेश होगा</string>
+    <string name="section_websites">वेबसाइट</string>
+    <string name="websites_none">(कोई नहीं)</string>
+</resources>

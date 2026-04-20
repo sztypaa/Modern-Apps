@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">OpenAssistant</string>
+    <string name="recording">Grabando&#8230;</string>
+    <string name="message_placeholder">Mensaje&#8230;</string>
+    <string name="voice_message">Mensaje de voz</string>
+    <string name="mic_error_format">Error del micrófono: %1$s</string>
+    <string name="new_conversation">Nueva conversación</string>
+    <string name="perm_desc_inference">Permite que otras aplicaciones accedan al servicio de inferencia de IA en el dispositivo para extraer datos estructurados.</string>
+</resources>

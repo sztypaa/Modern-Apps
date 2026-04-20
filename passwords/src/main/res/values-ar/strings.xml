@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">كلمات المرور</string>
+    <string name="autofill_service_description">تقديم اقتراحات التعبئة التلقائية لكلمات المرور المحفوظة</string>
+    <string name="label_name">الاسم</string>
+    <string name="label_user_id_email">معرف المستخدم / البريد الإلكتروني</string>
+    <string name="label_password">كلمة المرور</string>
+    <string name="label_totp_secret">سر TOTP</string>
+    <string name="label_add_website">إضافة موقع إلكتروني</string>
+    <string name="title_settings">الإعدادات</string>
+    <string name="import_csv_warning">سيؤدي استيراد ملف CSV إلى جلب بيانات الاعتماد بنص صريح إلى هذا التطبيق. يرجى حذف ملف التصدير بعد الاستيراد.</string>
+    <string name="import_bitwarden_csv">استيراد من Bitwarden (CSV)</string>
+    <string name="section_password">كلمة المرور</string>
+    <string name="section_totp">TOTP</string>
+    <string name="totp_not_configured">(غير مهيأ)</string>
+    <string name="totp_refreshes_in">يتجدد خلال %1$d ثانية</string>
+    <string name="section_websites">المواقع الإلكترونية</string>
+    <string name="websites_none">(لا يوجد)</string>
+</resources>

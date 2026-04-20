@@ -1,0 +1,60 @@
+<resources>
+    <string name="app_name">Reloj</string>
+
+    <!-- Navigation / page labels -->
+    <string name="label_alarm">Alarma</string>
+    <string name="label_clock">Reloj</string>
+    <string name="label_timer">Temporizador</string>
+    <string name="label_stopwatch">Cronómetro</string>
+
+    <!-- AlarmPage -->
+    <string name="no_alarms">No hay alarmas configuradas</string>
+
+    <!-- AlarmActivity -->
+    <string name="button_stop">PARAR</string>
+    <string name="button_snooze">POSPONER (5 MIN)</string>
+
+    <!-- AlarmReceiver / AlarmSoundService notifications -->
+    <string name="alarm_notification_wake_up">¡Despierta!</string>
+    <string name="alarm_ringing_notification_title">La alarma está sonando</string>
+
+    <!-- Notification channels -->
+    <string name="channel_ongoing_timers_name">Temporizadores en curso</string>
+    <string name="channel_ongoing_timers_description">Cuentas atrás activas</string>
+    <string name="channel_completed_timers_name">Temporizadores finalizados</string>
+    <string name="channel_completed_timers_description">Alertas cuando terminan los temporizadores</string>
+    <string name="channel_alarms_name">Alarmas</string>
+    <string name="channel_alarms_description">Notificaciones para alarmas programadas</string>
+
+    <!-- StopwatchPage column headers -->
+    <string name="header_laps">Vueltas</string>
+    <string name="lap_number_format"># %1$d</string>
+    <string name="duration_ms_format">%1$d.%2$02d</string>
+    <string name="duration_m_s_ms_format">%1$d:%2$02d.%3$02d</string>
+    <string name="header_split">Parcial</string>
+    <string name="header_total">Total</string>
+    <string name="stopwatch_time_format">%1$d:%2$02d</string>
+
+    <!-- TimerPage -->
+    <string name="button_add_minute">+ 1:00</string>
+
+    <!-- TimerReceiver notifications -->
+    <string name="timer_finished_title">Temporizador finalizado</string>
+    <string name="timer_finished_text">¡%1$s ha terminado!</string>
+
+    <!-- NewTimerDialog -->
+    <string name="label_new_timer">Nuevo temporizador</string>
+    <string name="field_label">Etiqueta</string>
+    <string name="field_minutes">Minutos</string>
+    <string name="field_seconds">Segundos</string>
+    <string name="button_cancel">Cancelar</string>
+    <string name="button_save">Guardar</string>
+
+    <!-- SelectTimeZonesDialog -->
+    <string name="select_cities_title">Seleccionar ciudades</string>
+    <string name="search_city_hint">Buscar ciudad o región…</string>
+
+    <!-- Time indicators -->
+    <string name="time_am">AM</string>
+    <string name="time_pm">PM</string>
+</resources>

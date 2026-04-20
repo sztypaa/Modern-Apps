@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Unblock Jam</string>
+    <string name="level">لغز</string>
+    <string name="level_selector">اختيار اللغز</string>
+    <string name="pack_selector">اختيار الحزمة</string>
+    <string name="undo">تراجع</string>
+    <string name="restart">إعادة تشغيل</string>
+    <string name="previous_level">اللغز السابق</string>
+    <string name="next_level">اللغز التالي</string>
+    <string name="completed">مكتمل</string>
+    <string name="moves">حركات</string>
+</resources>

@@ -1,0 +1,59 @@
+<resources>
+    <string name="app_name">संगीत</string>
+
+    <!-- Bottom navigation labels -->
+    <string name="nav_home">होम</string>
+    <string name="nav_albums">एल्बम</string>
+    <string name="nav_artists">कलाकार</string>
+    <string name="nav_playlists">प्लेलिस्ट</string>
+
+    <!-- List page titles -->
+    <string name="page_title_music">संगीत</string>
+    <string name="page_title_playlists">प्लेलिस्ट</string>
+
+    <!-- Now Playing screen -->
+    <string name="now_playing">अभी बज रहा है</string>
+    <string name="unknown_title">अज्ञात शीर्षक</string>
+    <string name="unknown_artist">अज्ञात कलाकार</string>
+    <string name="content_desc_repeat">दोहराएं</string>
+    <string name="content_desc_shuffle">शफल</string>
+    <string name="no_lyrics_available">बोल उपलब्ध नहीं हैं</string>
+
+    <!-- Detail screen overlines / section headers -->
+    <string name="label_album">एल्बम</string>
+    <string name="album_info_format">%1$s\n%2$s • %3$d गाने • %4$s</string>
+    <string name="label_artist">कलाकार</string>
+    <string name="artist_info_format">%1$d गाने • %2$s</string>
+    <string name="label_playlist">प्लेलिस्ट</string>
+    <string name="num_songs_format">%1$d गाने</string>
+    <string name="label_play">बजाएं</string>
+    <string name="label_shuffle">शफल</string>
+    <string name="label_songs">गाने</string>
+    <string name="label_albums">एल्बम</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_add_to_playlist">प्लेलिस्ट में जोड़ें</string>
+    <string name="dialog_ok">ठीक है</string>
+    <string name="dialog_cancel">रद्द करें</string>
+    <string name="dialog_rename_playlist">प्लेलिस्ट का नाम बदलें</string>
+    <string name="dialog_rename">नाम बदलें</string>
+
+    <!-- Playlist -->
+    <string name="new_playlist">नई प्लेलिस्ट</string>
+
+    <!-- Permissions -->
+    <string name="grant_audio_permissions">ऑडियो अनुमतियाँ दें</string>
+    <string name="grant_storage_permissions">स्टोरेज अनुमतियाँ दें</string>
+
+    <!-- Content descriptions -->
+    <string name="content_desc_album_art">एल्बम आर्ट</string>
+    <string name="content_desc_album_art_grid">एल्बम आर्ट ग्रिड</string>
+    <string name="content_desc_add_to_playlist">प्लेलिस्ट में जोड़ें</string>
+
+    <!-- Database / metadata -->
+    <string name="various_artists">विभिन्न कलाकार</string>
+
+    <!-- Notification button display names -->
+    <string name="notification_shuffle">शफल</string>
+    <string name="notification_repeat">दोहराएं</string>
+</resources>

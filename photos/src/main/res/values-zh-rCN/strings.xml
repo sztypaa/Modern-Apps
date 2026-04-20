@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">照片</string>
+    <string name="title_edit_photo">编辑照片</string>
+    <string name="action_save">保存</string>
+    <string name="action_save_as_copy">保存为副本</string>
+    <string name="action_undo">撤销</string>
+    <string name="label_gallery">相册</string>
+    <string name="label_map">地图</string>
+    <string name="label_trash">回收站</string>
+    <string name="items_selected">已选择 %1$d 项</string>
+    <string name="month_year_format">%1$s %2$d</string>
+    <string name="taken_on">拍摄于：%1$s</string>
+    <string name="location">地点：%1$s</string>
+    <string name="resolution">分辨率：%1$d x %2$d</string>
+    <string name="detecting">正在检测&#8230;</string>
+    <string name="date_format">%1$d %2$s %3$d</string>
+    <string name="grant_image_video_permissions">授予图像/视频权限</string>
+    <string name="grant_storage_permission">授予存储权限</string>
+</resources>

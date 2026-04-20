@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">الملفات</string>
+    <string name="enable_notifications">هل تريد تفعيل الإشعارات؟</string>
+    <string name="notification_permission_rationale">تفعيل الإشعارات سيسمح لك برؤية التقدم في الإجراءات التي تتم في الخلفية مثل ضغط وفك ضغط الملفات.</string>
+    <string name="enable">تفعيل</string>
+    <string name="skip">تخطي</string>
+    <string name="grant_all_files_access">منح الوصول إلى جميع الملفات</string>
+    <string name="archive_selection">ضغط الاختيار</string>
+    <string name="zip_file_name_label">اسم ملف zip</string>
+    <string name="archiving_started">بدأ الأرشفة&#8230;</string>
+    <string name="archive">أرشفة</string>
+    <string name="cancel">إلغاء</string>
+    <string name="unzipping_started_to">بدأ فك الضغط إلى %1$s</string>
+    <string name="move_failed">فشل النقل: %1$s</string>
+    <string name="could_not_open_zip">تعذر فتح ملف zip: %1$s</string>
+    <string name="no_app_found_to_open_file">لم يتم العثور على تطبيق لفتح هذا الملف</string>
+    <string name="zip_browse_only">عرض الملفات داخل zip يقتصر على التصفح فقط</string>
+    <string name="file_fallback">ملف</string>
+    <string name="unzip_channel_name">عمليات فك الضغط</string>
+    <string name="unzipping">جاري فك الضغط&#8230;</string>
+    <string name="zip_channel_name">عمليات الضغط</string>
+    <string name="archiving">جاري الأرشفة&#8230;</string>
+</resources>

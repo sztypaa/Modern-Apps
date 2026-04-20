@@ -1,0 +1,34 @@
+<resources>
+    <string name="app_name">YouPipe</string>
+    <string name="title_history">इतिहास</string>
+    <string name="label_search">खोजें</string>
+    <string name="subscribers_count">%1$s सदस्य</string>
+    <string name="title_create_subscription_category">सब्सक्रिप्शन श्रेणी बनाएं</string>
+    <string name="title_update_subscription_category">सब्सक्रिप्शन श्रेणी अपडेट करें</string>
+    <string name="label_category_name">श्रेणी का नाम</string>
+    <string name="label_select_subscriptions">सब्सक्रिप्शन चुनें:</string>
+    <string name="action_create">बनाएं</string>
+    <string name="action_update">अपडेट करें</string>
+    <string name="video_load_error">वीडियो लोड एरर - यूट्यूब ने इस आईपी से अनाम पहुंच को ब्लॉक कर दिया होगा</string>
+    <string name="action_go_back">वापस जाएं</string>
+    <string name="label_comments">कमेंट</string>
+    <string name="label_related_videos">संबंधित वीडियो</string>
+    <string name="title_subscriptions">सब्सक्रिप्शन</string>
+    <string name="label_groups">ग्रुप:</string>
+    <string name="label_all_subscriptions">सभी सब्सक्राइबर्स</string>
+    <string name="label_channels">चैनल:</string>
+    <string name="video_info_format">%1$s | %2$s व्यूज | %3$s</string>
+    <string name="time_ago_just_now">अभी</string>
+    <string name="time_ago_minutes">%1$d मिनट पहले</string>
+    <string name="time_ago_hours">%1$d घंटे पहले</string>
+    <string name="time_ago_days">%1$d दिन पहले</string>
+    <string name="time_ago_months">%1$d महीने पहले</string>
+    <string name="time_ago_years">%1$d साल पहले</string>
+    <string name="count_k_format">%1$sK</string>
+    <string name="count_m_format">%1$sM</string>
+    <string name="count_b_format">%1$sB</string>
+    <string name="action_subscribe">सब्सक्राइब करें</string>
+    <string name="action_unsubscribe">अनसब्सक्राइब करें</string>
+    <string name="channel_info">%1$s सदस्य | %2$s वीडियो</string>
+    <string name="video_stat_format">%1$s व्यूज | %2$s</string>
+</resources>

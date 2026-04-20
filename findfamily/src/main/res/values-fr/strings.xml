@@ -1,0 +1,118 @@
+<resources>
+    <string name="app_name">Trouver ma Famille</string>
+
+    <!-- Notification channels -->
+    <string name="notification_channel_location_tracking_name">Suivi de localisation</string>
+    <string name="notification_channel_location_tracking_desc">Utilisé pour les mises à jour de localisation en arrière-plan de FindFamily</string>
+    <string name="notification_channel_battery_name">Alertes de batterie</string>
+    <string name="notification_channel_battery_desc">Alertes lorsqu\'un membre de la famille a une batterie faible</string>
+    <string name="notification_channel_entry_exit_name">Arrivées et départs</string>
+    <string name="notification_channel_entry_exit_desc">Notifications lorsque des membres de la famille entrent ou sortent des points de repère</string>
+
+    <!-- Foreground service notification -->
+    <string name="notification_tracking_title">FindFamily est actif</string>
+    <string name="notification_tracking_text">Partage de localisation avec vos contacts sélectionnés</string>
+
+    <!-- Dynamic notifications -->
+    <string name="notification_low_battery">%1$s a une batterie faible</string>
+    <string name="notification_entered_waypoint">%1$s est entré dans %2$s</string>
+    <string name="notification_exited_waypoint">%1$s est sorti de %2$s</string>
+
+    <!-- Permission screen -->
+    <string name="permission_fine_location_granted">✅ Localisation précise accordée</string>
+    <string name="permission_grant_fine_location">1. Accorder la localisation précise</string>
+    <string name="permission_background_granted">✅ Localisation en arrière-plan accordée</string>
+    <string name="permission_enable_all_the_time">2. Activer \'Toujours autoriser\'</string>
+    <string name="permission_background_explanation">Pour activer le suivi en arrière-plan, veuillez sélectionner \'Toujours autoriser\' dans l\'écran suivant.</string>
+
+    <!-- MainPage FAB menu -->
+    <string name="fab_person">Personne</string>
+    <string name="fab_location">Lieu</string>
+    <string name="fab_link">Lien</string>
+
+    <!-- MainPage section headers -->
+    <string name="section_location_sharing_requests">Demandes de partage de localisation</string>
+    <string name="section_temporary_links">Liens temporaires</string>
+    <string name="section_saved_places">Lieux enregistrés</string>
+
+    <!-- MainPage cards -->
+    <string name="request_from">Demande de %1$s</string>
+    <string name="expires">Expire %1$s</string>
+    <string name="nobody_here">personne n\'est ici actuellement</string>
+    <string name="user_is_here">%1$s est ici actuellement</string>
+    <string name="users_are_here">%1$s sont ici actuellement</string>
+    <string name="last_updated_never">Jamais</string>
+    <string name="since_just_now">Depuis un instant</string>
+    <string name="since_minutes_ago">Depuis %1$d minutes</string>
+    <string name="since_time_date">Depuis %1$s %2$s</string>
+    <string name="today">aujourd\'hui</string>
+    <string name="yesterday">hier</string>
+    <string name="user_card_status">Mis à jour %1$s\nÀ %2$s\n%3$s</string>
+    <string name="speed_ms">%1$s m/s</string>
+    <string name="battery_percentage">%1$d%%</string>
+
+    <!-- timestring helper -->
+    <string name="time_just_now">à l\'instant</string>
+    <string name="time_minutes_ago">il y a %1$d minutes</string>
+    <string name="time_hours_ago">il y a %1$d heures</string>
+    <string name="time_days_ago">il y a %1$d jours</string>
+    <string name="time_very_soon">très bientôt</string>
+    <string name="time_in_minutes">dans %1$d minutes</string>
+    <string name="time_in_hours">dans %1$d heures</string>
+    <string name="time_in_days">dans %1$d jours</string>
+
+    <!-- UserPage -->
+    <string name="share_your_location">Partagez votre localisation</string>
+    <string name="change_connected_contact">Changer le contact connecté</string>
+    <string name="history_button">Historique</string>
+    <string name="hide_button">Masquer</string>
+    <string name="history_rewind_large">&lt;&lt;&lt;</string>
+    <string name="history_forward_large">&gt;&gt;&gt;</string>
+    <string name="history_rewind_medium">&lt;&lt;</string>
+    <string name="history_forward_medium">&gt;&gt;</string>
+    <string name="history_rewind_small">&lt;</string>
+    <string name="history_forward_small">&gt;</string>
+
+    <!-- WaypointEditPage -->
+    <string name="waypoint_name_blank_error">Le nom ne peut pas être vide</string>
+    <string name="waypoint_range_error">La portée doit être un nombre</string>
+    <string name="waypoint_range_suffix">mètres</string>
+
+    <!-- AddLinkDialog -->
+    <string name="add_link_title">Partager via un lien</string>
+    <string name="add_link_label">Nom du lien (pour différencier les liens)</string>
+    <string name="expiry_time_label">Délai d\'expiration</string>
+    <string name="create_temporary_link">Créer un lien temporaire</string>
+    <string name="expiry_15_minutes">15 minutes</string>
+    <string name="expiry_30_minutes">30 minutes</string>
+    <string name="expiry_1_hour">1 heure</string>
+    <string name="expiry_2_hours">2 heures</string>
+    <string name="expiry_4_hours">4 heures</string>
+    <string name="expiry_6_hours">6 heures</string>
+    <string name="expiry_12_hours">12 heures</string>
+    <string name="expiry_1_day">1 jour</string>
+    <string name="expiry_2_days">2 jours</string>
+    <string name="expiry_1_week">1 semaine</string>
+
+    <!-- AddPersonDialog -->
+    <string name="add_person_title">Ajouter une personne</string>
+    <string name="your_findfamily_id">Votre ID FindFamily</string>
+    <string name="contact_findfamily_id">ID FindFamily du contact</string>
+    <string name="status_awaiting_request">Cette personne a demandé votre localisation</string>
+    <string name="status_cannot_share_self">Vous ne pouvez pas partager votre localisation avec vous-même</string>
+    <string name="status_already_sharing">Vous partagez déjà votre localisation avec cette personne</string>
+    <string name="status_already_requested">Demande déjà envoyée à cette personne</string>
+    <string name="contact_name_label">Nom du contact</string>
+    <string name="accept_location_request">Accepter la demande de localisation</string>
+    <string name="request_location">Demander la localisation</string>
+
+    <!-- Platform -->
+    <string name="clipboard_label">texte</string>
+
+    <!-- MapView -->
+    <string name="me_label">Moi</string>
+
+    <!-- Missing features screen -->
+    <string name="missing_features_title">Fonctionnalités requises désactivées</string>
+    <string name="missing_features_explanation">FindFamily nécessite la localisation réseau et un Geocoder pour fonctionner correctement. Veuillez vous assurer que les services Google Play ou un équivalent sont installés et que la localisation réseau est activée dans les paramètres de votre appareil.</string>
+</resources>

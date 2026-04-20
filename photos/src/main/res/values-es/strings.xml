@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Fotos</string>
+    <string name="title_edit_photo">Editar foto</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_save_as_copy">Guardar como copia</string>
+    <string name="action_undo">Deshacer</string>
+    <string name="label_gallery">Galería</string>
+    <string name="label_map">Mapa</string>
+    <string name="label_trash">Papelera</string>
+    <string name="items_selected">%1$d seleccionados</string>
+    <string name="month_year_format">%1$s %2$d</string>
+    <string name="taken_on">Tomada el: %1$s</string>
+    <string name="location">Ubicación: %1$s</string>
+    <string name="resolution">Resolución: %1$d x %2$d</string>
+    <string name="detecting">Detectando&#8230;</string>
+    <string name="date_format">%1$d %2$s %3$d</string>
+    <string name="grant_image_video_permissions">Conceder permisos de imagen/vídeo</string>
+    <string name="grant_storage_permission">Conceder permisos de almacenamiento</string>
+</resources>

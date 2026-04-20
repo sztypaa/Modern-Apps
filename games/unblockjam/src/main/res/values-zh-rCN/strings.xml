@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Unblock Jam</string>
+    <string name="level">关卡</string>
+    <string name="level_selector">关卡选择</string>
+    <string name="pack_selector">关卡包选择</string>
+    <string name="undo">撤销</string>
+    <string name="restart">重开</string>
+    <string name="previous_level">上一关</string>
+    <string name="next_level">下一关</string>
+    <string name="completed">已完成</string>
+    <string name="moves">步数</string>
+</resources>

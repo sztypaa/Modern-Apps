@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">PDF</string>
+    <string name="pdf_viewer_title">Visor de PDF</string>
+    <string name="search_label">Buscar</string>
+    <string name="search_result_counter">%1$d de %2$d</string>
+    <string name="password_dialog_title">Contraseña requerida</string>
+    <string name="password_dialog_message">Este PDF está protegido por contraseña. Por favor, introdúzcala.</string>
+    <string name="password_label">Contraseña</string>
+    <string name="ok">Aceptar</string>
+    <string name="incorrect_password">Contraseña incorrecta. Por favor, inténtelo de nuevo.</string>
+    <string name="open_pdf">Abrir PDF</string>
+    <string name="capture_pdf">Capturar PDF</string>
+    <string name="capture_pdf_title">Capturar PDF</string>
+    <string name="request_camera_permission">Solicitar permiso de cámara</string>
+    <string name="upload_image">Subir imagen</string>
+</resources>

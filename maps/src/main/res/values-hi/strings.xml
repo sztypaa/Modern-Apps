@@ -1,0 +1,50 @@
+<resources>
+    <string name="app_name">मानचित्र</string>
+
+    <!-- BottomSheetContent -->
+    <string name="your_location">आपका स्थान</string>
+    <string name="walk_duration_distance">पैदल %1$s (%2$s किमी)</string>
+    <string name="transfer">ट्रांसफर</string>
+    <string name="no_route_found">कोई मार्ग नहीं मिला</string>
+    <string name="generating_route">मार्ग बनाया जा रहा है&#8230;</string>
+    <string name="distance_km">%1$s किमी</string>
+
+    <!-- SearchPage -->
+    <string name="search_nearby">आस-पास खोजें&#8230;</string>
+    <string name="no_results_found">इस क्षेत्र में कोई परिणाम नहीं मिला</string>
+    <string name="type_to_search">खोजने के लिए कम से कम 2 अक्षर टाइप करें</string>
+    <string name="unnamed_amenity">बिना नाम वाली सुविधा</string>
+    <string name="coordinates">निर्देशांक: %1$s, %2$s</string>
+
+    <!-- DownloadedMapsPage -->
+    <string name="downloaded_maps">डाउनलोड किए गए मानचित्र</string>
+    <string name="download_offline_map_title">ऑफलाइन मानचित्र डाउनलोड करें?</string>
+    <string name="download_offline_map_text">आप ज़ोन %1$d देख रहे हैं। क्या आप उच्च-विवरण वाला ऑफलाइन मानचित्र डाउनलोड करना और इस क्षेत्र में नेविगेशन सक्षम करना चाहेंगे?</string>
+    <string name="download">डाउनलोड</string>
+    <string name="cancel">रद्द करें</string>
+    <string name="delete_offline_map_title">ऑफलाइन मानचित्र हटाएं?</string>
+    <string name="delete_offline_map_text">क्या आप वाकई ज़ोन %1$d के लिए डाउनलोड हटाना या रद्द करना चाहते हैं?</string>
+    <string name="delete">हटाएं</string>
+    <string name="download_progress">%1$d%%</string>
+
+    <!-- RestaurantBottomSheet -->
+    <string name="reviews_summary">%1$s सितारे | %2$s समीक्षाएं</string>
+    <string name="directions">दिशा-निर्देश</string>
+    <string name="add_stop_to_route">मार्ग में स्टॉप जोड़ें</string>
+    <string name="open_status">खुला है</string>
+    <string name="closed_status">बंद है</string>
+    <string name="closes_at">%1$s बजे बंद होगा</string>
+    <string name="opens_at">%1$s बजे खुलेगा</string>
+    <string name="menu_label">मेन्यू</string>
+
+    <!-- MapPage -->
+    <string name="search_placeholder">खोजें&#8230;</string>
+    <string name="reorder">क्रम बदलें</string>
+    <string name="download_offline_map_text_overview">आप ज़ोन %1$d देख रहे हैं। क्या आप केवल अवलोकन से अधिक देखने के लिए उच्च-विवरण वाला ऑफलाइन मानचित्र डाउनलोड करना चाहेंगे?</string>
+
+    <!-- MainActivity -->
+    <string name="downloading_amenity_database">सुविधा डेटाबेस डाउनलोड हो रहा है&#8230;</string>
+    <string name="downloading_navigation_metadata">नेविगेशन मेटाडेटा डाउनलोड हो रहा है&#8230;</string>
+    <string name="downloading_road_data">सड़क डेटा डाउनलोड हो रहा है&#8230;</string>
+    <string name="grant_location_permission">लोकेशन की अनुमति दें</string>
+</resources>

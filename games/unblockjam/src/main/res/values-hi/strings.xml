@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Unblock Jam</string>
+    <string name="level">पहेली</string>
+    <string name="level_selector">पहेली चयन</string>
+    <string name="pack_selector">पैक चयन</string>
+    <string name="undo">पूर्ववत करें</string>
+    <string name="restart">पुनः प्रारंभ करें</string>
+    <string name="previous_level">पिछली पहेली</string>
+    <string name="next_level">अगली पहेली</string>
+    <string name="completed">पूरा हुआ</string>
+    <string name="moves">चालें</string>
+</resources>

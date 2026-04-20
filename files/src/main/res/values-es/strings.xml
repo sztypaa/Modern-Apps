@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Archivos</string>
+    <string name="enable_notifications">¿Activar notificaciones?</string>
+    <string name="notification_permission_rationale">Activar las notificaciones te permitirá ver el progreso de acciones en segundo plano como comprimir y descomprimir archivos.</string>
+    <string name="enable">Activar</string>
+    <string name="skip">Omitir</string>
+    <string name="grant_all_files_access">Conceder acceso a todos los archivos</string>
+    <string name="archive_selection">Comprimir selección</string>
+    <string name="zip_file_name_label">Nombre del archivo zip</string>
+    <string name="archiving_started">Compresión iniciada&#8230;</string>
+    <string name="archive">Comprimir</string>
+    <string name="cancel">Cancelar</string>
+    <string name="unzipping_started_to">Descompresión iniciada en %1$s</string>
+    <string name="move_failed">Error al mover: %1$s</string>
+    <string name="could_not_open_zip">No se pudo abrir el zip: %1$s</string>
+    <string name="no_app_found_to_open_file">No se encontró ninguna aplicación para abrir este archivo</string>
+    <string name="zip_browse_only">La visualización de archivos dentro del zip se limita a la exploración</string>
+    <string name="file_fallback">Archivo</string>
+    <string name="unzip_channel_name">Operaciones de descompresión</string>
+    <string name="unzipping">Descomprimiendo&#8230;</string>
+    <string name="zip_channel_name">Operaciones de compresión</string>
+    <string name="archiving">Comprimiendo&#8230;</string>
+</resources>

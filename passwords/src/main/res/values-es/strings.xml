@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Contraseñas</string>
+    <string name="autofill_service_description">Proporcionar sugerencias de autorrelleno para las contraseñas guardadas</string>
+    <string name="label_name">Nombre</string>
+    <string name="label_user_id_email">ID de usuario / Correo</string>
+    <string name="label_password">Contraseña</string>
+    <string name="label_totp_secret">Secreto TOTP</string>
+    <string name="label_add_website">Añadir sitio web</string>
+    <string name="title_settings">Ajustes</string>
+    <string name="import_csv_warning">La importación de un CSV traerá credenciales en texto plano a esta aplicación. Por favor, elimine la exportación después de importar.</string>
+    <string name="import_bitwarden_csv">Importar de Bitwarden (CSV)</string>
+    <string name="section_password">Contraseña</string>
+    <string name="section_totp">TOTP</string>
+    <string name="totp_not_configured">(no configurado)</string>
+    <string name="totp_refreshes_in">Se actualiza en %1$d s</string>
+    <string name="section_websites">Sitios web</string>
+    <string name="websites_none">(ninguno)</string>
+</resources>

@@ -1,0 +1,118 @@
+<resources>
+    <string name="app_name">परिवार खोजें</string>
+
+    <!-- Notification channels -->
+    <string name="notification_channel_location_tracking_name">लोकेशन ट्रैकिंग</string>
+    <string name="notification_channel_location_tracking_desc">FindFamily बैकग्राउंड लोकेशन अपडेट के लिए उपयोग किया जाता है</string>
+    <string name="notification_channel_battery_name">बैटरी अलर्ट</string>
+    <string name="notification_channel_battery_desc">परिवार के किसी सदस्य की बैटरी कम होने पर अलर्ट</string>
+    <string name="notification_channel_entry_exit_name">आगमन और प्रस्थान</string>
+    <string name="notification_channel_entry_exit_desc">परिवार के सदस्यों के वेपॉइंट में प्रवेश करने या बाहर निकलने पर सूचनाएं</string>
+
+    <!-- Foreground service notification -->
+    <string name="notification_tracking_title">FindFamily सक्रिय है</string>
+    <string name="notification_tracking_text">अपने चयनित संपर्कों के साथ लोकेशन साझा कर रहे हैं</string>
+
+    <!-- Dynamic notifications -->
+    <string name="notification_low_battery">%1$s की बैटरी कम है</string>
+    <string name="notification_entered_waypoint">%1$s ने %2$s में प्रवेश किया है</string>
+    <string name="notification_exited_waypoint">%1$s %2$s से बाहर निकल गया है</string>
+
+    <!-- Permission screen -->
+    <string name="permission_fine_location_granted">✅ सटीक लोकेशन दी गई</string>
+    <string name="permission_grant_fine_location">1. सटीक लोकेशन दें</string>
+    <string name="permission_background_granted">✅ बैकग्राउंड लोकेशन दी गई</string>
+    <string name="permission_enable_all_the_time">2. \'हर समय अनुमति दें\' सक्षम करें</string>
+    <string name="permission_background_explanation">बैकग्राउंड ट्रैकिंग सक्षम करने के लिए, कृपया अगली स्क्रीन में \'हर समय अनुमति दें\' चुनें।</string>
+
+    <!-- MainPage FAB menu -->
+    <string name="fab_person">व्यक्ति</string>
+    <string name="fab_location">लोकेशन</string>
+    <string name="fab_link">लिंक</string>
+
+    <!-- MainPage section headers -->
+    <string name="section_location_sharing_requests">लोकेशन शेयरिंग अनुरोध</string>
+    <string name="section_temporary_links">अस्थायी लिंक</string>
+    <string name="section_saved_places">सहेजे गए स्थान</string>
+
+    <!-- MainPage cards -->
+    <string name="request_from">%1$s से अनुरोध</string>
+    <string name="expires">%1$s को समाप्त होगा</string>
+    <string name="nobody_here">अभी यहाँ कोई नहीं है</string>
+    <string name="user_is_here">%1$s अभी यहाँ है</string>
+    <string name="users_are_here">%1$s अभी यहाँ हैं</string>
+    <string name="last_updated_never">कभी नहीं</string>
+    <string name="since_just_now">अभी से</string>
+    <string name="since_minutes_ago">%1$d मिनट पहले से</string>
+    <string name="since_time_date">%1$s %2$s से</string>
+    <string name="today">आज</string>
+    <string name="yesterday">कल</string>
+    <string name="user_card_status">%1$s अपडेट किया गया\n%2$s पर\n%3$s</string>
+    <string name="speed_ms">%1$s मी/से</string>
+    <string name="battery_percentage">%1$d%%</string>
+
+    <!-- timestring helper -->
+    <string name="time_just_now">अभी</string>
+    <string name="time_minutes_ago">%1$d मिनट पहले</string>
+    <string name="time_hours_ago">%1$d घंटे पहले</string>
+    <string name="time_days_ago">%1$d दिन पहले</string>
+    <string name="time_very_soon">बहुत जल्द</string>
+    <string name="time_in_minutes">%1$d मिनट में</string>
+    <string name="time_in_hours">%1$d घंटे में</string>
+    <string name="time_in_days">%1$d दिन में</string>
+
+    <!-- UserPage -->
+    <string name="share_your_location">अपनी लोकेशन साझा करें</string>
+    <string name="change_connected_contact">जुड़ा हुआ संपर्क बदलें</string>
+    <string name="history_button">इतिहास</string>
+    <string name="hide_button">छिपाएं</string>
+    <string name="history_rewind_large">&lt;&lt;&lt;</string>
+    <string name="history_forward_large">&gt;&gt;&gt;</string>
+    <string name="history_rewind_medium">&lt;&lt;</string>
+    <string name="history_forward_medium">&gt;&gt;</string>
+    <string name="history_rewind_small">&lt;</string>
+    <string name="history_forward_small">&gt;</string>
+
+    <!-- WaypointEditPage -->
+    <string name="waypoint_name_blank_error">नाम खाली नहीं हो सकता</string>
+    <string name="waypoint_range_error">रेंज एक संख्या होनी चाहिए</string>
+    <string name="waypoint_range_suffix">मीटर</string>
+
+    <!-- AddLinkDialog -->
+    <string name="add_link_title">लिंक के माध्यम से साझा करें</string>
+    <string name="add_link_label">लिंक लेबल (लिंक में अंतर करने के लिए)</string>
+    <string name="expiry_time_label">समाप्ति समय</string>
+    <string name="create_temporary_link">अस्थायी लिंक बनाएं</string>
+    <string name="expiry_15_minutes">15 मिनट</string>
+    <string name="expiry_30_minutes">30 मिनट</string>
+    <string name="expiry_1_hour">1 घंटा</string>
+    <string name="expiry_2_hours">2 घंटे</string>
+    <string name="expiry_4_hours">4 घंटे</string>
+    <string name="expiry_6_hours">6 घंटे</string>
+    <string name="expiry_12_hours">12 घंटे</string>
+    <string name="expiry_1_day">1 दिन</string>
+    <string name="expiry_2_days">2 दिन</string>
+    <string name="expiry_1_week">1 सप्ताह</string>
+
+    <!-- AddPersonDialog -->
+    <string name="add_person_title">व्यक्ति जोड़ें</string>
+    <string name="your_findfamily_id">आपकी FindFamily ID</string>
+    <string name="contact_findfamily_id">संपर्क की FindFamily ID</string>
+    <string name="status_awaiting_request">इस व्यक्ति ने आपकी लोकेशन मांगी है</string>
+    <string name="status_cannot_share_self">अपनी लोकेशन अपने साथ साझा नहीं कर सकते</string>
+    <string name="status_already_sharing">इस व्यक्ति के साथ पहले से ही लोकेशन साझा कर रहे हैं</string>
+    <string name="status_already_requested">इस व्यक्ति के साथ साझा करने के लिए पहले ही अनुरोध किया जा चुका है</string>
+    <string name="contact_name_label">संपर्क का नाम</string>
+    <string name="accept_location_request">लोकेशन अनुरोध स्वीकार करें</string>
+    <string name="request_location">लोकेशन मांगें</string>
+
+    <!-- Platform -->
+    <string name="clipboard_label">टेक्स्ट</string>
+
+    <!-- MapView -->
+    <string name="me_label">मैं</string>
+
+    <!-- Missing features screen -->
+    <string name="missing_features_title">आवश्यक सुविधाएं अक्षम हैं</string>
+    <string name="missing_features_explanation">FindFamily को सही ढंग से काम करने के लिए नेटवर्क लोकेशन और Geocoder की आवश्यकता होती है। कृपया सुनिश्चित करें कि Google Play सेवाएं या उसके समान कोई ऐप इंस्टॉल है और आपके डिवाइस सेटिंग्स में नेटवर्क लोकेशन सक्षम है।</string>
+</resources>
