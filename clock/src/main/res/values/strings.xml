@@ -57,4 +57,5 @@
     <!-- Time indicators (ClockPage) -->
     <string name="time_am">AM</string>
     <string name="time_pm">PM</string>
+    <string name="grant_notifications_permission">Grant Notifications Permission</string>
 </resources>

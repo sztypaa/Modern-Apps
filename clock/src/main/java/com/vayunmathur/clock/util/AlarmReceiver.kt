@@ -16,6 +16,7 @@ import com.vayunmathur.clock.R
 
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        createNotificationChannels(context)
         val alarmId = intent.getLongExtra("ALARM_ID", -1L)
 
         // 1. Create the Intent for your "Ringing" Activity

@@ -1,27 +1,37 @@
 package com.vayunmathur.clock
 
+import android.Manifest
 import android.app.AlarmManager
-import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.media.AudioAttributes
-import android.media.RingtoneManager
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.AlarmClock
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.vayunmathur.library.util.NavKey
 import com.vayunmathur.clock.data.Alarm
@@ -35,6 +45,7 @@ import com.vayunmathur.clock.ui.dialogs.NewTimerDialog
 import com.vayunmathur.clock.ui.dialogs.SelectTimeZonesDialog
 import com.vayunmathur.clock.ui.sendTimerNotification
 import com.vayunmathur.clock.util.AlarmScheduler
+import com.vayunmathur.clock.util.createNotificationChannels
 import com.vayunmathur.library.ui.DynamicTheme
 import com.vayunmathur.library.ui.dialog.TimePickerDialogContent
 import com.vayunmathur.library.util.BottomBarItem
@@ -69,7 +80,7 @@ class MainActivity : ComponentActivity() {
             }
             startActivity(intent)
         }
-        createTimerNotificationChannels(this)
+        createNotificationChannels(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             if (!notificationManager.canUseFullScreenIntent()) {
@@ -136,7 +147,49 @@ class MainActivity : ComponentActivity() {
                 }
             }
             DynamicTheme {
-                Navigation(ds, viewModel, initialRoute)
+                val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    emptyArray()
+                }
+                var hasPermissions by remember {
+                    mutableStateOf(
+                        permissions.all {
+                            ContextCompat.checkSelfPermission(this@MainActivity, it) == PackageManager.PERMISSION_GRANTED
+                        }
+                    )
+                }
+                if (!hasPermissions && permissions.isNotEmpty()) {
+                    InitialPermissionsScreen(permissions) { hasPermissions = it }
+                } else {
+                    Navigation(ds, viewModel, initialRoute)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun InitialPermissionsScreen(permissions: Array<String>, setHasPermissions: (Boolean) -> Unit) {
+    val permissionRequestor = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissionsResult ->
+        setHasPermissions(permissionsResult.values.all { it })
+    }
+    LaunchedEffect(Unit) {
+        permissionRequestor.launch(permissions)
+    }
+    Scaffold {
+        Box(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Button(
+                {
+                    permissionRequestor.launch(permissions)
+                }
+            ) {
+                Text(text = stringResource(R.string.grant_notifications_permission))
             }
         }
     }
@@ -222,32 +275,4 @@ fun Navigation(ds: DataStoreUtils, viewModel: DatabaseViewModel, initialRoute: R
             TimePickerDialogContent(backStack, "alarm_set_time_${it.id}", it.time)
         }
     }
-}
-
-fun createTimerNotificationChannels(context: Context) {
-    val nm = context.getSystemService(NotificationManager::class.java)
-
-    nm.createNotificationChannels(listOf(
-        // 1. Quiet channel for ongoing countdowns
-        NotificationChannel("active_timers_channel", context.getString(R.string.channel_ongoing_timers_name), NotificationManager.IMPORTANCE_LOW).apply {
-            description = context.getString(R.string.channel_ongoing_timers_description)
-            setShowBadge(false)
-        },
-        // 2. Loud channel for the "Time's Up" alert
-        NotificationChannel("finished_timers_channel", context.getString(R.string.channel_completed_timers_name), NotificationManager.IMPORTANCE_HIGH).apply {
-            description = context.getString(R.string.channel_completed_timers_description)
-            enableVibration(true)
-            setSound(
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
-                AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build())
-        },
-        NotificationChannel("ALARM_CHANNEL_ID", context.getString(R.string.channel_alarms_name), NotificationManager.IMPORTANCE_HIGH).apply {
-            description = context.getString(R.string.channel_alarms_description)
-            // Optional: Set a specific sound for the channel here
-            setBypassDnd(true) // Allows alarm to ring during Doze/DND
-            setSound(null, null) // Service handles sound via MediaPlayer
-            enableVibration(false)
-            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-        }
-    ))
 }

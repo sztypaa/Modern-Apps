@@ -16,6 +16,7 @@ class AlarmSoundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // 1. Create the channel (Safe to call multiple times)
+        createNotificationChannels(this)
 
         // 2. Build and show notification FIRST
         val notification = NotificationCompat.Builder(this, "ALARM_CHANNEL_ID")
