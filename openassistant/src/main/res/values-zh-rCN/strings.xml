@@ -1,9 +1,0 @@
-<resources>
-    <string name="app_name">OpenAssistant</string>
-    <string name="recording">正在录音&#8230;</string>
-    <string name="message_placeholder">信息&#8230;</string>
-    <string name="voice_message">语音消息</string>
-    <string name="mic_error_format">麦克风错误：%1$s</string>
-    <string name="new_conversation">新对话</string>
-    <string name="perm_desc_inference">允许其他应用访问设备上的 AI 推理服务以提取结构化数据。</string>
-</resources>

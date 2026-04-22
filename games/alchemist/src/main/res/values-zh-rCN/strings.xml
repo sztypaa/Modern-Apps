@@ -1,6 +1,0 @@
-<resources>
-    <string name="app_name">Alchemist</string>
-    <string name="alchemy_icon_content_description">炼金图标 %1$d</string>
-    <string name="see_details">查看详情</string>
-    <string name="item_details">物品详情</string>
-</resources>

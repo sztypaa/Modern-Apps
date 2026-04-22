@@ -1,6 +1,0 @@
-<resources>
-    <string name="app_name">Alchemist</string>
-    <string name="alchemy_icon_content_description">Icône d\'alchimie %1$d</string>
-    <string name="see_details">Voir les détails</string>
-    <string name="item_details">Détails de l\'objet</string>
-</resources>

@@ -1,9 +1,0 @@
-<resources>
-    <string name="app_name">OpenAssistant</string>
-    <string name="recording">تسجيل&#8230;</string>
-    <string name="message_placeholder">رسالة&#8230;</string>
-    <string name="voice_message">رسالة صوتية</string>
-    <string name="mic_error_format">خطأ في الميكروفون: %1$s</string>
-    <string name="new_conversation">محادثة جديدة</string>
-    <string name="perm_desc_inference">يسمح للتطبيقات الأخرى بالوصول إلى خدمة استدلال الذكاء الاصطناعي على الجهاز لاستخراج البيانات المهيكلة.</string>
-</resources>
