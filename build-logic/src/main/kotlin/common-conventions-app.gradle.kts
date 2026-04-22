@@ -41,6 +41,10 @@ configure<com.android.build.api.dsl.ApplicationExtension> {
     }
     compileSdkExtension = 19
 
+    androidResources {
+        generateLocaleConfig = true
+    }
+
     ndkVersion = "29.0.14206865"
 
     defaultConfig {
