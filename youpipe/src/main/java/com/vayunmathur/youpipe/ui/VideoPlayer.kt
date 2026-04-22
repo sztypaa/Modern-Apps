@@ -303,7 +303,7 @@ fun VideoPlayer(
                         modifier = Modifier.size(64.dp).align(Alignment.Center),
                     )
                 }
-                Row(Modifier.align(Alignment.BottomCenter).padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.Bottom) {
+                Row(Modifier.align(Alignment.BottomCenter).padding(16.dp), verticalAlignment = Alignment.Bottom) {
                     Column(Modifier.weight(1f)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),

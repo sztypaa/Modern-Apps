@@ -35,7 +35,7 @@ class MainActivity : FragmentActivity() {
                 val viewModel = DatabaseViewModel(db,Password::class to db.passwordDao())
                 setContent {
                     DynamicTheme {
-                        Navigation(viewModel, passphrase)
+                        Navigation(viewModel)
                     }
                 }
             },
@@ -63,11 +63,11 @@ sealed interface Route: NavKey {
 
 
 @Composable
-fun Navigation(viewModel: DatabaseViewModel, passphrase: String) {
+fun Navigation(viewModel: DatabaseViewModel) {
     val backStack = rememberNavBackStack<Route>(Route.Menu)
     MainNavigation(backStack) {
         entry<Route.Menu>(metadata = ListPage()) {
-            MenuPage(backStack, viewModel, passphrase)
+            MenuPage(backStack, viewModel)
         }
         entry<Route.PasswordPage>(metadata = ListDetailPage()) {
             PasswordPage(backStack, it.id, viewModel)
