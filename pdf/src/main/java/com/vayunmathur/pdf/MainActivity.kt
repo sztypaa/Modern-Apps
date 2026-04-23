@@ -168,7 +168,7 @@ class MainActivity : ComponentActivity() {
                     )
                 } else {
                     pdfDocument?.let {
-                        PdfViewerScreen(it)
+                        PdfViewerScreen(it, data?.lastPathSegment ?: "pdf")
                     } ?: Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
                 }
 
@@ -470,7 +470,7 @@ suspend fun savePdfToUri(context: Context, images: List<Uri>, targetUri: Uri): B
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PdfViewerScreen(pdfDocument: EditablePdfDocument) {
+fun PdfViewerScreen(pdfDocument: EditablePdfDocument, pdfName: String) {
     val pdfState = remember { PdfViewerState() }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
