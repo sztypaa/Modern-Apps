@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -31,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -75,59 +77,74 @@ fun SettingsScreen(viewModel: CalendarViewModel, backStack: NavBackStack<Route>)
             })
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { backStack.add(Route.Settings.AddCalendar()) }) {
-                IconAdd()
+            if (calendars.isNotEmpty()) {
+                FloatingActionButton(onClick = { backStack.add(Route.Settings.AddCalendar()) }) {
+                    IconAdd()
+                }
             }
         }
     ) { paddingValues ->
-        LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = paddingValues + PaddingValues(8.dp)) {
-            grouped.forEach { (account, cals) ->
-                item {
-                    Text(text = account.ifEmpty { stringResource(R.string.no_account) }, modifier = Modifier.padding(vertical = 8.dp))
-                }
-                items(cals) { cal ->
-                    val isSelected = selectedCalendarId == cal.id
-                    ListItem(
-                        headlineContent = { Text(cal.displayName) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .then(if (isSelected) Modifier.background(Color(0x11000000)) else Modifier)
-                            .clickable {
-                                // select this calendar (or deselect if already selected)
-                                selectedCalendarId = if (isSelected) null else cal.id
-                            },
-                        supportingContent = { Text(text = stringResource(R.string.calendar_id_label, cal.id)) },
-                        leadingContent = {
-                            // colored circle showing calendar color; clickable to open color picker
-                            Box(
-                                modifier = Modifier
-                                    .size(28.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(cal.color))
-                                    .border(
-                                        width = 1.dp,
-                                        color = Color.Black.copy(alpha = 0.12f),
-                                        shape = CircleShape
-                                    )
-                                    .then(if (cal.canModify) Modifier.clickable {
-                                        // navigate to color change dialog
-                                        backStack.add(Route.Settings.ChangeColor(cal.id))
-                                    } else Modifier)
-                            )
-                        },
-                        trailingContent = {
-                            val isChecked = visibility[cal.id] ?: true
-                            androidx.compose.material3.Checkbox(checked = isChecked, onCheckedChange = { checked -> viewModel.setCalendarVisibility(cal.id, checked) })
-                        },
-                        colors = ListItemDefaults.colors(
-                            containerColor = if(selectedCalendarId == cal.id) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface
-                        )
-                    )
-                    HorizontalDivider()
+        if (calendars.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Button(onClick = { backStack.add(Route.Settings.AddCalendar()) }) {
+                    Text(text = stringResource(R.string.create_a_calendar))
                 }
             }
-            item {
-                Spacer(modifier = Modifier.height(64.dp))
+        } else {
+            LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = paddingValues + PaddingValues(8.dp)) {
+                grouped.forEach { (account, cals) ->
+                    item {
+                        Text(text = account.ifEmpty { stringResource(R.string.no_account) }, modifier = Modifier.padding(vertical = 8.dp))
+                    }
+                    items(cals) { cal ->
+                        val isSelected = selectedCalendarId == cal.id
+                        ListItem(
+                            headlineContent = { Text(cal.displayName) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .then(if (isSelected) Modifier.background(Color(0x11000000)) else Modifier)
+                                .clickable {
+                                    // select this calendar (or deselect if already selected)
+                                    selectedCalendarId = if (isSelected) null else cal.id
+                                },
+                            supportingContent = { Text(text = stringResource(R.string.calendar_id_label, cal.id)) },
+                            leadingContent = {
+                                // colored circle showing calendar color; clickable to open color picker
+                                Box(
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(cal.color))
+                                        .border(
+                                            width = 1.dp,
+                                            color = Color.Black.copy(alpha = 0.12f),
+                                            shape = CircleShape
+                                        )
+                                        .then(if (cal.canModify) Modifier.clickable {
+                                            // navigate to color change dialog
+                                            backStack.add(Route.Settings.ChangeColor(cal.id))
+                                        } else Modifier)
+                                )
+                            },
+                            trailingContent = {
+                                val isChecked = visibility[cal.id] ?: true
+                                androidx.compose.material3.Checkbox(checked = isChecked, onCheckedChange = { checked -> viewModel.setCalendarVisibility(cal.id, checked) })
+                            },
+                            colors = ListItemDefaults.colors(
+                                containerColor = if(selectedCalendarId == cal.id) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface
+                            )
+                        )
+                        HorizontalDivider()
+                    }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(64.dp))
+                }
             }
         }
     }

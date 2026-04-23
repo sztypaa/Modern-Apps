@@ -76,6 +76,7 @@
     <!-- Rename calendar dialog -->
     <string name="rename_calendar">Rename calendar</string>
     <string name="new_name">New name</string>
+    <string name="create_a_calendar">Create a calendar</string>
 
     <!-- Timezone picker dialog -->
     <string name="choose_timezone">Choose timezone</string>
