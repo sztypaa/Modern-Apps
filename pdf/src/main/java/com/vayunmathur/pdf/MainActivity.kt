@@ -571,10 +571,12 @@ fun PdfViewerScreen(pdfDocument: EditablePdfDocument, pdfName: String) {
                     IconButton({ showSearchBar = true }) { IconSearch() }
                     IconButton({ downloadLauncher.launch(pdfName) }) { IconSave() }
                     IconButton({
-                        val intent = Intent(Intent.ACTION_SEND)
-                        intent.type = "application/pdf"
-                        intent.putExtra(Intent.EXTRA_STREAM, pdfDocument.uri)
-                        context.startActivity(intent)
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "application/pdf"
+                            putExtra(Intent.EXTRA_STREAM, pdfDocument.uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_pdf)))
                     }) {
                         IconShare()
                     }
