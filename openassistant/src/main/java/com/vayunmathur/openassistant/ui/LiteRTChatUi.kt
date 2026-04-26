@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -31,6 +33,7 @@ import com.vayunmathur.openassistant.data.Conversation
 import com.vayunmathur.openassistant.data.Message
 import com.vayunmathur.openassistant.util.InferenceService
 import com.vayunmathur.openassistant.util.WavRecorder
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,10 +46,11 @@ import com.vayunmathur.library.ui.IconClose
 import com.vayunmathur.library.ui.IconMenu
 import com.vayunmathur.library.ui.BackupButtons
 import com.vayunmathur.library.ui.IconDelete
+import com.vayunmathur.library.ui.IconCopy
 import com.vayunmathur.library.util.BiometricDatabaseHelper
 import com.vayunmathur.library.util.DatabaseViewModel
+import com.vayunmathur.library.util.parseMarkdown
 import com.vayunmathur.openassistant.util.copyUriToFile
-import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -194,8 +198,10 @@ fun LiteRTChatUi(backStack: NavBackStack<Route>, conversationId: Long, viewModel
                     )
                 }
             ) { padding ->
-                LazyColumn(state = listState, modifier = Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    items(filteredMessages, key = { it.id }) { ChatBubble(it) }
+                SelectionContainer {
+                    LazyColumn(state = listState, modifier = Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        items(filteredMessages, key = { it.id }) { ChatBubble(it) }
+                    }
                 }
             }
         }
@@ -261,6 +267,7 @@ fun ChatInput(
 @Composable
 fun ChatBubble(message: Message) {
     val isUser = message.role == "user"
+    val clipboardManager = LocalClipboardManager.current
     Column(Modifier.fillMaxWidth(), horizontalAlignment = if (isUser) Alignment.End else Alignment.Start) {
         if (isUser) {
             Surface(color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(20.dp, 20.dp, 4.dp, 20.dp), modifier = Modifier.widthIn(max = 300.dp)) {
@@ -274,7 +281,19 @@ fun ChatBubble(message: Message) {
                 }
             }
         } else if (message.text.isNotBlank()) {
-            MarkdownText(message.text, Modifier.padding(vertical = 4.dp, horizontal = 0.dp).padding(end = 100.dp), style = LocalTextStyle.current.copy(fontSize = 16.sp, lineHeight = 22.sp))
+            Text(
+                parseMarkdown(message.text, showMarkers = false),
+                Modifier.padding(vertical = 4.dp, horizontal = 0.dp).padding(end = 100.dp),
+                style = LocalTextStyle.current.copy(fontSize = 16.sp, lineHeight = 22.sp)
+            )
+        }
+        if (message.text.isNotBlank()) {
+            IconButton(
+                onClick = { clipboardManager.setText(AnnotatedString(message.text)) },
+                modifier = Modifier.size(32.dp).padding(top = 4.dp)
+            ) {
+                IconCopy(tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f))
+            }
         }
     }
 }

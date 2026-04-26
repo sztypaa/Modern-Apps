@@ -1,4 +1,5 @@
-package com.vayunmathur.notes.util
+package com.vayunmathur.library.util
+
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
