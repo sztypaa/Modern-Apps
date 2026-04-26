@@ -94,7 +94,7 @@ fun PredictionMarketDetailScreen(viewModel: PortfolioViewModel, backStack: NavBa
                         )
                         Row(Modifier, Arrangement.spacedBy(8.dp), Alignment.CenterVertically) {
                             Text(
-                                "${(marketItem.chance * 100).toInt()}%",
+                                stringResource(R.string.percent_format, (marketItem.chance * 100).toInt()),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                             )
@@ -165,13 +165,13 @@ fun PredictionMarketDetailScreen(viewModel: PortfolioViewModel, backStack: NavBa
             {
                 Row {
                     Text(
-                        stringResource(R.string.buy_choice, if (isYes) stringResource(R.string.yes) else stringResource(R.string.no)),
+                        if (isYes) stringResource(R.string.buy_yes) else stringResource(R.string.buy_no),
                         color = if (isYes) Color(0xFF25D366) else Color(0xFFF44336)
                     )
                     Text(stringResource(R.string.market_subtitle_separator, marketItem.subtitle))
                 }
             },
-            { outputAmount -> Text(stringResource(R.string.buy_win_format, if (isYes) stringResource(R.string.yes) else stringResource(R.string.no), outputAmount.round(2))) },
+            { outputAmount -> Text(if (isYes) stringResource(R.string.buy_yes_win_format, outputAmount.round(2)) else stringResource(R.string.buy_no_win_format, outputAmount.round(2))) },
             { selectedMarket = null },
         )
     }

@@ -47,4 +47,44 @@
     <string name="downloading_navigation_metadata">Downloading Navigation Tiling Metadata...</string>
     <string name="downloading_road_data">Downloading Road Data...</string>
     <string name="grant_location_permission">Grant Location Permission</string>
+
+    <!-- Navigation Maneuvers -->
+    <string name="maneuver_depart">Head toward %1$s</string>
+    <string name="maneuver_depart_unnamed">Head toward destination</string>
+    <string name="maneuver_straight">Continue on %1$s</string>
+    <string name="maneuver_straight_unnamed">Continue straight</string>
+    <string name="maneuver_turn_left">Turn left onto %1$s</string>
+    <string name="maneuver_turn_left_unnamed">Turn left</string>
+    <string name="maneuver_turn_right">Turn right onto %1$s</string>
+    <string name="maneuver_turn_right_unnamed">Turn right</string>
+    <string name="maneuver_turn_slight_left">Turn slight left onto %1$s</string>
+    <string name="maneuver_turn_slight_left_unnamed">Turn slight left</string>
+    <string name="maneuver_turn_slight_right">Turn slight right onto %1$s</string>
+    <string name="maneuver_turn_slight_right_unnamed">Turn slight right</string>
+    <string name="maneuver_turn_sharp_left">Turn sharp left onto %1$s</string>
+    <string name="maneuver_turn_sharp_left_unnamed">Turn sharp left</string>
+    <string name="maneuver_turn_sharp_right">Turn sharp right onto %1$s</string>
+    <string name="maneuver_turn_sharp_right_unnamed">Turn sharp right</string>
+    <string name="maneuver_uturn">Make a U-turn onto %1$s</string>
+    <string name="maneuver_uturn_unnamed">Make a U-turn</string>
+    <string name="maneuver_merge">Merge onto %1$s</string>
+    <string name="maneuver_merge_unnamed">Merge</string>
+    <string name="maneuver_ramp_left">Take the ramp on the left toward %1$s</string>
+    <string name="maneuver_ramp_left_unnamed">Take the ramp on the left</string>
+    <string name="maneuver_ramp_right">Take the ramp on the right toward %1$s</string>
+    <string name="maneuver_ramp_right_unnamed">Take the ramp on the right</string>
+    <string name="maneuver_fork_left">Keep left toward %1$s</string>
+    <string name="maneuver_fork_left_unnamed">Keep left</string>
+    <string name="maneuver_fork_right">Keep right toward %1$s</string>
+    <string name="maneuver_fork_right_unnamed">Keep right</string>
+    <string name="maneuver_roundabout">At the roundabout, continue onto %1$s</string>
+    <string name="maneuver_roundabout_unnamed">At the roundabout, continue</string>
+    <string name="maneuver_unspecified">Continue onto %1$s</string>
+    <string name="maneuver_unspecified_unnamed">Continue</string>
+
+    <!-- Travel Modes -->
+    <string name="travel_mode_walk">Walk</string>
+    <string name="travel_mode_bicycle">Bicycle</string>
+    <string name="travel_mode_drive">Drive</string>
+    <string name="travel_mode_transit">Transit</string>
 </resources>

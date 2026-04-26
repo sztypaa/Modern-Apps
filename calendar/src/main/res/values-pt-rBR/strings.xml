@@ -37,11 +37,8 @@
     <string name="new_local_calendar">Novo calendário local</string>
     <string name="calendar_name">Nome do calendário</string>
     <string name="choose_color">Escolher cor:</string>
-    <string name="change_color_for">Mudar cor para \"%1$s\"</string>
     <string name="change_color">Mudar cor</string>
     <string name="delete_calendar">Excluir calendário</string>
-    <string name="delete_calendar_confirm">Tem certeza de que deseja excluir \"%1$s\"? Isso removerá todos os eventos no calendário.</string>
-    <string name="this_calendar">este calendário</string>
     <string name="rename_calendar">Renomear calendário</string>
     <string name="new_name">Nome novo</string>
     <string name="create_a_calendar">Criar um calendário</string>

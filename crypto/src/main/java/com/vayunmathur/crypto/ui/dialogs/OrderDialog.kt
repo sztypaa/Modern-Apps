@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.vayunmathur.crypto.R
 import com.vayunmathur.crypto.util.PortfolioViewModel
 import com.vayunmathur.crypto.util.api.PendingOrder
+import com.vayunmathur.crypto.util.displayAmount
 import com.vayunmathur.crypto.data.TokenInfo
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -101,8 +102,10 @@ fun OrderDialog(
                 )
                 Spacer(Modifier.width(16.dp))
                 order?.let {
-                    if(inputTheOutput) Text(stringResource(R.string.token_exchange_display, "$outputAmount", outputToken.symbol, "$inputAmount", inputToken.symbol))
-                    else Text(stringResource(R.string.token_exchange_display, "$inputAmount", inputToken.symbol, "$outputAmount", outputToken.symbol))
+                    val inputStr = inputAmount?.displayAmount() ?: ""
+                    val outputStr = outputAmount?.displayAmount() ?: ""
+                    if(inputTheOutput) Text(stringResource(R.string.token_exchange_display, outputStr, outputToken.symbol, inputStr, inputToken.symbol))
+                    else Text(stringResource(R.string.token_exchange_display, inputStr, inputToken.symbol, outputStr, outputToken.symbol))
                 }
             }
             Spacer(Modifier.height(24.dp))

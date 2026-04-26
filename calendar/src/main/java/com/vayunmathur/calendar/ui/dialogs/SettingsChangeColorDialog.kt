@@ -56,7 +56,7 @@ fun SettingsChangeColorDialog(viewModel: CalendarViewModel, backStack: NavBackSt
 
     AlertDialog(
         onDismissRequest = { backStack.pop() },
-        title = { Text(stringResource(R.string.change_color_for, cal.displayName)) },
+        title = { Text(stringResource(R.string.change_color_for)) },
         text = {
             Column {
                 // swatches row

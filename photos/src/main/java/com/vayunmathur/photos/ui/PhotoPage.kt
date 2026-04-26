@@ -51,6 +51,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -301,14 +302,17 @@ fun PhotoDetailView(
                 val dateFormatted = remember(photo.date) {
                     Instant.fromEpochMilliseconds(photo.date)
                         .toLocalDateTime(TimeZone.currentSystemDefault())
-                        .let { "${it.day} ${it.month.name.lowercase().replaceFirstChar { c -> c.uppercase() }} ${it.year}" }
+                        .let {
+                            // Simple formatting for now, better to use localized date formatter
+                            "${it.day} ${it.month.name.lowercase().replaceFirstChar { c -> c.uppercase() }} ${it.year}"
+                        }
                 }
 
-                Text(text = "Taken on: $dateFormatted", color = Color.LightGray)
+                Text(text = stringResource(R.string.taken_on, dateFormatted), color = Color.LightGray)
                 if (photo.exifSet) {
-                    Text(text = "Location: ${countryName ?: "Detecting..."}", color = Color.LightGray)
+                    Text(text = stringResource(R.string.location, countryName ?: stringResource(R.string.detecting)), color = Color.LightGray)
                 }
-                Text(text = "Resolution: ${photo.width} x ${photo.height}", color = Color.LightGray)
+                Text(text = stringResource(R.string.resolution, photo.width, photo.height), color = Color.LightGray)
 
                 if (photo.videoData == null) {
                     IconButton(

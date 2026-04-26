@@ -23,6 +23,10 @@
     <string name="grant_storage_permission">Grant Storage Permission</string>
     <string name="search_photos">Search photos&#8230;</string>
     <string name="indexing_photos">Indexing Photos</string>
+    <string name="image_understanding_title">Experimental Image Understanding</string>
+    <string name="image_understanding_description">This feature requires the OpenAssistant app to be installed and will use its local models to process images on-device.</string>
+    <string name="openassistant_not_found">OpenAssistant app is not installed. Please install it to enable this feature.</string>
+    <string name="enable_feature">Enable Feature</string>
     <string name="indexing_progress_details">%1$d of %2$d photos processed</string>
     <string name="close">Close</string>
 </resources>

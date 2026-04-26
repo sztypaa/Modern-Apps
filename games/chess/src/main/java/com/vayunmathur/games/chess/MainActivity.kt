@@ -362,9 +362,27 @@ fun ChessBoard(
 
 @Composable
 fun ChessPiece(piece: Piece, size: Dp? = null, isFlipped: Boolean = false) {
+    val description = when(piece.color) {
+        PieceColor.WHITE -> when(piece.type) {
+            PieceType.KING -> stringResource(R.string.piece_white_king)
+            PieceType.QUEEN -> stringResource(R.string.piece_white_queen)
+            PieceType.ROOK -> stringResource(R.string.piece_white_rook)
+            PieceType.BISHOP -> stringResource(R.string.piece_white_bishop)
+            PieceType.KNIGHT -> stringResource(R.string.piece_white_knight)
+            PieceType.PAWN -> stringResource(R.string.piece_white_pawn)
+        }
+        PieceColor.BLACK -> when(piece.type) {
+            PieceType.KING -> stringResource(R.string.piece_black_king)
+            PieceType.QUEEN -> stringResource(R.string.piece_black_queen)
+            PieceType.ROOK -> stringResource(R.string.piece_black_rook)
+            PieceType.BISHOP -> stringResource(R.string.piece_black_bishop)
+            PieceType.KNIGHT -> stringResource(R.string.piece_black_knight)
+            PieceType.PAWN -> stringResource(R.string.piece_black_pawn)
+        }
+    }
     Image(
         painterResource(id = piece.type.resID),
-        "${piece.color} ${piece.type}",
+        description,
         (if (size != null) Modifier.size(size) else Modifier.fillMaxSize())
             .graphicsLayer { if (isFlipped) rotationZ = 180f },
         colorFilter = ColorFilter.tint(if (piece.color == PieceColor.WHITE) Color.White else Color.Black)

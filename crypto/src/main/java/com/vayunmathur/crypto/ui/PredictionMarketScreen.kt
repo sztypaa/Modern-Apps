@@ -93,13 +93,13 @@ fun PredictionMarketScreen(viewModel: PortfolioViewModel, backStack: NavBackStac
             {
                 Row {
                     Text(
-                        stringResource(R.string.buy_choice, if (isYes) stringResource(R.string.yes) else stringResource(R.string.no)),
+                        if (isYes) stringResource(R.string.buy_yes) else stringResource(R.string.buy_no),
                         color = if (isYes) Color(0xFF25D366) else Color(0xFFF44336)
                     )
                     Text(stringResource(R.string.market_subtitle_separator, marketItem.subtitle))
                 }
             },
-            { outputAmount -> Text(stringResource(R.string.buy_win_format, if (isYes) stringResource(R.string.yes) else stringResource(R.string.no), outputAmount.round(2))) },
+            { outputAmount -> Text(if (isYes) stringResource(R.string.buy_yes_win_format, outputAmount.round(2)) else stringResource(R.string.buy_no_win_format, outputAmount.round(2))) },
             { selectedMarket = null },
         )
     }
@@ -120,7 +120,7 @@ fun PredictionMarketCard(market: PredictionMarket.Event, backStack: NavBackStack
                 MaximizedRow {
                     Text(marketItem.subtitle, fontSize = 14.sp)
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("${(marketItem.chance * 100).toInt()}%", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.percent_format, (marketItem.chance * 100).toInt()), fontSize = 14.sp, fontWeight = FontWeight.Bold)
                         SingleChoiceSegmentedButtonRow {
                             SegmentedButton(selectedMarket == Pair(marketItem, true), {
                                 setSelectedMarket(Pair(marketItem, true))

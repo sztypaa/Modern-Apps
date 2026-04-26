@@ -2,8 +2,12 @@
 -dontwarn java.beans.**
 -dontobfuscate
 
-# PaddleOCR
--keep class com.equationl.paddleocr4android.** { *; }
+# Tesseract
+-keep class com.googlecode.tesseract.android.** { *; }
+
+# LiteRT LM / Gemma 4
+-keep class com.google.ai.edge.litertlm.** { *; }
+
 -keepclasseswithmembernames class * {
     native <methods>;
 }

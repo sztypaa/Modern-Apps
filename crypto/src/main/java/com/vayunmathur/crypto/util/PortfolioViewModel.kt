@@ -157,7 +157,7 @@ class PortfolioViewModel(private val application: Application) : AndroidViewMode
                 listOf(
                     TokenInfo(
                         symbol = "Contracts",
-                        name = "Yes ${market.subtitle}: ${event.title}",
+                        name = application.getString(com.vayunmathur.crypto.R.string.prediction_yes_name_format, market.subtitle, event.title),
                         category = TokenInfo.Companion.Category.PRED_MARKET,
                         mintAddress = market.yesMint,
                         decimals = 6,
@@ -165,7 +165,7 @@ class PortfolioViewModel(private val application: Application) : AndroidViewMode
                     ),
                     TokenInfo(
                         symbol = "Contracts",
-                        name = "No ${market.subtitle}: ${event.title}",
+                        name = application.getString(com.vayunmathur.crypto.R.string.prediction_no_name_format, market.subtitle, event.title),
                         category = TokenInfo.Companion.Category.PRED_MARKET,
                         mintAddress = market.noMint,
                         decimals = 6,

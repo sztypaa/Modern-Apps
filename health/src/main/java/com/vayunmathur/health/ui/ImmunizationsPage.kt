@@ -61,20 +61,20 @@ fun ImmunizationsPage(backStack: NavBackStack<Route>) {
     if (showInstallDialog) {
         AlertDialog(
             onDismissRequest = { showInstallDialog = false },
-            title = { Text("OpenAssistant Required") },
-            text = { Text("The OpenAssistant app is required for offline, secure, medical document extraction. Please install it from GitHub.") },
+            title = { Text(stringResource(R.string.open_assistant_required)) },
+            text = { Text(stringResource(R.string.open_assistant_rationale)) },
             confirmButton = {
                 TextButton(onClick = {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/vayun-mathur/Modern-Apps"))
                     context.startActivity(intent)
                     showInstallDialog = false
                 }) {
-                    Text("View on GitHub")
+                    Text(stringResource(R.string.view_on_github))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showInstallDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -202,19 +202,19 @@ fun ImmunizationCard(immunization: Immunization) {
             )
             Spacer(Modifier.width(16.dp))
             Column {
-                Text(immunization.vaccineCode.text?.value ?: "Unknown Vaccine", style = MaterialTheme.typography.titleLarge)
-                Text("Status: ${immunization.status.value?.getDisplay() ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
+                Text(immunization.vaccineCode.text?.value ?: stringResource(R.string.unknown), style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.status_format, immunization.status.value?.getDisplay() ?: stringResource(R.string.unknown)), style = MaterialTheme.typography.bodyMedium)
                 
                 val occurrenceDisplay = when (val occ = immunization.occurrence) {
                     is Immunization.Occurrence.DateTime -> occ.value.value?.toString()
                     is Immunization.Occurrence.String -> occ.value.value
                 }
                 if (occurrenceDisplay != null) {
-                    Text("Date: $occurrenceDisplay", style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.date_format_label, occurrenceDisplay), style = MaterialTheme.typography.bodyMedium)
                 }
                 
                 if (immunization.lotNumber?.value != null) {
-                    Text("Lot: ${immunization.lotNumber!!.value}", style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(R.string.lot_format, immunization.lotNumber!!.value), style = MaterialTheme.typography.bodySmall)
                 }
             }
         }

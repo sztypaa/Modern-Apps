@@ -1,12 +1,17 @@
 package com.vayunmathur.photos.util
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
+import android.content.pm.ServiceInfo
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.core.database.getLongOrNull
 import androidx.core.net.toUri
 import androidx.exifinterface.media.ExifInterface
@@ -14,6 +19,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
+import androidx.work.ForegroundInfo
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -25,15 +31,18 @@ import com.vayunmathur.photos.data.Photo
 import com.vayunmathur.photos.data.PhotoOCR
 import com.vayunmathur.photos.data.PhotoDatabase
 import com.vayunmathur.photos.data.VideoData
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): WorkResult = withContext(Dispatchers.IO) {
+        setForeground(createForegroundInfo())
         val database = applicationContext.buildDatabase<PhotoDatabase>(PhotoDatabase.ALL_MIGRATIONS)
         val dataStore = DataStoreUtils.getInstance(applicationContext)
         
@@ -49,7 +58,10 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         
         val photos = database.photoDao().getAll<Photo>()
         setExifData(photos, database, applicationContext)
-        runOCR(photos, database, applicationContext)
+        
+        if (dataStore.getBoolean("image_understanding_enabled", false)) {
+            OCRWorker.enqueue(applicationContext)
+        }
         
         dataStore.setLong("last_photos_generation", currentGeneration)
         
@@ -57,6 +69,30 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         enqueue(applicationContext)
         
         WorkResult.success()
+    }
+
+    private fun createForegroundInfo(): ForegroundInfo {
+        val channelId = "sync_worker"
+        val channel = NotificationChannel(
+            channelId,
+            "Photo Sync",
+            NotificationManager.IMPORTANCE_LOW
+        )
+        val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.createNotificationChannel(channel)
+
+        val notification = NotificationCompat.Builder(applicationContext, channelId)
+            .setContentTitle("Syncing Photos")
+            .setContentText("Indexing photos and extracting text...")
+            .setSmallIcon(android.R.drawable.stat_notify_sync)
+            .setOngoing(true)
+            .build()
+
+        return ForegroundInfo(
+            101,
+            notification,
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        )
     }
 
     companion object {
@@ -76,14 +112,65 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
 
             WorkManager.getInstance(context).enqueueUniqueWork(
                 WORK_NAME,
-                ExistingWorkPolicy.REPLACE,
+                ExistingWorkPolicy.KEEP,
                 request
             )
         }
 
         fun runOnce(context: Context) {
             val request = OneTimeWorkRequestBuilder<SyncWorker>().build()
-            WorkManager.getInstance(context).enqueue(request)
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                WORK_NAME,
+                ExistingWorkPolicy.KEEP,
+                request
+            )
+        }
+    }
+}
+
+class OCRWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
+    override suspend fun doWork(): WorkResult = withContext(Dispatchers.IO) {
+        setForeground(createForegroundInfo())
+        val database = applicationContext.buildDatabase<PhotoDatabase>(PhotoDatabase.ALL_MIGRATIONS)
+        val photos = database.photoDao().getAll<Photo>()
+        runOCR(photos, database, applicationContext)
+        WorkResult.success()
+    }
+
+    private fun createForegroundInfo(): ForegroundInfo {
+        val channelId = "ocr_worker"
+        val channel = NotificationChannel(
+            channelId,
+            "Photo Indexing",
+            NotificationManager.IMPORTANCE_LOW
+        )
+        val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.createNotificationChannel(channel)
+
+        val notification = NotificationCompat.Builder(applicationContext, channelId)
+            .setContentTitle("Analyzing Photos")
+            .setContentText("Extracting scene information...")
+            .setSmallIcon(android.R.drawable.stat_notify_sync)
+            .setOngoing(true)
+            .build()
+
+        return ForegroundInfo(
+            102,
+            notification,
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        )
+    }
+
+    companion object {
+        private const val WORK_NAME = "OCRWorker"
+
+        fun enqueue(context: Context) {
+            val request = OneTimeWorkRequestBuilder<OCRWorker>().build()
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                WORK_NAME,
+                ExistingWorkPolicy.KEEP,
+                request
+            )
         }
     }
 }
@@ -262,16 +349,22 @@ suspend fun runOCR(photos: List<Photo>, database: PhotoDatabase, context: Contex
     ocrManager.init()
 
     ps.forEach { photo ->
+        ensureActive()
+
+        // Double check if another thread/worker finished this photo while we were waiting
+        val alreadyExists = database.query(SimpleSQLiteQuery("SELECT EXISTS(SELECT 1 FROM PhotoOCR WHERE rowid = ${photo.id})"), null).use { cursor ->
+            cursor.moveToFirst() && cursor.getInt(0) == 1
+        }
+        if (alreadyExists) return@forEach
+
         try {
-            context.contentResolver.openInputStream(photo.uri.toUri())?.use { inputStream ->
-                val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
-                if (bitmap != null) {
-                    val text = ocrManager.runOCR(bitmap)
-                    if (text != null && text.isNotBlank()) {
-                        photoDao.upsertOCR(PhotoOCR(photo.id, text))
-                    }
-                }
+            val text = ocrManager.runOCR(photo.uri.toUri())
+            if (text != null && text.isNotBlank()) {
+                photoDao.upsertOCR(PhotoOCR(photo.id, text))
+                Log.i("SyncWorker", "OCR for ${photo.id} produced $text")
             }
+            // 1 minute break to allow device to cool down
+            delay(60000)
         } catch (e: Exception) {
             Log.e("SyncWorker", "Error running OCR for photo ${photo.id}", e)
         }

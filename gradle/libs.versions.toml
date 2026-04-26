@@ -7,7 +7,7 @@ ksp = "2.3.6"
 # AndroidX Core & Lifecycle
 coreKtx = "1.18.0"
 lifecycle = "2.10.0"
-litertlmAndroid = "0.10.0"
+litertlmAndroid = "0.10.2"
 newpipeextractor = "v0.26.0"
 workRuntimeKtx = "2.11.2"
 datastorePreferences = "1.2.1"
@@ -49,7 +49,6 @@ libphonenumber = "9.0.27"
 material3AdaptiveNavigationSuite = "1.4.0"
 maplibre = "0.12.1"
 foundation = "1.10.6"
-paddleocr = "v1.3.0"
 
 [libraries]
 # AndroidX Core & Lifecycle
@@ -137,9 +136,6 @@ kotlin-compose-gradle = { module = "org.jetbrains.kotlin:compose-compiler-gradle
 kotlin-serialization-gradle = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
 symbol-processing-gradle-plugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
-paddleocr4android = { module = "com.github.equationl.paddleocr4android:paddleocr4android", version.ref = "paddleocr" }
-paddleocr4android-fastdeploy = { module = "com.github.equationl.paddleocr4android:fastdeplyocr", version.ref = "paddleocr" }
-paddleocr4android-ncnn = { module = "com.github.equationl.paddleocr4android:ncnnandroidppocr", version.ref = "paddleocr" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

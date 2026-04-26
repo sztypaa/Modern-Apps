@@ -582,7 +582,10 @@ fun PdfViewerScreen(pdfDocument: EditablePdfDocument, pdfName: String) {
                     }
                 } else {
                     if (searchResults.isNotEmpty()) {
-                        Text(stringResource(R.string.search_result_counter, searchIndex + 1, searchResults.size) + "   ")
+                        Text(
+                            stringResource(R.string.search_result_counter, searchIndex + 1, searchResults.size),
+                            modifier = Modifier.padding(end = 12.dp)
+                        )
                     }
                 }
             })

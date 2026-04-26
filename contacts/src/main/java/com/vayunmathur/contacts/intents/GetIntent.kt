@@ -1,5 +1,6 @@
 package com.vayunmathur.contacts.intents
 
+import com.vayunmathur.contacts.R
 import com.vayunmathur.contacts.data.Contact
 import com.vayunmathur.library.intents.contacts.ContactData
 import com.vayunmathur.library.util.AssistantIntent
@@ -12,7 +13,7 @@ class GetIntent: AssistantIntent<Unit, List<ContactData>>(serializer<Unit>(), se
     override suspend fun performCalculation(input: Unit): List<ContactData> {
         return Contact.getAllContacts(this).map { contact ->
             ContactData(
-                name = contact.name.firstName + " " + contact.name.lastName,
+                name = getString(R.string.full_name_format, contact.name.firstName, contact.name.lastName),
                 phoneNumber = contact.details.phoneNumbers.firstOrNull()?.number ?: ""
             )
         }

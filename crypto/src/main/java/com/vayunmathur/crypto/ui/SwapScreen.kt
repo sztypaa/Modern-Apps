@@ -165,7 +165,7 @@ fun SwapScreen(viewModel: PortfolioViewModel, backStack: NavBackStack<NavKey>) {
                         )
                         val fromValue = (fromAmount.toDoubleOrNull()
                             ?: 0.0) * (TokenPriceRepository[fromTokenInfo]?.price ?: 0.0)
-                        Text("$${fromValue.round(2)}", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.usd_format, fromValue.round(2)), style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -206,7 +206,7 @@ fun SwapScreen(viewModel: PortfolioViewModel, backStack: NavBackStack<NavKey>) {
                         Spacer(Modifier.weight(1f))
                         val toValue = if(toAmount != null) toAmount * (TokenPriceRepository[toTokenInfo]?.price ?: 0.0) else null
                         Text(
-                            toValue?.let { "$${it.round(2)}" } ?: "—",
+                            toValue?.let { stringResource(R.string.usd_format, it.round(2)) } ?: "—",
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }

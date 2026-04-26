@@ -26,8 +26,6 @@
     <string name="account">Kasutajakonto</string>
     <string name="choose_account">Vali kasutajakonto</string>
     <string name="remove_birthday">Eemalda sünnipäev</string>
-    <string name="add_detail_type">Lisa %1$s</string>
-    <string name="remove_detail_type">Eemalda %1$s</string>
     <string name="dates">Kuupäevad</string>
     <string name="phone">Telefon</string>
     <string name="email">E-posti aadress</string>
@@ -45,8 +43,6 @@
     <string name="cancel">Katkesta</string>
     <string name="ok">Sobib</string>
     <string name="delete_contact_title">Kustuta kontakt</string>
-    <string name="delete_contact_confirm">Kas sa oled kindel, et soovid %1$s kontakti kustutada? Seda tegevust ei saa tagasi pöörata.</string>
-    <string name="this_contact">selle kontakti</string>
     <string name="delete">Kustuta</string>
     <string name="grant_contacts_permission">Palun anna õigused kontaktide kasutamiseks</string>
     <string name="select_contact_hint">Üksikasjade vaatamiseks palun vali kontakt</string>

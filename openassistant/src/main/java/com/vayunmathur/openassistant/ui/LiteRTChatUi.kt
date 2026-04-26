@@ -102,7 +102,9 @@ fun LiteRTChatUi(backStack: NavBackStack<Route>, conversationId: Long, viewModel
             selectedImageUris.add(uri)
             scope.launch(Dispatchers.IO) {
                 val file = copyUriToFile(context, uri)
-                withContext(Dispatchers.Main) { selectedImageFiles.add(file) }
+                if(file != null) {
+                    withContext(Dispatchers.Main) { selectedImageFiles.add(file) }
+                }
             }
         }
     }

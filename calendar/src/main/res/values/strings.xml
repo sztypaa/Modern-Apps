@@ -65,13 +65,13 @@
     <string name="choose_color">Choose color:</string>
 
     <!-- Change color dialog -->
-    <string name="change_color_for">Change color for \"%1$s\"</string>
+    <string name="change_color_for">Change color for this calendar</string>
     <string name="change_color">Change color</string>
 
     <!-- Delete calendar dialog -->
     <string name="delete_calendar">Delete calendar</string>
-    <string name="delete_calendar_confirm">Are you sure you want to delete \"%1$s\"? This will remove all events in the calendar.</string>
-    <string name="this_calendar">this calendar</string>
+    <string name="delete_calendar_confirm">Are you sure you want to delete this calendar? This will remove all events in the calendar.</string>
+    <string name="delete_calendar_name_confirm">Are you sure you want to delete \"%1$s\"? This will remove all events in the calendar.</string>
 
     <!-- Rename calendar dialog -->
     <string name="rename_calendar">Rename calendar</string>

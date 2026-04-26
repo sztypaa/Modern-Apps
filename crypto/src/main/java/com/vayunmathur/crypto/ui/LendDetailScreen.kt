@@ -60,11 +60,11 @@ fun LendDetailScreen(viewModel: PortfolioViewModel, backStack: NavBackStack<NavK
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "$${jlToken.totalValue.round(2)}",
+                text = stringResource(R.string.usd_format, jlToken.totalValue.round(2)),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
             )
-            Text(text = "${jlToken.amount.displayAmount()} ${jlToken.tokenInfo.symbol}")
+            Text(text = stringResource(R.string.token_amount_format, jlToken.amount.displayAmount(), jlToken.tokenInfo.symbol))
 
             Spacer(modifier = Modifier.height(32.dp))
 

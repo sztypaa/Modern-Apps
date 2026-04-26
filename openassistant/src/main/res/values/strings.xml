@@ -6,4 +6,5 @@
     <string name="mic_error_format">Mic error: %1$s</string>
     <string name="new_conversation">New Conversation</string>
     <string name="perm_desc_inference">Allows other apps to access the on-device AI inference service for extracting structured data.</string>
+    <string name="error_prefix">Error: %1$s</string>
 </resources>

@@ -3,10 +3,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.ResultReceiver
+import android.net.Uri
 import android.util.Log
 import androidx.core.net.toUri
 import com.google.ai.edge.litertlm.Tool
@@ -21,71 +18,34 @@ import com.vayunmathur.openassistant.MainActivity
 import com.vayunmathur.library.intents.notes.NoteData
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.boolean
-import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.serializer
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.time.Clock
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.serialization.decodeFromString
-import kotlin.reflect.KClass
 
-class IntentToolSet(
-    private val resultReceiver: ResultReceiver?,
-    private val expectedSchema: String?
-) : ToolSet {
-    var extractionSuccessful: Boolean = false
-        private set
-
-    @Tool(description = "Return the structured JSON result of an intent request and finish.")
-    fun return_intent_result(json_result: String): String {
-        Log.i("IntentToolSet", "return_intent_result called with data size: ${json_result.length}")
-        
-        var sanitized = json_result.trim()
-            .removePrefix("```json")
-            .removePrefix("```")
-            .removeSuffix("```")
-            .trim()
-
-        // Auto-fix: Remove leading/trailing spaces from keys
-        try {
-            val element = Json.parseToJsonElement(sanitized)
-            sanitized = trimJsonKeys(element).toString()
-            Log.d("IntentToolSet", "Auto-trimmed keys in JSON")
+object JsonSchemaValidator {
+    fun validateJsonAgainstSchema(jsonString: String, schemaString: String): String? {
+        val json = try {
+            Json.parseToJsonElement(jsonString)
         } catch (e: Exception) {
-            Log.w("IntentToolSet", "Initial parse for key trimming failed: ${e.message}")
-        }
-            
-        Log.d("IntentToolSet", "Sanitized JSON Result: $sanitized")
-
-        if (expectedSchema != null) {
-            val validationError = validateJsonAgainstSchema(sanitized, expectedSchema)
-            if (validationError != null) {
-                Log.e("IntentToolSet", "Schema validation failed: $validationError")
-                return "CRITICAL ERROR: Your JSON output is INVALID. Details: $validationError. You MUST fix this error and call 'return_intent_result' AGAIN immediately with the corrected JSON. Do NOT respond with text."
-            }
+            return "Invalid JSON format: ${e.message}"
         }
 
-        if (resultReceiver == null) {
-            Log.e("IntentToolSet", "ResultReceiver is null, cannot return result!")
-            return "Error: Internal callback missing"
+        val schemaElement = try {
+            Json.parseToJsonElement(schemaString)
+        } catch (e: Exception) {
+            Log.e("JsonSchemaValidator", "Internal Error: Schema itself is invalid JSON", e)
+            return null
         }
-        extractionSuccessful = true
-        resultReceiver.send(0, Bundle().apply { putString("json_result", sanitized) })
-        Log.d("IntentToolSet", "Result sent to receiver")
-        return "Result returned successfully."
+
+        return performValidation(json, schemaElement)
     }
 
-    private fun trimJsonKeys(element: JsonElement): JsonElement {
+    fun trimJsonKeys(element: JsonElement): JsonElement {
         return when (element) {
             is JsonObject -> {
                 val newMap = mutableMapOf<String, JsonElement>()
@@ -101,24 +61,6 @@ class IntentToolSet(
         }
     }
 
-    private fun validateJsonAgainstSchema(jsonString: String, schemaString: String): String? {
-        val json = try {
-            Json.parseToJsonElement(jsonString)
-        } catch (e: Exception) {
-            Log.e("IntentToolSet", "JSON parsing failed: ${e.message}")
-            return "Invalid JSON format: ${e.message}"
-        }
-
-        val schemaElement = try {
-            Json.parseToJsonElement(schemaString)
-        } catch (e: Exception) {
-            Log.e("IntentToolSet", "Internal Error: Schema itself is invalid JSON", e)
-            return null
-        }
-
-        return performValidation(json, schemaElement)
-    }
-
     private fun performValidation(data: JsonElement, schema: JsonElement, path: String = ""): String? {
         val pathPrefix = if (path.isEmpty()) "" else "at $path: "
 
@@ -132,9 +74,7 @@ class IntentToolSet(
                     if (error == null) return null // Found a matching schema
                     errors.add("Option $i: $error")
                 }
-                val err = "Data does not match any of the allowed schemas in anyOf. Details: ${errors.joinToString("; ")}"
-                Log.e("IntentToolSet", "Validation Error: $err")
-                return err
+                return "Data does not match any of the allowed schemas in anyOf. Details: ${errors.joinToString("; ")}"
             }
 
             // Handle oneOf
@@ -151,13 +91,11 @@ class IntentToolSet(
                     }
                 }
                 if (matchingIndices.size == 1) return null // Exactly one matches
-                val err = if (matchingIndices.isEmpty()) {
+                return if (matchingIndices.isEmpty()) {
                     "Data does not match any of the allowed options in 'oneOf'. Details: ${errors.joinToString("; ")}"
                 } else {
-                    "Data matches MULTIPLE options in 'oneOf': $matchingIndices. FHIR requires ONLY ONE of these fields (e.g., provide EITHER valueQuantity OR valueString, but not both)."
+                    "Data matches MULTIPLE options in 'oneOf': $matchingIndices."
                 }
-                Log.e("IntentToolSet", "Validation Error: $err")
-                return err
             }
 
             // Handle not
@@ -165,23 +103,17 @@ class IntentToolSet(
             if (notSchema != null) {
                 val error = performValidation(data, notSchema, path)
                 if (error == null) {
-                    val err = "Data matched the 'not' schema at $path, which is forbidden."
-                    Log.e("IntentToolSet", "Validation Error: $err")
-                    return err
+                    return "Data matched the 'not' schema at $path, which is forbidden."
                 }
             }
 
             // 1. Basic Type Check
             val expectedType = schema["type"]?.jsonPrimitive?.content
             if (expectedType == "object" && data !is JsonObject) {
-                val err = "${pathPrefix}Expected an object but got ${data::class.simpleName}"
-                Log.e("IntentToolSet", "Validation Error: $err")
-                return err
+                return "${pathPrefix}Expected an object but got ${data::class.simpleName}"
             }
             if (expectedType == "array" && data !is JsonArray) {
-                val err = "${pathPrefix}Expected an array but got ${data::class.simpleName}"
-                Log.e("IntentToolSet", "Validation Error: $err")
-                return err
+                return "${pathPrefix}Expected an array but got ${data::class.simpleName}"
             }
 
             // 2. Object Validation
@@ -192,9 +124,7 @@ class IntentToolSet(
                 data.keys.forEach { key ->
                     if (properties == null || !properties.containsKey(key)) {
                         val fullPath = if (path.isEmpty()) key else "$path.$key"
-                        val err = "Unexpected field found: '$fullPath'. Please only use EXACT field names defined in the schema (be careful of leading/trailing spaces in keys!)."
-                        Log.e("IntentToolSet", "Validation Error: $err")
-                        return err
+                        return "Unexpected field found: '$fullPath'."
                     }
                 }
 
@@ -204,9 +134,7 @@ class IntentToolSet(
                     val fieldName = req.jsonPrimitive.content
                     if (!data.containsKey(fieldName)) {
                         val fullPath = if (path.isEmpty()) fieldName else "$path.$fieldName"
-                        val err = "Missing required field: '$fullPath'"
-                        Log.e("IntentToolSet", "Validation Error: $err")
-                        return err
+                        return "Missing required field: '$fullPath'"
                     }
                 }
 
@@ -220,9 +148,7 @@ class IntentToolSet(
                             // Const check
                             val constValue = propSchema["const"]?.jsonPrimitive?.content
                             if (constValue != null && value.jsonPrimitive.content != constValue) {
-                                val err = "Field '$fullPath' must be '$constValue' but got '${value.jsonPrimitive.content}'"
-                                Log.e("IntentToolSet", "Validation Error: $err")
-                                return err
+                                return "Field '$fullPath' must be '$constValue' but got '${value.jsonPrimitive.content}'"
                             }
 
                             // Enum check
@@ -230,9 +156,7 @@ class IntentToolSet(
                             if (enumValues != null) {
                                 val allowed = enumValues.map { it.jsonPrimitive.content }
                                 if (value.jsonPrimitive.content !in allowed) {
-                                    val err = "Field '$fullPath' has invalid value '${value.jsonPrimitive.content}'. Allowed values: $allowed"
-                                    Log.e("IntentToolSet", "Validation Error: $err")
-                                    return err
+                                    return "Field '$fullPath' has invalid value '${value.jsonPrimitive.content}'. Allowed values: $allowed"
                                 }
                             }
                         }

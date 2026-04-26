@@ -166,7 +166,7 @@ fun TokenListScreen(viewModel: PortfolioViewModel, backStack: NavBackStack<NavKe
         }
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "$${totalValue.round(2)}",
+            text = stringResource(R.string.usd_format, totalValue.round(2)),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
         )
@@ -257,9 +257,14 @@ fun TokenCard(token: Token, onClick: () -> Unit = {}) {
                 Text(text = token.tokenInfo.name, fontWeight = FontWeight.Bold)
                 when(token.tokenInfo.category) {
                     TokenInfo.Companion.Category.NORMAL, TokenInfo.Companion.Category.XSTOCK -> {
-                        val tpr = TokenPriceRepository[token.tokenInfo] ?: return@Column
+                        val priceStr = tpr.price.round(2)
+                        val changeStr = tpr.change.round(2)
                         Text(
-                            text = "$${tpr.price.round(2)} ${if (tpr.change >= 0) "+" else ""}${tpr.change.round(2)}%",
+                            text = if (tpr.change >= 0) {
+                                stringResource(R.string.price_change_positive_format, priceStr, changeStr)
+                            } else {
+                                stringResource(R.string.price_change_negative_format, priceStr, changeStr)
+                            },
                             color = if (tpr.change >= 0) Color.Green else Color.Red
                         )
                     }
@@ -274,8 +279,8 @@ fun TokenCard(token: Token, onClick: () -> Unit = {}) {
                 }
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text(text = "$${token.totalValue.round(2)}")
-                Text(text = "${token.amount.displayAmount()} ${token.tokenInfo.symbol}")
+                Text(text = stringResource(R.string.usd_format, token.totalValue.round(2)))
+                Text(text = stringResource(R.string.token_amount_format, token.amount.displayAmount(), token.tokenInfo.symbol))
             }
         }
     }

@@ -23,8 +23,7 @@
     <string name="history_month_label">Month %1$d</string>
 
     <!-- BarChartDetails – unit suffix -->
-    <string name="per_day_avg">per day (avg)</string>
-    <string name="unit_per_day_avg_format">\u0020%1$s\u0020%2$s</string>
+    <string name="unit_per_day_avg_format">%1$s per day (avg)</string>
     <string name="unit_only_format">\u0020%1$s</string>
     <string name="hour_am_pm_format">%1$d %2$s</string>
     <string name="month_year_format">%1$s %2$d</string>
@@ -149,6 +148,7 @@
     <string name="status_format">Status: %1$s</string>
     <string name="result_format">Result: %1$s</string>
     <string name="date_format_label">Date: %1$s</string>
+    <string name="lot_format">Lot: %1$s</string>
     <string name="open_assistant_required">OpenAssistant Required</string>
     <string name="open_assistant_rationale">The OpenAssistant app is required for offline, secure, medical document extraction. Please install it from GitHub.</string>
     <string name="view_on_github">View on GitHub</string>

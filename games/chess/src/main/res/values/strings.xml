@@ -15,4 +15,19 @@
     <string name="promote_pawn">Promote Pawn</string>
     <string name="check">Check!</string>
     <string name="checkmate_wins">Checkmate! %1$s wins.</string>
+    <string name="white_wins">Checkmate! White wins.</string>
+    <string name="black_wins">Checkmate! Black wins.</string>
+
+    <string name="piece_white_king">White King</string>
+    <string name="piece_white_queen">White Queen</string>
+    <string name="piece_white_rook">White Rook</string>
+    <string name="piece_white_bishop">White Bishop</string>
+    <string name="piece_white_knight">White Knight</string>
+    <string name="piece_white_pawn">White Pawn</string>
+    <string name="piece_black_king">Black King</string>
+    <string name="piece_black_queen">Black Queen</string>
+    <string name="piece_black_rook">Black Rook</string>
+    <string name="piece_black_bishop">Black Bishop</string>
+    <string name="piece_black_knight">Black Knight</string>
+    <string name="piece_black_pawn">Black Pawn</string>
 </resources>

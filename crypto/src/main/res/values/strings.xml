@@ -62,8 +62,12 @@
     <string name="prediction_market_notice">Prediction Market viewing is available, but trading currently is unavailable until our provider increases liquidity</string>
     <string name="live_indicator">● Live</string>
     <string name="show_more">Show More ></string>
-    <string name="buy_choice">Buy %1$s</string>
-    <string name="buy_win_format">Buy %1$s -> Win $%2$s</string>
+    <string name="buy_yes">Buy Yes</string>
+    <string name="buy_no">Buy No</string>
+    <string name="buy_yes_win_format">Buy Yes -> Win $%1$s</string>
+    <string name="buy_no_win_format">Buy No -> Win $%1$s</string>
+    <string name="prediction_yes_name_format">Yes %1$s: %2$s</string>
+    <string name="prediction_no_name_format">No %1$s: %2$s</string>
     <string name="market_subtitle_separator"> — %1$s</string>
     <string name="yes_price_cents">Yes %1$s¢</string>
     <string name="no_price_cents">No %1$s¢</string>
@@ -73,4 +77,9 @@
     <string name="balance_format">Balance: %1$s</string>
     <string name="apy_format">%1$s%% APY</string>
     <string name="token_name_apy_format">%1$s - %2$s%% APY</string>
+    <string name="usd_format">$%1$s</string>
+    <string name="token_amount_format">%1$s %2$s</string>
+    <string name="percent_format">%1$s%%</string>
+    <string name="price_change_positive_format">$%1$s +%2$s%%</string>
+    <string name="price_change_negative_format">$%1$s %2$s%%</string>
 </resources>

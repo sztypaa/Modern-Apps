@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
-import kotlin.time.Clock
 
 class WavRecorder(val context: Context, val outputFile: File, val scope: CoroutineScope) {
     private var audioRecord: AudioRecord? = null
@@ -31,7 +30,7 @@ class WavRecorder(val context: Context, val outputFile: File, val scope: Corouti
         audioRecord?.startRecording()
 
         scope.launch(Dispatchers.IO) {
-            val tempRaw = File(context.cacheDir, "temp_${Clock.System.now().toEpochMilliseconds()}.raw")
+            val tempRaw = File(context.cacheDir, "temp_${System.currentTimeMillis()}.raw")
             FileOutputStream(tempRaw).use { fos ->
                 val buffer = ByteArray(bufferSize)
                 while (isRecording) {
@@ -97,14 +96,23 @@ class WavRecorder(val context: Context, val outputFile: File, val scope: Corouti
     }
 }
 
-fun copyUriToFile(context: Context, uri: Uri): File {
-    val tempFile = File(context.cacheDir, "img_${Clock.System.now().toEpochMilliseconds()}_${UUID.randomUUID()}.jpg")
-    try {
+fun copyUriToFile(context: Context, uri: Uri): File? {
+    val tempFile = File(context.cacheDir, "img_${System.currentTimeMillis()}_${UUID.randomUUID()}.jpg")
+    return try {
         context.contentResolver.openInputStream(uri)?.use { input ->
-            FileOutputStream(tempFile).use { output -> input.copyTo(output) }
+            FileOutputStream(tempFile).use { output ->
+                input.copyTo(output)
+            }
+            if (tempFile.exists() && tempFile.length() > 0) {
+                tempFile
+            } else {
+                Log.e("AudioRecorder", "Copy failed: File is empty or does not exist for $uri")
+                null
+            }
         }
     } catch (e: Exception) {
         Log.e("AudioRecorder", "Error copying URI to file: $uri", e)
+        if (tempFile.exists()) tempFile.delete()
+        null
     }
-    return tempFile
 }

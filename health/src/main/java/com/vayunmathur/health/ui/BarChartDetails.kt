@@ -386,9 +386,8 @@ fun BarChartDetails(
                             style = MaterialTheme.typography.displayMedium,
                             fontWeight = FontWeight.Light
                         )
-                        val perDayAvg = stringResource(R.string.per_day_avg)
                         Text(
-                            text = if (selectedTab != 0 && !config.isLineChart) stringResource(R.string.unit_per_day_avg_format, config.unit, perDayAvg) else stringResource(R.string.unit_only_format, config.unit),
+                            text = if (selectedTab != 0 && !config.isLineChart) stringResource(R.string.unit_per_day_avg_format, config.unit) else stringResource(R.string.unit_only_format, config.unit),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(bottom = 12.dp, start = 4.dp),
                             color = LocalContentColor.current.copy(alpha = 0.6f)

@@ -123,7 +123,7 @@ fun SendScreen(viewModel: PortfolioViewModel, backStack: NavBackStack<NavKey>) {
                         )
                         val fromValue = (fromAmount.toDoubleOrNull()
                             ?: 0.0) * (TokenPriceRepository[fromTokenInfo]?.price ?: 0.0)
-                        Text("$${fromValue.round(2)}", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.usd_format, fromValue.round(2)), style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }

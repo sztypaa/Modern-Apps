@@ -45,6 +45,7 @@ import com.vayunmathur.library.ui.IconDelete
 import com.vayunmathur.library.ui.IconUnarchive
 import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.library.util.NavBackStack
+import com.vayunmathur.photos.LocalColumnCount
 import com.vayunmathur.photos.NavigationBar
 import com.vayunmathur.photos.Route
 import com.vayunmathur.photos.data.Photo
@@ -69,7 +70,7 @@ fun TrashPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewModel) {
         SyncWorker.enqueue(context)
     }
 
-    var columnCount by remember { mutableFloatStateOf(3f) }
+    var columnCount by LocalColumnCount.current
 
     val selectedIds = remember { mutableStateListOf<Long>() }
     val isSelectionMode by remember { derivedStateOf { selectedIds.isNotEmpty() } }

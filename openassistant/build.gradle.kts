@@ -14,6 +14,13 @@ android {
             isShrinkResources = false
         }
     }
+
+    packaging {
+        jniLibs {
+            pickFirsts.add("**/libLiteRtTopKOpenClSampler.so")
+            pickFirsts.add("**/libc++_shared.so")
+        }
+    }
 }
 
 dependencies {

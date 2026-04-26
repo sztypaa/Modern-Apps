@@ -276,6 +276,8 @@ fun EditContactPage(backStack: NavBackStack<Route>, viewModel: ContactViewModel,
 
             DetailsSection(
                 stringResource(R.string.phone),
+                R.string.add_phone,
+                R.string.remove_phone,
                 phoneNumbers,
                 painterResource(R.drawable.outline_call_24),
                 KeyboardType.Phone,
@@ -286,6 +288,8 @@ fun EditContactPage(backStack: NavBackStack<Route>, viewModel: ContactViewModel,
 
             DetailsSection(
                 stringResource(R.string.email),
+                R.string.add_email,
+                R.string.remove_email,
                 emails,
                 painterResource(R.drawable.outline_mail_24),
                 KeyboardType.Email,
@@ -308,6 +312,8 @@ fun EditContactPage(backStack: NavBackStack<Route>, viewModel: ContactViewModel,
 
             DetailsSection(
                 stringResource(R.string.addresses),
+                R.string.add_address,
+                R.string.remove_address,
                 addresses,
                 painterResource(R.drawable.outline_event_24),
                 KeyboardType.Text,
@@ -357,7 +363,7 @@ fun AccountChooser(
         DropdownMenu(expanded, { expanded = false }) {
             accounts.forEach { account ->
                 DropdownMenuItem(
-                    text = { Text(account.name.ifEmpty { onDevice } + " (${account.type})") },
+                    text = { Text(stringResource(R.string.account_display_format, account.name.ifEmpty { onDevice }, account.type)) },
                     onClick = {
                         onAccountChange(account.name, account.type)
                         expanded = false
@@ -519,7 +525,7 @@ private fun ColumnScope.DateDetailsSection(
                         IconButton(onClick = { details.removeAt(index) }) {
                             Icon(
                                 painterResource(R.drawable.baseline_remove_circle_outline_24),
-                                stringResource(R.string.remove_detail_type, detailType)
+                                stringResource(R.string.remove_date)
                             )
                         }
                     }
@@ -543,14 +549,14 @@ private fun ColumnScope.DateDetailsSection(
         ) {
             Icon(icon, contentDescription = null)
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.add_detail_type, detailType))
+            Text(stringResource(R.string.add_date))
         }
     } else {
         TextButton(
             onClick = { details += ContactDetail.default<Event>() },
             modifier = Modifier.align(Alignment.Start)
         ) {
-            Text(stringResource(R.string.add_detail_type, detailType))
+            Text(stringResource(R.string.add_date))
         }
     }
 }
@@ -558,6 +564,8 @@ private fun ColumnScope.DateDetailsSection(
 @Composable
 private inline fun <reified T : ContactDetail<T>> ColumnScope.DetailsSection(
     detailType: String,
+    addLabelRes: Int,
+    removeLabelRes: Int,
     details: SnapshotStateList<T>,
     icon: Painter,
     keyboardType: KeyboardType,
@@ -604,7 +612,7 @@ private inline fun <reified T : ContactDetail<T>> ColumnScope.DetailsSection(
                     IconButton(onClick = { details.removeAt(index) }) {
                         Icon(
                             painterResource(R.drawable.baseline_remove_circle_outline_24),
-                            stringResource(R.string.remove_detail_type, detailType)
+                            stringResource(removeLabelRes)
                         )
                     }
                 }
@@ -621,14 +629,14 @@ private inline fun <reified T : ContactDetail<T>> ColumnScope.DetailsSection(
         ) {
             Icon(icon, contentDescription = null)
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.add_detail_type, detailType))
+            Text(stringResource(addLabelRes))
         }
     } else {
         TextButton(
             onClick = { details += ContactDetail.default<T>() },
             modifier = Modifier.align(Alignment.Start)
         ) {
-            Text(stringResource(R.string.add_detail_type, detailType))
+            Text(stringResource(addLabelRes))
         }
     }
 }

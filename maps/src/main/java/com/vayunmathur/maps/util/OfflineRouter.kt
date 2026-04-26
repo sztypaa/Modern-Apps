@@ -73,10 +73,24 @@ object OfflineRouter {
             }
 
             val maneuver = RouteService.API.Maneuver.entries.getOrElse(raw.maneuverId) { RouteService.API.Maneuver.MANEUVER_UNSPECIFIED }
+            val hasName = raw.roadName.isNotBlank()
             val instructionText = when (maneuver) {
-                RouteService.API.Maneuver.DEPART -> "Head toward ${raw.roadName}"
-                RouteService.API.Maneuver.STRAIGHT -> "Continue on ${raw.roadName}"
-                else -> "Turn ${maneuver.name.replace("TURN_", "").lowercase().replace("_", " ")} onto ${raw.roadName}"
+                RouteService.API.Maneuver.DEPART -> if (hasName) context.getString(R.string.maneuver_depart, raw.roadName) else context.getString(R.string.maneuver_depart_unnamed)
+                RouteService.API.Maneuver.STRAIGHT -> if (hasName) context.getString(R.string.maneuver_straight, raw.roadName) else context.getString(R.string.maneuver_straight_unnamed)
+                RouteService.API.Maneuver.TURN_LEFT -> if (hasName) context.getString(R.string.maneuver_turn_left, raw.roadName) else context.getString(R.string.maneuver_turn_left_unnamed)
+                RouteService.API.Maneuver.TURN_RIGHT -> if (hasName) context.getString(R.string.maneuver_turn_right, raw.roadName) else context.getString(R.string.maneuver_turn_right_unnamed)
+                RouteService.API.Maneuver.TURN_SLIGHT_LEFT -> if (hasName) context.getString(R.string.maneuver_turn_slight_left, raw.roadName) else context.getString(R.string.maneuver_turn_slight_left_unnamed)
+                RouteService.API.Maneuver.TURN_SLIGHT_RIGHT -> if (hasName) context.getString(R.string.maneuver_turn_slight_right, raw.roadName) else context.getString(R.string.maneuver_turn_slight_right_unnamed)
+                RouteService.API.Maneuver.TURN_SHARP_LEFT -> if (hasName) context.getString(R.string.maneuver_turn_sharp_left, raw.roadName) else context.getString(R.string.maneuver_turn_sharp_left_unnamed)
+                RouteService.API.Maneuver.TURN_SHARP_RIGHT -> if (hasName) context.getString(R.string.maneuver_turn_sharp_right, raw.roadName) else context.getString(R.string.maneuver_turn_sharp_right_unnamed)
+                RouteService.API.Maneuver.UTURN_LEFT, RouteService.API.Maneuver.UTURN_RIGHT -> if (hasName) context.getString(R.string.maneuver_uturn, raw.roadName) else context.getString(R.string.maneuver_uturn_unnamed)
+                RouteService.API.Maneuver.MERGE -> if (hasName) context.getString(R.string.maneuver_merge, raw.roadName) else context.getString(R.string.maneuver_merge_unnamed)
+                RouteService.API.Maneuver.RAMP_LEFT -> if (hasName) context.getString(R.string.maneuver_ramp_left, raw.roadName) else context.getString(R.string.maneuver_ramp_left_unnamed)
+                RouteService.API.Maneuver.RAMP_RIGHT -> if (hasName) context.getString(R.string.maneuver_ramp_right, raw.roadName) else context.getString(R.string.maneuver_ramp_right_unnamed)
+                RouteService.API.Maneuver.FORK_LEFT -> if (hasName) context.getString(R.string.maneuver_fork_left, raw.roadName) else context.getString(R.string.maneuver_fork_left_unnamed)
+                RouteService.API.Maneuver.FORK_RIGHT -> if (hasName) context.getString(R.string.maneuver_fork_right, raw.roadName) else context.getString(R.string.maneuver_fork_right_unnamed)
+                RouteService.API.Maneuver.ROUNDABOUT_LEFT, RouteService.API.Maneuver.ROUNDABOUT_RIGHT -> if (hasName) context.getString(R.string.maneuver_roundabout, raw.roadName) else context.getString(R.string.maneuver_roundabout_unnamed)
+                else -> if (hasName) context.getString(R.string.maneuver_unspecified, raw.roadName) else context.getString(R.string.maneuver_unspecified_unnamed)
             }
 
             RouteService.Step(

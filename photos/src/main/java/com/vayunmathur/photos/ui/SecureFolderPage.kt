@@ -4,6 +4,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
@@ -37,6 +39,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.changedToUp
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -48,6 +53,7 @@ import com.vayunmathur.library.ui.BackupButtons
 import java.io.File
 import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.library.util.NavBackStack
+import com.vayunmathur.photos.LocalColumnCount
 import com.vayunmathur.photos.NavigationBar
 import com.vayunmathur.photos.R
 import com.vayunmathur.photos.Route
@@ -56,6 +62,7 @@ import com.vayunmathur.photos.util.SecureFolderManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,6 +70,7 @@ fun SecureFolderPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewMode
     val photos by viewModel.data<VaultPhoto>().collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var columnCount by LocalColumnCount.current
     val selectedIds = remember { mutableStateListOf<Long>() }
     val isSelectionMode = selectedIds.isNotEmpty()
 
@@ -119,18 +127,38 @@ fun SecureFolderPage(backStack: NavBackStack<Route>, viewModel: DatabaseViewMode
                 Text("Secure Folder is empty", color = Color.Gray)
             }
         } else {
-            LazyVerticalGrid(
-                GridCells.Fixed(3),
-                Modifier.padding(paddingValues).fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        awaitEachGesture {
+                            while (true) {
+                                val event = awaitPointerEvent(PointerEventPass.Initial)
+                                if (event.changes.size > 1) {
+                                    val zoom = event.calculateZoom()
+                                    if (zoom != 1f) {
+                                        columnCount = (columnCount / zoom).coerceIn(2f, 8f)
+                                        event.changes.forEach { it.consume() }
+                                    }
+                                }
+                                if (event.changes.all { it.changedToUp() }) break
+                            }
+                        }
+                    }
             ) {
-                items(photos, { it.id }) { photo ->
-                    VaultPhotoItem(photo, password, selectedIds.contains(photo.id), isSelectionMode) {
-                        if (isSelectionMode) {
-                            if (selectedIds.contains(photo.id)) selectedIds.remove(photo.id) else selectedIds.add(photo.id)
-                        } else {
-                            selectedIds.add(photo.id)
+                LazyVerticalGrid(
+                    GridCells.Fixed(columnCount.roundToInt().coerceIn(2, 8)),
+                    Modifier.padding(paddingValues).fillMaxSize(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(photos, { it.id }) { photo ->
+                        VaultPhotoItem(photo, password, selectedIds.contains(photo.id), isSelectionMode) {
+                            if (isSelectionMode) {
+                                if (selectedIds.contains(photo.id)) selectedIds.remove(photo.id) else selectedIds.add(photo.id)
+                            } else {
+                                selectedIds.add(photo.id)
+                            }
                         }
                     }
                 }

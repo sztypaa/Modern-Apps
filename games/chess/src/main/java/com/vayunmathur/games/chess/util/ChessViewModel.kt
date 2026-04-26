@@ -134,10 +134,7 @@ class ChessViewModel(application: Application) : AndroidViewModel(application) {
         val turn = if (_uiState.value.turn == PieceColor.WHITE) PieceColor.BLACK else PieceColor.WHITE
         val ctx = getApplication<Application>()
         return when {
-            board.isCheckmate(turn) -> ctx.getString(
-                R.string.checkmate_wins,
-                if (turn == PieceColor.WHITE) ctx.getString(R.string.color_black) else ctx.getString(R.string.color_white)
-            )
+            board.isCheckmate(turn) -> if (turn == PieceColor.WHITE) ctx.getString(R.string.black_wins) else ctx.getString(R.string.white_wins)
             board.isKingInCheck(turn) -> ctx.getString(R.string.check)
             else -> null
         }

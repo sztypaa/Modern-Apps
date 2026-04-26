@@ -86,9 +86,13 @@ fun BottomSheetContent(selectedFeature: SpecificFeature?, setSelectedFeature: (S
                             Tab(
                                 selectedRouteType == it.key,
                                 { setSelectedRouteType(it.key) }) {
-                                Text(
-                                    it.key.name.lowercase()
-                                        .replaceFirstChar { it.uppercase() })
+                                val label = when(it.key) {
+                                    RouteService.TravelMode.WALK -> stringResource(R.string.travel_mode_walk)
+                                    RouteService.TravelMode.BICYCLE -> stringResource(R.string.travel_mode_bicycle)
+                                    RouteService.TravelMode.DRIVE -> stringResource(R.string.travel_mode_drive)
+                                    RouteService.TravelMode.TRANSIT -> stringResource(R.string.travel_mode_transit)
+                                }
+                                Text(label)
                             }
                         }
                     }

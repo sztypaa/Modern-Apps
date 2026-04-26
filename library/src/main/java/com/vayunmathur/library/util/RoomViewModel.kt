@@ -2,6 +2,7 @@ package com.vayunmathur.library.util
 
 import android.content.Context
 import java.io.File
+import java.io.FileInputStream
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
@@ -416,19 +417,19 @@ inline fun <reified T : RoomDatabase> Context.buildDatabase(
 fun encryptExistingDatabase(context: Context, dbName: String, password: String) {
     loadSqlCipher()
     val dbFile = context.getDatabasePath(dbName)
-    if (!dbFile.exists() || dbFile.length() == 0L) return
+    if (!dbFile.exists() || dbFile.length() < 16) return
 
-    // Try to open it with standard Android SQLite. If it works, it's NOT encrypted.
-    var isEncrypted = false
-    try {
-        val db = android.database.sqlite.SQLiteDatabase.openDatabase(
-            dbFile.absolutePath,
-            null,
-            android.database.sqlite.SQLiteDatabase.OPEN_READONLY
-        )
-        db.close()
+    val isEncrypted = try {
+        FileInputStream(dbFile).use { fis ->
+            val header = ByteArray(16)
+            if (fis.read(header) != 16) {
+                true
+            } else {
+                !header.contentEquals("SQLite format 3\u0000".toByteArray(StandardCharsets.UTF_8))
+            }
+        }
     } catch (e: Exception) {
-        isEncrypted = true
+        true
     }
 
     if (isEncrypted) return
@@ -460,7 +461,7 @@ fun encryptExistingDatabase(context: Context, dbName: String, password: String) 
         File("${dbFile.path}-journal").delete()
 
         tempFile.renameTo(dbFile)
-    } catch (e: Exception) {
+    } catch (e: net.zetetic.database.sqlcipher.SQLiteNotADatabaseException) {
         tempFile.delete()
     }
 }

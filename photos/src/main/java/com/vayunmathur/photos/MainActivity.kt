@@ -20,6 +20,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -49,6 +54,10 @@ import com.vayunmathur.library.util.unlockDatabaseWithBiometrics
 import com.vayunmathur.photos.data.VaultDatabase
 import com.vayunmathur.photos.data.VaultPhoto
 
+val LocalColumnCount = staticCompositionLocalOf<MutableFloatState> {
+    error("No LocalColumnCount provided")
+}
+
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,23 +67,26 @@ class MainActivity : FragmentActivity() {
         ImageLoader.init(this)
         setContent {
             DynamicTheme {
-                if(Build.VERSION.SDK_INT >= 33) {
-                    PermissionsChecker(
-                        arrayOf(
-                            Manifest.permission.READ_MEDIA_IMAGES,
-                            Manifest.permission.READ_MEDIA_VIDEO,
-                            Manifest.permission.ACCESS_MEDIA_LOCATION
-                        ), getString(R.string.grant_image_video_permissions)
-                    ) {
-                        Navigation(viewModel)
-                    }
-                } else {
-                    PermissionsChecker(
-                        arrayOf(
-                            Manifest.permission.READ_EXTERNAL_STORAGE
-                        ), getString(R.string.grant_storage_permission)
-                    ) {
-                        Navigation(viewModel)
+                val columnCount = rememberSaveable { mutableFloatStateOf(3f) }
+                CompositionLocalProvider(LocalColumnCount provides columnCount) {
+                    if (Build.VERSION.SDK_INT >= 33) {
+                        PermissionsChecker(
+                            arrayOf(
+                                Manifest.permission.READ_MEDIA_IMAGES,
+                                Manifest.permission.READ_MEDIA_VIDEO,
+                                Manifest.permission.ACCESS_MEDIA_LOCATION
+                            ), getString(R.string.grant_image_video_permissions)
+                        ) {
+                            Navigation(viewModel)
+                        }
+                    } else {
+                        PermissionsChecker(
+                            arrayOf(
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                            ), getString(R.string.grant_storage_permission)
+                        ) {
+                            Navigation(viewModel)
+                        }
                     }
                 }
             }

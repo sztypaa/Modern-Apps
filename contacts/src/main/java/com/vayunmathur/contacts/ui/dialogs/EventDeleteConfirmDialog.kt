@@ -24,9 +24,12 @@ fun EventDeleteConfirmDialog(
         onDismissRequest = { onDismiss() },
         title = { Text(text = stringResource(R.string.delete_contact_title)) },
         text = {
-            val thisContact = stringResource(R.string.this_contact)
             Text(
-                text = stringResource(R.string.delete_contact_confirm, contactName ?: thisContact)
+                text = if (contactName.isNullOrBlank()) {
+                    stringResource(R.string.delete_contact_confirm)
+                } else {
+                    stringResource(R.string.delete_contact_name_confirm, contactName)
+                }
             )
         },
         confirmButton = {
