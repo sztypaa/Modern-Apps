@@ -37,9 +37,9 @@ configure<com.android.build.api.dsl.ApplicationExtension> {
 
     namespace = "com.vayunmathur${path.replace(":", ".")}"
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
-    compileSdkExtension = 19
+    //compileSdkExtension = 19
 
     androidResources {
         generateLocaleConfig = true
