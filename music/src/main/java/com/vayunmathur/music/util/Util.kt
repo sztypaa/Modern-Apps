@@ -29,6 +29,7 @@ import com.vayunmathur.music.data.Artist
 import com.vayunmathur.music.data.Music
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 fun getThumbnail(context: Context, uri: Uri): Bitmap? {
     return try {
@@ -216,5 +217,44 @@ fun createCollageBitmap(context: Context, uris: List<Uri>): Bitmap {
 fun AddToPlaylistButton(backStack: NavBackStack<Route>, music: Music) {
     IconButton(onClick = { backStack.add(Route.AddToPlaylistDialog(music.id)) }) {
         Icon(painterResource(R.drawable.ic_more_vert), contentDescription = "Add to playlist")
+    }
+}
+
+fun getRealAudioDuration(context: Context, uri: Uri): Long {
+    val retriever = android.media.MediaMetadataRetriever()
+    return try {
+        retriever.setDataSource(context, uri)
+        val timeString = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)
+        timeString?.toLong() ?: 0L
+    } catch (e: Exception) {
+        0L
+    } finally {
+        retriever.release()
+    }
+}
+
+fun formatDuration(durationMs: Long): String {
+    val totalSeconds = durationMs / 1000
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
+    val hours = totalSeconds / 3600
+
+    return if (hours > 0) {
+        String.format(Locale.US, "%d:%02d:%02d", hours, minutes, seconds)
+    } else {
+        String.format(Locale.US, "%d:%02d", minutes, seconds)
+    }
+}
+
+fun getAudioYear(context: Context, uri: Uri): Int {
+    val retriever = android.media.MediaMetadataRetriever()
+    return try {
+        retriever.setDataSource(context, uri)
+        val yearString = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_YEAR)
+        yearString?.take(4)?.toIntOrNull() ?: 0
+    } catch (e: Exception) {
+        0
+    } finally {
+        retriever.release()
     }
 }

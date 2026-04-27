@@ -4,8 +4,10 @@ import com.vayunmathur.library.intents.music.MusicSearchResult
 import com.vayunmathur.library.util.AssistantIntent
 import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.library.util.buildDatabase
+import com.vayunmathur.music.data.MIGRATION_1_2
 import com.vayunmathur.music.data.Album
 import com.vayunmathur.music.data.Artist
+import com.vayunmathur.music.data.MIGRATION_2_3
 import com.vayunmathur.music.data.Music
 import com.vayunmathur.music.data.MusicDatabase
 import com.vayunmathur.music.data.Playlist
@@ -16,7 +18,7 @@ import kotlinx.serialization.serializer
 class SearchIntent: AssistantIntent<String, List<MusicSearchResult>>(serializer<String>(), serializer<List<MusicSearchResult>>()) {
 
     override suspend fun performCalculation(input: String): List<MusicSearchResult> {
-        val db = buildDatabase<MusicDatabase>()
+        val db = buildDatabase<MusicDatabase>(listOf(MIGRATION_1_2, MIGRATION_2_3))
         val viewModel = DatabaseViewModel(db, Music::class to db.musicDao(), Album::class to db.albumDao(), Artist::class to db.artistDao(), Playlist::class to db.playlistDao())
         
         val results = mutableListOf<MusicSearchResult>()

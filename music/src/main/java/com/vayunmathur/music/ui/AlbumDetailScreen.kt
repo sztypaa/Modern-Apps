@@ -33,6 +33,7 @@ import com.vayunmathur.music.util.AlbumArt
 import com.vayunmathur.music.util.PlaybackManager
 import com.vayunmathur.music.util.AddToPlaylistButton
 import com.vayunmathur.music.R
+import com.vayunmathur.music.util.formatDuration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,7 +41,15 @@ fun AlbumDetailScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewMod
     val album by viewModel.getState<Album>(albumId)
     val allMusic by viewModel.data<Music>().collectAsState()
     val musicInAlbum = remember(allMusic, albumId) {
-        allMusic.filter { it.albumId == albumId }
+        allMusic.filter { it.albumId == albumId }.sortedBy { it.trackNumber }
+    }
+    val totalDurationMs = remember(musicInAlbum) {
+        musicInAlbum.sumOf { it.duration }
+    }
+
+    val albumYear = remember(musicInAlbum) {
+        val extractedYear = musicInAlbum.firstOrNull()?.year ?: 0
+        if (extractedYear > 0) extractedYear.toString() else "Unknown Year"
     }
 
     val context = LocalContext.current
@@ -77,7 +86,7 @@ fun AlbumDetailScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewMod
                     ListItem({
                         Text(album.name, style = MaterialTheme.typography.titleLarge)
                     }, Modifier, {Text(stringResource(R.string.label_album))}, {
-                        Text(stringResource(R.string.album_info_format, album.artistString(viewModel), "Jan 2016", musicInAlbum.size, "1:25:02"))
+                        Text(stringResource(R.string.album_info_format, album.artistString(viewModel), albumYear, musicInAlbum.size, formatDuration(totalDurationMs)))
                     })
                 }
             }
@@ -146,11 +155,22 @@ fun AlbumDetailScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewMod
                     playbackManager.playSong(musicInAlbum, idx)
                 }, trailingContent = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("3:02")
+                        Text(formatDuration(music.duration))
                         AddToPlaylistButton(backStack, music)
                     }
-                }, leadingContent = {
+                }, leadingContent = {Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = music.trackNumber.toString(),
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        modifier = Modifier.width(28.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
                     AlbumArt(music.uri.toUri(), Modifier.size(48.dp))
+                }
                 })
             }
         }

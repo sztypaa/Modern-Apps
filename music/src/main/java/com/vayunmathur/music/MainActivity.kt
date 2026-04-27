@@ -25,6 +25,8 @@ import com.vayunmathur.music.data.Music
 import com.vayunmathur.music.data.MusicDatabase
 import com.vayunmathur.music.data.Playlist
 import com.vayunmathur.music.R
+import com.vayunmathur.music.data.MIGRATION_1_2
+import com.vayunmathur.music.data.MIGRATION_2_3
 import com.vayunmathur.music.ui.AlbumDetailScreen
 import com.vayunmathur.music.ui.AlbumScreen
 import com.vayunmathur.music.ui.ArtistDetailScreen
@@ -43,7 +45,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val db = buildDatabase<MusicDatabase>(listOf(MIGRATION_1_2))
+        val db = buildDatabase<MusicDatabase>(listOf(MIGRATION_1_2, MIGRATION_2_3))
         val viewModel = DatabaseViewModel(db,Music::class to db.musicDao(), Album::class to db.albumDao(), Artist::class to db.artistDao(), Playlist::class to db.playlistDao(), matchingDao = db.matchingDao())
         val pm = PlaybackManager.getInstance(this)
         setContent {
@@ -126,15 +128,4 @@ fun Navigation(viewModel: DatabaseViewModel) {
             AddToPlaylistDialog(backStack, viewModel, it.musicId)
         }
     }
-}
-
-val MIGRATION_1_2 = Migration(1, 2) {
-    it.execSQL(
-        """
-        CREATE TABLE IF NOT EXISTS `Playlist` (
-            `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-            `name` TEXT NOT NULL
-        )
-        """.trimIndent()
-    )
 }

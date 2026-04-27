@@ -13,5 +13,8 @@ data class Music(
     val artistId: Long,
     val album: String,
     val albumId: Long,
-    val uri: String
+    val uri: String,
+    val duration: Long,
+    val trackNumber: Int,
+    val year: Int
 ): DatabaseItem

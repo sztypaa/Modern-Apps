@@ -4,9 +4,11 @@ import com.vayunmathur.library.intents.music.PlayMusicData
 import com.vayunmathur.library.util.AssistantIntent
 import com.vayunmathur.library.util.DatabaseViewModel
 import com.vayunmathur.library.util.buildDatabase
+import com.vayunmathur.music.data.MIGRATION_1_2
 import com.vayunmathur.music.util.PlaybackManager
 import com.vayunmathur.music.data.Album
 import com.vayunmathur.music.data.Artist
+import com.vayunmathur.music.data.MIGRATION_2_3
 import com.vayunmathur.music.data.Music
 import com.vayunmathur.music.data.MusicDatabase
 import com.vayunmathur.music.data.Playlist
@@ -17,7 +19,7 @@ import kotlinx.serialization.serializer
 class PlayIntent: AssistantIntent<PlayMusicData, Unit>(serializer<PlayMusicData>(), serializer<Unit>()) {
 
     override suspend fun performCalculation(input: PlayMusicData) {
-        val db = buildDatabase<MusicDatabase>()
+        val db = buildDatabase<MusicDatabase>(listOf(MIGRATION_1_2, MIGRATION_2_3))
         val viewModel = DatabaseViewModel(db, Music::class to db.musicDao(), Album::class to db.albumDao(), Artist::class to db.artistDao(), Playlist::class to db.playlistDao(), matchingDao = db.matchingDao())
         val pm = PlaybackManager.getInstance(this)
         
