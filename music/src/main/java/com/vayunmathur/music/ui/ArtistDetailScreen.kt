@@ -53,6 +53,7 @@ import com.vayunmathur.music.data.Album
 import com.vayunmathur.music.data.Artist
 import com.vayunmathur.music.data.Music
 import com.vayunmathur.music.R
+import com.vayunmathur.music.util.formatDuration
 import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,6 +63,9 @@ fun ArtistDetailScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewMo
     val allMusic by viewModel.data<Music>().collectAsState()
     val artistsMusic = remember(allMusic, artistId) {
         allMusic.filter { it.artistId == artistId }
+    }
+    val artistTotalDurationMs = remember(artistsMusic) {
+        artistsMusic.sumOf { it.duration }
     }
     val albumIds by viewModel.getMatchesState<Artist, Album>(artistId)
     val allAlbums by viewModel.data<Album>().collectAsState()
@@ -107,7 +111,7 @@ fun ArtistDetailScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewMo
                     ListItem({
                         Text(artist.name, style = MaterialTheme.typography.titleLarge)
                     }, Modifier, {Text(stringResource(R.string.label_artist))}, {
-                        Text(stringResource(R.string.artist_info_format, artistsMusic.size, "1:25:02"))
+                        Text(stringResource(R.string.artist_info_format, artistsMusic.size, formatDuration(artistTotalDurationMs)))
                     })
                 }
             }
@@ -157,15 +161,28 @@ fun ArtistDetailScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewMo
 
             // Track Items
             itemsIndexed(albums) { idx, album ->
-                ListItem({
-                    Text(album.name)
-                }, Modifier.clickable{
-                    backStack.add(Route.AlbumDetail(album.id))
-                }, {}, {
-                    Text("3:02")
-                }, leadingContent = {
-                    AlbumArt(album.uri.toUri(), Modifier.size(48.dp))
-                })
+                val albumMusic = remember(allMusic, album.id) {
+                    allMusic.filter { it.albumId == album.id }
+                }
+
+                val albumDurationMs = remember(albumMusic) {
+                    albumMusic.sumOf { it.duration }
+                }
+
+                val albumYear = remember(albumMusic) {
+                    val year = albumMusic.firstOrNull()?.year ?: 0
+                    if (year > 0) year.toString() else "Unknown"
+                }
+
+                ListItem(
+                    headlineContent = { Text(album.name) },
+                    modifier = Modifier.clickable {
+                        backStack.add(Route.AlbumDetail(album.id))
+                    },
+                    supportingContent = { Text(albumYear) },
+                    trailingContent = { Text(formatDuration(albumDurationMs)) },
+                    leadingContent = { AlbumArt(album.uri.toUri(), Modifier.size(48.dp)) }
+                )
             }
 
             // Track List Header
@@ -175,18 +192,21 @@ fun ArtistDetailScreen(backStack: NavBackStack<Route>, viewModel: DatabaseViewMo
 
             // Track Items
             itemsIndexed(artistsMusic) { idx, music ->
-                ListItem({
-                    Text(music.title)
-                }, Modifier.clickable{
-                    playbackManager.playSong(artistsMusic, idx)
-                }, trailingContent = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("3:02")
-                        AddToPlaylistButton(backStack, music)
+                ListItem(
+                    headlineContent = { Text(music.title) },
+                    modifier = Modifier.clickable {
+                        playbackManager.playSong(artistsMusic, idx)
+                    },
+                    trailingContent = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(formatDuration(music.duration))
+                            AddToPlaylistButton(backStack, music)
+                        }
+                    },
+                    leadingContent = {
+                        AlbumArt(music.uri.toUri(), Modifier.size(48.dp))
                     }
-                }, leadingContent = {
-                    AlbumArt(music.uri.toUri(), Modifier.size(48.dp))
-                })
+                )
             }
         }
     }
