@@ -37,6 +37,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
@@ -129,12 +131,16 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
 }
 
 class OCRWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
+
     override suspend fun doWork(): WorkResult = withContext(Dispatchers.IO) {
-        setForeground(createForegroundInfo())
-        val database = applicationContext.buildDatabase<PhotoDatabase>(PhotoDatabase.ALL_MIGRATIONS)
-        val photos = database.photoDao().getAll<Photo>()
-        runOCR(photos, database, applicationContext)
-        WorkResult.success()
+        ocrMutex.withLock {
+            setForeground(createForegroundInfo())
+            val database =
+                applicationContext.buildDatabase<PhotoDatabase>(PhotoDatabase.ALL_MIGRATIONS)
+            val photos = database.photoDao().getAll<Photo>()
+            runOCR(photos, database, applicationContext)
+            WorkResult.success()
+        }
     }
 
     private fun createForegroundInfo(): ForegroundInfo {
@@ -163,6 +169,8 @@ class OCRWorker(context: Context, params: WorkerParameters) : CoroutineWorker(co
 
     companion object {
         private const val WORK_NAME = "OCRWorker"
+        private val ocrMutex = Mutex() // Shared across all instances of OCRWorker
+
 
         fun enqueue(context: Context) {
             val request = OneTimeWorkRequestBuilder<OCRWorker>().build()

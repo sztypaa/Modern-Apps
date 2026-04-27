@@ -251,6 +251,10 @@ fun GalleryPage(
                     }
                 )
             } else {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.app_name)) },
+                )
+                /*
                 SearchBar(
                     inputField = {
                         SearchBarDefaults.InputField(
@@ -424,6 +428,7 @@ fun GalleryPage(
                         }
                     }
                 )
+                */
             }
         },
         bottomBar = { if (!isSelectionMode) NavigationBar(Route.Gallery, backStack) }
